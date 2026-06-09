@@ -27,7 +27,7 @@ This repo solves those documented problems with a microservices architecture on 
 ## Status
 
 - [x] Stage 0 — Repo setup
-- [~] Stage 1 — Notification service (Session 1 complete — service built, tested, Docker image ready)
+- [x] Stage 1 — Notification service (complete — REST API + Redis pub/sub verified, emails delivered)
 - [ ] Stage 2 — Gallery service
 - [ ] Stage 3 — Scheduler service
 - [ ] Stage 4 — Booking + Portal services
