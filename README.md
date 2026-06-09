@@ -26,8 +26,8 @@ This repo solves those documented problems with a microservices architecture on 
 
 ## Status
 
-- [ ] Stage 0 — Repo setup
-- [ ] Stage 1 — Notification service
+- [x] Stage 0 — Repo setup
+- [~] Stage 1 — Notification service (Session 1 complete — service built, tested, Docker image ready)
 - [ ] Stage 2 — Gallery service
 - [ ] Stage 3 — Scheduler service
 - [ ] Stage 4 — Booking + Portal services
@@ -37,6 +37,7 @@ This repo solves those documented problems with a microservices architecture on 
 - [ ] Stage 8 — BiggShots Monitor v2
 - [ ] Stage 9 — Benchmarking + docs
 - [ ] Stage 10 — AWS EKS (optional)
+
 
 ## Related
 
