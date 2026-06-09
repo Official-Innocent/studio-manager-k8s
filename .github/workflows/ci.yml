@@ -1,0 +1,61 @@
+﻿name: CI - Build Changed Services
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-notification:
+    if: contains(toJson(github.event.commits.*.modified), 'services/notification-service')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push notification-service
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t innocentobuteofficial/notification-service:latest services/notification-service/
+          docker push innocentobuteofficial/notification-service:latest
+
+  build-gallery:
+    if: contains(toJson(github.event.commits.*.modified), 'services/gallery-service')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push gallery-service
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t innocentobuteofficial/gallery-service:latest services/gallery-service/
+          docker push innocentobuteofficial/gallery-service:latest
+
+  build-booking:
+    if: contains(toJson(github.event.commits.*.modified), 'services/booking-service')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push booking-service
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t innocentobuteofficial/booking-service:latest services/booking-service/
+          docker push innocentobuteofficial/booking-service:latest
+
+  build-portal:
+    if: contains(toJson(github.event.commits.*.modified), 'services/portal-service')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push portal-service
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t innocentobuteofficial/portal-service:latest services/portal-service/
+          docker push innocentobuteofficial/portal-service:latest
+
+  build-scheduler:
+    if: contains(toJson(github.event.commits.*.modified), 'services/scheduler-service')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build and push scheduler-service
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker build -t innocentobuteofficial/scheduler-service:latest services/scheduler-service/
+          docker push innocentobuteofficial/scheduler-service:latest
