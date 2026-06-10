@@ -33,7 +33,7 @@ This repo solves those documented problems with a microservices architecture on 
 - [x] Stage 4 — Booking + Portal services (complete — all 5 services built, health endpoints verified, Docker images ready)
 - [x] Stage 5 — Kubernetes manifests + kind (complete — all pods running, fault isolation demonstrated, self-healing verified)
 - [ ] Stage 6 — k3s on QNAP
-- [ ] Stage 7 — Prometheus + Grafana
+- [x] Stage 7 — Prometheus + Grafana (complete — kube-prometheus-stack deployed, 15+ dashboards live, Prometheus query interface verified)
 - [ ] Stage 8 — BiggShots Monitor v2
 - [ ] Stage 9 — Benchmarking + docs
 - [ ] Stage 10 — AWS EKS (optional)
