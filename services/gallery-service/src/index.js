@@ -6,10 +6,12 @@ const session = require('express-session');
 const galleriesRouter = require('./routes/galleries');
 const photosRouter = require('./routes/photos');
 
+const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json({ limit: '10mb' }));
+app.use(metricsMiddleware);
 app.use(cookieParser());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'gallery-secret',
@@ -18,6 +20,7 @@ app.use(session({
   cookie: { secure: false }
 }));
 
+app.get('/metrics', metricsHandler);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'gallery-service', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });

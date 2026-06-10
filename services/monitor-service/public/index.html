@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiggShots Monitor v2</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --border:   #30363d;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --green:    #3fb950;
+      --red:      #f85149;
+      --amber:    #d29922;
+      --blue:     #58a6ff;
+      --purple:   #bc8cff;
+      --teal:     #39d353;
+      --gap:      16px;
+      --radius:   10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    header h1 span { color: var(--blue); }
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    #conn-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--amber);
+      transition: background 0.3s;
+    }
+    #conn-dot.live   { background: var(--green); }
+    #conn-dot.error  { background: var(--red); }
+
+    /* ── Grid ────────────────────────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: var(--gap);
+    }
+
+    /* ── Panel ───────────────────────────────────────────────────────────── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      min-height: 220px;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    /* ── Service row ─────────────────────────────────────────────────────── */
+    .svc-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: 6px;
+      margin-bottom: 5px;
+      background: rgba(255,255,255,0.03);
+    }
+    .svc-name  { font-weight: 500; min-width: 160px; }
+    .svc-meta  { color: var(--muted); font-size: 11px; display: flex; gap: 16px; }
+    .badge {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.up   { background: rgba(63,185,80,0.15); color: var(--green); }
+    .badge.down { background: rgba(248,81,73,0.15);  color: var(--red); }
+
+    /* ── Stat cards ─────────────────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border-radius: 7px;
+      padding: 10px 12px;
+    }
+    .stat-label { color: var(--muted); font-size: 11px; margin-bottom: 3px; }
+    .stat-value { font-size: 20px; font-weight: 600; }
+    .stat-value.green  { color: var(--green); }
+    .stat-value.blue   { color: var(--blue); }
+    .stat-value.purple { color: var(--purple); }
+    .stat-value.amber  { color: var(--amber); }
+
+    /* ── Stage bar ──────────────────────────────────────────────────────── */
+    .stage-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .stage-label { min-width: 110px; color: var(--muted); font-size: 12px; }
+    .stage-bar-wrap { flex: 1; background: var(--border); border-radius: 3px; height: 6px; }
+    .stage-bar-fill { height: 6px; border-radius: 3px; background: var(--blue); transition: width 0.5s; }
+    .stage-count { min-width: 28px; text-align: right; color: var(--text); }
+
+    /* ── Activity feed ──────────────────────────────────────────────────── */
+    .feed-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(48,54,61,0.6);
+      font-size: 12px;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-action { color: var(--blue); margin-right: 6px; }
+    .feed-time   { color: var(--muted); white-space: nowrap; }
+
+    /* ── GA4 page list ──────────────────────────────────────────────────── */
+    .page-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(48,54,61,0.6);
+      font-size: 12px;
+    }
+    .page-row:last-child { border-bottom: none; }
+    .page-path { color: var(--blue); font-family: monospace; }
+    .page-views { color: var(--muted); }
+
+    /* ── Error / loading ────────────────────────────────────────────────── */
+    .loading { color: var(--muted); font-style: italic; font-size: 12px; }
+    .error-msg { color: var(--red); font-size: 12px; }
+    .stub-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(210,153,34,0.2);
+      color: var(--amber);
+      margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Bigg<span>Shots</span> Monitor <span style="color:var(--muted);font-weight:400">v2</span></h1>
+  <div id="status-bar">
+    <div id="conn-dot"></div>
+    <span id="conn-label">connecting…</span>
+    <span id="last-updated"></span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ① System health -->
+  <div class="panel" id="panel-system">
+    <div class="panel-title"><span class="dot"></span> System health</div>
+    <div class="loading">Waiting for data…</div>
+  </div>
+
+  <!-- ② Business metrics -->
+  <div class="panel" id="panel-business">
+    <div class="panel-title"><span class="dot" style="background:var(--green)"></span> Business metrics</div>
+    <div class="loading">Waiting for data…</div>
+  </div>
+
+  <!-- ③ Client activity -->
+  <div class="panel" id="panel-activity">
+    <div class="panel-title"><span class="dot" style="background:var(--purple)"></span> Client activity</div>
+    <div class="loading">Waiting for data…</div>
+  </div>
+
+  <!-- ④ GA4 traffic -->
+  <div class="panel" id="panel-ga4">
+    <div class="panel-title"><span class="dot" style="background:var(--amber)"></span> GA4 traffic</div>
+    <div class="loading">Waiting for data…</div>
+  </div>
+
+</div>
+
+<script>
+// ── SSE connection ────────────────────────────────────────────────────────────
+let es;
+const dot   = document.getElementById('conn-dot');
+const label = document.getElementById('conn-label');
+const ts    = document.getElementById('last-updated');
+
+function connect() {
+  if (es) es.close();
+  es = new EventSource('/monitor/stream');
+
+  es.onopen = () => {
+    dot.className = 'live';
+    label.textContent = 'live';
+  };
+
+  es.onmessage = (e) => {
+    const payload = JSON.parse(e.data);
+    if (payload.error) {
+      console.error('stream error:', payload.error);
+      return;
+    }
+    ts.textContent = '· updated ' + new Date(payload.timestamp).toLocaleTimeString();
+    renderSystem(payload.systemHealth);
+    renderBusiness(payload.businessMetrics);
+    renderActivity(payload.clientActivity);
+    renderGA4(payload.ga4);
+  };
+
+  es.onerror = () => {
+    dot.className = 'error';
+    label.textContent = 'reconnecting…';
+    es.close();
+    setTimeout(connect, 5000);
+  };
+}
+
+connect();
+
+// ── Panel renderers ───────────────────────────────────────────────────────────
+
+function renderSystem(d) {
+  const el = document.getElementById('panel-system');
+  if (!d || d.error) { el.querySelector('.loading, .error-msg') && (el.innerHTML = '<div class="panel-title"><span class="dot"></span> System health</div><div class="error-msg">Collection failed</div>'); return; }
+
+  const svcRows = d.services.map(s => `
+    <div class="svc-row">
+      <span class="svc-name">${s.name}</span>
+      <span class="svc-meta">
+        <span>${s.requestRate} req/s</span>
+        <span>p99: ${s.p99Ms}ms</span>
+        <span>err: ${(parseFloat(s.errorRate)*100).toFixed(2)}%</span>
+      </span>
+      <span class="badge ${s.up ? 'up' : 'down'}">${s.up ? '▲ UP' : '▼ DOWN'}</span>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="panel-title"><span class="dot"></span> System health</div>
+    ${svcRows}
+    <div style="margin-top:10px;color:var(--muted);font-size:11px">
+      Scheduler: ${d.scheduler.jobsRegistered} jobs registered
+    </div>`;
+}
+
+function renderBusiness(d) {
+  const el = document.getElementById('panel-business');
+  if (!d || d.error) { el.innerHTML = '<div class="panel-title"><span class="dot" style="background:var(--green)"></span> Business metrics</div><div class="error-msg">Collection failed</div>'; return; }
+
+  const p = d.pipeline;
+  const maxCount = Math.max(...p.byStage.map(s => s.count), 1);
+  const stageBars = p.byStage.map(s => `
+    <div class="stage-row">
+      <span class="stage-label">${s.stage}</span>
+      <div class="stage-bar-wrap"><div class="stage-bar-fill" style="width:${Math.round((s.count/maxCount)*100)}%"></div></div>
+      <span class="stage-count">${s.count}</span>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div class="panel-title"><span class="dot" style="background:var(--green)"></span> Business metrics</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Pipeline</div><div class="stat-value blue">£${fmt(p.pipelineValue)}</div></div>
+      <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value green">£${fmt(p.confirmedRevenue)}</div></div>
+      <div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value amber">£${fmt(d.outstandingBalance)}</div></div>
+    </div>
+    <div style="margin-bottom:10px">${stageBars}</div>
+    <div style="color:var(--muted);font-size:11px">
+      Conversion (90d): ${d.conversionRate90d}% &nbsp;·&nbsp; Completed all-time: ${p.completedTotal}
+    </div>`;
+}
+
+function renderActivity(d) {
+  const el = document.getElementById('panel-activity');
+  if (!d || d.error) { el.innerHTML = '<div class="panel-title"><span class="dot" style="background:var(--purple)"></span> Client activity</div><div class="error-msg">Collection failed</div>'; return; }
+
+  const feed = d.recentActivity.slice(0, 10).map(a => `
+    <div class="feed-item">
+      <span><span class="feed-action">${a.action}</span>${a.clientName}</span>
+      <span class="feed-time">${timeAgo(a.at)}</span>
+    </div>`).join('') || '<div class="loading">No recent activity</div>';
+
+  el.innerHTML = `
+    <div class="panel-title"><span class="dot" style="background:var(--purple)"></span> Client activity</div>
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">
+      <div class="stat-card"><div class="stat-label">Actions (24h)</div><div class="stat-value purple">${d.summary.actionsLast24h}</div></div>
+      <div class="stat-card"><div class="stat-label">Actions (7d)</div><div class="stat-value purple">${d.summary.actionsLast7d}</div></div>
+      <div class="stat-card"><div class="stat-label">Gallery DLs (7d)</div><div class="stat-value blue">${d.galleries.downloads7d}</div></div>
+    </div>
+    ${feed}`;
+}
+
+function renderGA4(d) {
+  const el = document.getElementById('panel-ga4');
+  if (!d || d.error) { el.innerHTML = '<div class="panel-title"><span class="dot" style="background:var(--amber)"></span> GA4 traffic</div><div class="error-msg">Collection failed</div>'; return; }
+
+  const stubBadge = d.stub ? '<span class="stub-badge">stub</span>' : '';
+  const pages = d.topPages.map(p => `
+    <div class="page-row">
+      <span class="page-path">${p.page}</span>
+      <span class="page-views">${p.views} views</span>
+    </div>`).join('') || '<div class="loading">No page data</div>';
+
+  const g = d.last7Days;
+  el.innerHTML = `
+    <div class="panel-title"><span class="dot" style="background:var(--amber)"></span> GA4 traffic (7d)${stubBadge}</div>
+    <div class="stat-grid" style="margin-bottom:12px">
+      <div class="stat-card"><div class="stat-label">Active users</div><div class="stat-value amber">${g.activeUsers}</div></div>
+      <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-value blue">${g.sessions}</div></div>
+      <div class="stat-card"><div class="stat-label">Page views</div><div class="stat-value green">${g.pageviews}</div></div>
+    </div>
+    <div style="margin-bottom:6px;color:var(--muted);font-size:11px">Top pages</div>
+    ${pages}`;
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function fmt(v) {
+  return parseFloat(v).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function timeAgo(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60)  return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  return `${Math.floor(diff/3600)}h ago`;
+}
+</script>
+</body>
+</html>

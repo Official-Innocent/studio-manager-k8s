@@ -2,9 +2,12 @@
 require('dotenv').config();
 const express = require('express');
 const emailService = require('./email');
+const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(express.json());
+app.use(metricsMiddleware);
+app.get('/metrics', metricsHandler);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'notification-service', timestamp: new Date().toISOString(), uptime: process.uptime() });
 });

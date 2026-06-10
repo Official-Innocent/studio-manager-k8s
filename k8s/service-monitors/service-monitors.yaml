@@ -1,0 +1,109 @@
+---
+# k8s/service-monitors/service-monitors.yaml
+# Prometheus Operator ServiceMonitor resources.
+# These tell Prometheus to scrape /metrics on each service every 15s.
+# Apply with: kubectl apply -f k8s/service-monitors/service-monitors.yaml
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: notification-service-monitor
+  namespace: biggshots
+  labels:
+    release: prometheus   # must match the Helm release label selector
+spec:
+  selector:
+    matchLabels:
+      app: notification-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - biggshots
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gallery-service-monitor
+  namespace: biggshots
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: gallery-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - biggshots
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scheduler-service-monitor
+  namespace: biggshots
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: scheduler-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - biggshots
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: booking-service-monitor
+  namespace: biggshots
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: booking-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - biggshots
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: portal-service-monitor
+  namespace: biggshots
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: portal-service
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+      scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+      - biggshots

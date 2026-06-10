@@ -3,11 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const { runAll } = require('./scheduler');
 
+const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
 const PORT = process.env.PORT || 3003;
+app.use(metricsMiddleware);
 
 const jobHealth = { lastRun: null, lastStatus: 'never', nextRun: null };
 
+app.get('/metrics', metricsHandler);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'scheduler-service', timestamp: new Date().toISOString(), uptime: process.uptime(), scheduler: jobHealth });
 });
