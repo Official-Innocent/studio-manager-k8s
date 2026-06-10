@@ -1,0 +1,5 @@
+grafana:
+  adminPassword: biggshots123
+prometheus:
+  prometheusSpec:
+    scrapeInterval: 30s
