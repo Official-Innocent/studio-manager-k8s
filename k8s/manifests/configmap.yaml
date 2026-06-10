@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: biggshots-config
+  namespace: biggshots
+data:
+  DB_HOST: "biggshots-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "biggshots"
+  DB_USER: "biggshots_user"
+  REDIS_URL: "redis://biggshots-redis:6379"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_SECURE: "false"
+  SITE_URL: "https://biggshotsmedia.com"
+  ADMIN_EMAIL: "hello@biggshotsmedia.com"
+  SCHEDULER_INTERVAL_MS: "1800000"
