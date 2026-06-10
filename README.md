@@ -28,7 +28,7 @@ This repo solves those documented problems with a microservices architecture on 
 
 - [x] Stage 0 — Repo setup
 - [x] Stage 1 — Notification service (complete — REST API + Redis pub/sub verified, emails delivered)
-- [ ] Stage 2 — Gallery service
+- [x] Stage 2 — Gallery service (complete — health endpoint verified, Redis event publisher, Docker image built)
 - [ ] Stage 3 — Scheduler service
 - [ ] Stage 4 — Booking + Portal services
 - [ ] Stage 5 — Kubernetes manifests + kind
