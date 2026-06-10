@@ -1,0 +1,24 @@
+{
+  "name": "portal-service",
+  "version": "1.0.0",
+  "description": "Bigg Shots Media — Client portal microservice",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemailer": "^8.0.10",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.6",
+    "express-session": "^1.17.3",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
