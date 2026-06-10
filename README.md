@@ -31,7 +31,7 @@ This repo solves those documented problems with a microservices architecture on 
 - [x] Stage 2 — Gallery service (complete — health endpoint verified, Redis event publisher, Docker image built)
 - [x] Stage 3 — Scheduler service (complete — 13 jobs isolated, per-job health tracking, Docker image built)
 - [x] Stage 4 — Booking + Portal services (complete — all 5 services built, health endpoints verified, Docker images ready)
-- [ ] Stage 5 — Kubernetes manifests + kind
+- [x] Stage 5 — Kubernetes manifests + kind (complete — all pods running, fault isolation demonstrated, self-healing verified)
 - [ ] Stage 6 — k3s on QNAP
 - [ ] Stage 7 — Prometheus + Grafana
 - [ ] Stage 8 — BiggShots Monitor v2
