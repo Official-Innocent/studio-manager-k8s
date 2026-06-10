@@ -30,7 +30,7 @@ This repo solves those documented problems with a microservices architecture on 
 - [x] Stage 1 — Notification service (complete — REST API + Redis pub/sub verified, emails delivered)
 - [x] Stage 2 — Gallery service (complete — health endpoint verified, Redis event publisher, Docker image built)
 - [x] Stage 3 — Scheduler service (complete — 13 jobs isolated, per-job health tracking, Docker image built)
-- [ ] Stage 4 — Booking + Portal services
+- [x] Stage 4 — Booking + Portal services (complete — all 5 services built, health endpoints verified, Docker images ready)
 - [ ] Stage 5 — Kubernetes manifests + kind
 - [ ] Stage 6 — k3s on QNAP
 - [ ] Stage 7 — Prometheus + Grafana
