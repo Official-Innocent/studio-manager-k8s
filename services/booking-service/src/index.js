@@ -6,10 +6,14 @@ const session = require('express-session');
 const bookingsRouter = require('./routes/bookings');
 const contractsRouter = require('./routes/contracts');
 const invoicesRouter = require('./routes/invoices');
+const paymentsRouter = require('./routes/payments');
 
 const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
 const PORT = process.env.PORT || 3004;
+
+// Stripe webhook needs the raw body — mount it BEFORE express.json()
+app.use('/payments/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(metricsMiddleware);
@@ -25,6 +29,7 @@ app.get('/health', (req, res) => {
 app.use('/bookings', bookingsRouter);
 app.use('/contracts', contractsRouter);
 app.use('/invoices', invoicesRouter);
+app.use('/payments', paymentsRouter);
 
 app.listen(PORT, () => console.log('[booking-service] running on port ' + PORT));
 
