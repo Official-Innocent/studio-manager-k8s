@@ -40,9 +40,18 @@ router.post('/admin/login',
       await query('UPDATE admin_users SET last_login=NOW() WHERE id=$1', [admin.id]);
       loginAttemptsTotal.inc({ actor: 'admin', result: 'success' });
 
+      // Issue a JWT for cross-service admin auth (other services' requireAdmin
+      // middleware accepts `Bearer <token>` where decoded.role === 'admin')
+      const token = jwt.sign(
+        { id: admin.id, email: admin.email, role: 'admin' },
+        process.env.JWT_SECRET,
+        { expiresIn: '12h' }
+      );
+
       res.json({
         success: true,
         admin: { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
+        token,
       });
     } catch (err) {
       console.error('[POST /admin/login]', err);
