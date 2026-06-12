@@ -233,6 +233,37 @@ async function sendOrderShipped(order, client) {
   return send(client.email, '📦 Your Order Has Shipped — Bigg Shots Media', html, 'order_shipped');
 }
 
+// 8. Portal credentials (new account / admin reset)
+async function sendPortalCredentials(client, password) {
+  const html = emailWrapper(`
+    <h2>Your Portal is <em>Ready</em></h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, your Bigg Shots Media client portal is ready. You can view your gallery, documents, invoices and more.</p>
+    <div class="highlight">
+      <p class="label">Your Login Details</p>
+      <p><strong style="color:#F5F0E8">Email:</strong> ${client.email}</p>
+      <p><strong style="color:#F5F0E8">Password:</strong> ${password}</p>
+    </div>
+    <p>We recommend changing your password after your first login.</p>
+    <a href="${process.env.SITE_URL || 'https://biggshotsmedia.com'}/portal" class="btn">Access Your Portal</a>
+  `, 'Your client portal is ready');
+
+  return send(client.email, 'Your Bigg Shots Media client portal is ready', html, 'portal_credentials');
+}
+
+// 9. Portal password reset
+async function sendPasswordReset(client, resetUrl) {
+  const html = emailWrapper(`
+    <h2>Reset Your <em>Password</em></h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, we received a request to reset your portal password. Click below to set a new password. This link expires in 1 hour.</p>
+    <a href="${resetUrl}" class="btn">Reset My Password</a>
+    <p style="margin-top:24px;font-size:12px;color:#666;">If you did not request this, you can safely ignore this email.</p>
+  `, 'Reset your portal password');
+
+  return send(client.email, 'Reset your Bigg Shots Media portal password', html, 'portal_password_reset');
+}
+
 module.exports = {
   sendBookingConfirmationToClient,
   sendBookingNotificationToOwner,
@@ -241,4 +272,6 @@ module.exports = {
   sendPaymentReceived,
   sendPaymentNotificationToOwner,
   sendOrderShipped,
+  sendPortalCredentials,
+  sendPasswordReset,
 };
