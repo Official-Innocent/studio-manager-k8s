@@ -1,9 +1,29 @@
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: biggshots-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: biggshots_dev
+      POSTGRES_USER: biggshots_dev
+      POSTGRES_PASSWORD: dev_password_only
+    ports:
+      - "55432:5432"
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biggshots_dev -d biggshots_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   redis:
     image: redis:7-alpine
+    container_name: biggshots-dev-redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "56379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -14,21 +34,224 @@ services:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
+    container_name: biggshots-dev-notification
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "3001:3001"
     environment:
-      - PORT=3001
-      - REDIS_URL=redis://redis:6379
-      - MAIL_HOST=smtp.gmail.com
-      - MAIL_PORT=587
-      - MAIL_SECURE=false
-      - MAIL_USER=thephotographerltd@gmail.com
-      - MAIL_PASS=pymy olhw nkca bhms
-      - MAIL_FROM=Bigg Shots Media <thephotographerltd@gmail.com>
-      - ADMIN_EMAIL=hello@biggshotsmedia.com
-      - SITE_URL=https://biggshotsmedia.com
+      NODE_ENV: development
+      PORT: "3001"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: pymy olhw nkca bhms
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      SITE_URL: http://localhost:8080
+
+  gallery-service:
+    build:
+      context: ./services/gallery-service
+      dockerfile: Dockerfile
+    container_name: biggshots-dev-gallery
+    restart: unless-stopped
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
-    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: development
+      PORT: "3002"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-not-for-production
+      SESSION_SECRET: dev-session-secret-not-for-production
+      GALLERY_DIR: /data/galleries
+      SITE_URL: http://localhost:8080
+    volumes:
+      - dev_galleries_data:/data/galleries
 
+  scheduler-service:
+    build:
+      context: ./services/scheduler-service
+      dockerfile: Dockerfile
+    container_name: biggshots-dev-scheduler
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: development
+      PORT: "3003"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: pymy olhw nkca bhms
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      SITE_URL: http://localhost:8080
+      GOOGLE_CLIENT_ID: ""
+      GOOGLE_CLIENT_SECRET: ""
+      GOOGLE_REFRESH_TOKEN: ""
+      SCHEDULER_INTERVAL_MS: "1800000"
+
+  booking-service:
+    build:
+      context: ./services/booking-service
+      dockerfile: Dockerfile
+    container_name: biggshots-dev-booking
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: development
+      PORT: "3004"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-not-for-production
+      SESSION_SECRET: dev-session-secret-not-for-production
+      SITE_URL: http://localhost:8080
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      OWNER_PHONE: "+447700900000"
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: pymy olhw nkca bhms
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+      UPLOAD_DIR: /data/uploads
+      GOOGLE_CLIENT_ID: ""
+      GOOGLE_CLIENT_SECRET: ""
+      GOOGLE_REFRESH_TOKEN: ""
+      STRIPE_SECRET_KEY: sk_test_dev_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_dev_placeholder
+      TWILIO_ACCOUNT_SID: ""
+      TWILIO_AUTH_TOKEN: ""
+      TWILIO_FROM_NUMBER: ""
+    volumes:
+      - dev_uploads_data:/data/uploads
+
+  portal-service:
+    build:
+      context: ./services/portal-service
+      dockerfile: Dockerfile
+    container_name: biggshots-dev-portal
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: development
+      PORT: "3005"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      JWT_SECRET: dev-jwt-secret-not-for-production
+      SESSION_SECRET: dev-session-secret-not-for-production
+      SITE_URL: http://localhost:8080
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: pymy olhw nkca bhms
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: biggshots-dev-auth
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3007:3007"
+    environment:
+      NODE_ENV: development
+      PORT: "3007"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-not-for-production
+      SESSION_SECRET: dev-session-secret-not-for-production
+      SITE_URL: http://localhost:8080
+
+  monitor-service:
+    build:
+      context: .
+      dockerfile: services/monitor-service/Dockerfile
+    container_name: biggshots-dev-monitor
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3006:3006"
+    environment:
+      NODE_ENV: development
+      PORT: "3006"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_dev
+      DB_USER: biggshots_dev
+      DB_PASSWORD: dev_password_only
+      GA4_STUB: "true"
+      GA4_API_KEY: ""
+      GA4_PROPERTY_ID: ""
+      PROMETHEUS_URL: ""
+      SSE_INTERVAL_MS: "5000"
+
+volumes:
+  dev_postgres_data:
+  dev_galleries_data:
+  dev_uploads_data:
