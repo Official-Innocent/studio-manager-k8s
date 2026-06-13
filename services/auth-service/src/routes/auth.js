@@ -83,6 +83,28 @@ router.get('/admin/me', requireAdmin, async (req, res) => {
   }
 });
 
+// ── POST /admin/verify-password — confirm current admin's password ───────────
+// Used by the admin UI to require re-entering the password before destructive
+// actions (e.g. cancelling a booking).
+router.post('/admin/verify-password', requireAdmin,
+  body('password').notEmpty(),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: 'Password is required.' });
+    try {
+      const { rows } = await query('SELECT password_hash FROM admin_users WHERE id=$1', [req.session.adminId || req.adminId]);
+      if (!rows.length) return res.status(404).json({ error: 'Admin not found.' });
+
+      const match = await bcrypt.compare(req.body.password, rows[0].password_hash);
+      if (!match) return res.status(401).json({ error: 'Incorrect password.' });
+
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: 'Verification failed.' });
+    }
+  }
+);
+
 // ── POST /admin/change-password ───────────────────────────────────────────────
 router.post('/admin/change-password', requireAdmin,
   body('currentPassword').notEmpty(),
