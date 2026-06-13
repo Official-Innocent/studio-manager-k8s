@@ -264,6 +264,43 @@ async function sendPasswordReset(client, resetUrl) {
   return send(client.email, 'Reset your Bigg Shots Media portal password', html, 'portal_password_reset');
 }
 
+// 10. Questionnaire sent
+async function sendQuestionnaireSent(client, questionnaire) {
+  const html = emailWrapper(`
+    <h2>Your <em>Questionnaire</em> is Ready</h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, your photographer has sent you a pre-shoot questionnaire: <strong style="color:#F5F0E8">${questionnaire.title}</strong>.</p>
+    <p>Please log in to your client portal to fill it in before your session — this helps us prepare and make your experience as smooth as possible.</p>
+    <a href="${process.env.SITE_URL || 'https://biggshotsmedia.com'}/portal" class="btn">Go to Portal</a>
+  `, 'Your pre-shoot questionnaire is ready');
+
+  return send(client.email, 'Your pre-shoot questionnaire — Bigg Shots Media', html, 'questionnaire_sent');
+}
+
+// 11. Project stage changed (quote/invoice sent, etc.)
+async function sendProjectStageChanged(client, data) {
+  const { project, to_stage, doc, message } = data;
+  const stageCopy = {
+    quote_sent: { heading: 'Your Quote is Ready', body: 'We\'ve prepared a quote for your upcoming session.' },
+    invoice_sent: { heading: 'Your Invoice is Ready', body: 'An invoice has been issued for your booking.' },
+    project_covered: { heading: 'Pre-Shoot Questionnaire', body: 'Please complete your pre-shoot questionnaire ahead of your session.' },
+    post_production: { heading: 'Your Session Contract', body: 'Your contract is ready for review.' },
+    completed: { heading: 'Session Complete', body: 'Thank you — your session is complete!' },
+  };
+  const copy = stageCopy[to_stage] || { heading: 'Project Update', body: 'There has been an update to your project.' };
+
+  const html = emailWrapper(`
+    <h2>${copy.heading.replace(/^(\S+)/, '$1<em>').replace(/(\s+\S+)$/, '</em>$1')}</h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, ${copy.body}</p>
+    ${message ? `<p>${message}</p>` : ''}
+    ${doc ? `<p>Reference: <strong style="color:#F5F0E8">${doc.data?.invoice_number || doc.data?.quote_number || ''}</strong></p>` : ''}
+    <a href="${process.env.SITE_URL || 'https://biggshotsmedia.com'}/portal" class="btn">View in Portal</a>
+  `, copy.heading);
+
+  return send(client.email, `${copy.heading} — Bigg Shots Media`, html, 'project_stage_' + to_stage);
+}
+
 module.exports = {
   sendBookingConfirmationToClient,
   sendBookingNotificationToOwner,
@@ -274,4 +311,6 @@ module.exports = {
   sendOrderShipped,
   sendPortalCredentials,
   sendPasswordReset,
+  sendQuestionnaireSent,
+  sendProjectStageChanged,
 };

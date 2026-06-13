@@ -234,6 +234,26 @@ services:
       restart_policy:
         condition: on-failure
 
+  crm-service:
+    image: innocentobuteofficial/crm-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3009"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
 volumes:
   prod_postgres_data:
   prod_galleries_data:
