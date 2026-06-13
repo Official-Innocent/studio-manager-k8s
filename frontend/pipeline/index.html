@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline — Bigg Shots Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--black:#0A0A0A;--dark:#111111;--dark2:#1A1A1A;--dark3:#242424;--white:#F5F0E8;--white-dim:#B0A898;--green:#4ECBA0;--red:#E05555;--amber:#E0A030;--blue:#4A90D9;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Montserrat",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+.topbar{background:var(--dark);border-bottom:0.5px solid rgba(201,168,76,0.15);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;}
+.topbar h1{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--gold);}
+.topbar-right{display:flex;gap:0.5rem;align-items:center;}
+.btn-top{background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;cursor:pointer;transition:all 0.2s;}
+.btn-top:hover{background:var(--gold-light);}
+.btn-ghost{background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-ghost:hover{background:var(--gold);color:var(--black);}
+.main{margin-top:56px;padding:1.5rem;}
+.board-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.board-title{font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--white);}
+.board-title em{font-style:italic;color:var(--gold);}
+.board-filters{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.filter-btn{background:none;border:0.5px solid rgba(245,240,232,0.15);color:var(--white-dim);font-family:var(--sans);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:0.35rem 0.8rem;cursor:pointer;transition:all 0.2s;}
+.filter-btn:hover,.filter-btn.active{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);}
+.board{display:flex;gap:10px;overflow-x:auto;padding-bottom:1rem;min-height:calc(100vh - 160px);}
+.board::-webkit-scrollbar{height:4px;}
+.board::-webkit-scrollbar-track{background:var(--dark2);}
+.board::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.3);border-radius:2px;}
+.col{flex-shrink:0;width:230px;display:flex;flex-direction:column;}
+.col-header{padding:0.7rem 0.8rem;border-bottom:2px solid;margin-bottom:0.5rem;}
+.col-header h3{font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.2rem;}
+.col-header .col-count{font-size:10px;color:var(--white-dim);}
+.col-body{flex:1;min-height:100px;padding:2px;transition:background 0.2s;border-radius:4px;}
+.col-body.drag-over{background:rgba(201,168,76,0.06);outline:1px dashed rgba(201,168,76,0.3);}
+.card{background:var(--dark);border:0.5px solid rgba(245,240,232,0.08);padding:0.85rem;margin-bottom:8px;cursor:grab;transition:all 0.2s;position:relative;border-radius:2px;}
+.card:hover{border-color:rgba(201,168,76,0.3);background:var(--dark2);}
+.card.dragging{opacity:0.4;cursor:grabbing;}
+.card-client{font-size:12px;font-weight:600;color:var(--white);margin-bottom:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-title{font-size:11px;color:var(--white-dim);margin-bottom:0.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-meta{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.3rem;}
+.card-date{font-size:10px;color:var(--white-dim);}
+.card-amount{font-size:11px;font-weight:600;color:var(--gold);}
+.card-badges{display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.4rem;}
+.badge{font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.4rem;}
+.badge-paid{background:rgba(78,203,160,0.15);color:var(--green);}
+.badge-unpaid{background:rgba(224,85,85,0.12);color:var(--red);}
+.badge-partial{background:rgba(201,168,76,0.15);color:var(--gold);}
+.badge-overdue{background:rgba(224,85,85,0.2);color:var(--red);}
+.card-actions{display:flex;gap:0.3rem;margin-top:0.5rem;}
+.card-btn{background:none;border:0.5px solid rgba(245,240,232,0.12);color:var(--white-dim);font-family:var(--sans);font-size:9px;letter-spacing:0.1em;padding:0.2rem 0.5rem;cursor:pointer;transition:all 0.2s;}
+.card-btn:hover{border-color:var(--gold);color:var(--gold);}
+.add-card{width:100%;background:none;border:0.5px dashed rgba(201,168,76,0.2);color:rgba(201,168,76,0.4);font-family:var(--sans);font-size:10px;letter-spacing:0.1em;padding:0.6rem;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.add-card:hover{border-color:var(--gold);color:var(--gold);}
+.loading-col{text-align:center;padding:2rem;color:var(--white-dim);font-size:11px;letter-spacing:0.15em;}
+
+/* Stage colours */
+.col[data-stage=lead] .col-header{border-color:#5F5E5A;}
+.col[data-stage=lead] .col-header h3{color:#B4B2A9;}
+.col[data-stage=quote_sent] .col-header{border-color:#3B8BD4;}
+.col[data-stage=quote_sent] .col-header h3{color:#85B7EB;}
+.col[data-stage=invoice_sent] .col-header{border-color:#BA7517;}
+.col[data-stage=invoice_sent] .col-header h3{color:#FAC775;}
+.col[data-stage=contract_sent] .col-header{border-color:#7F77DD;}
+.col[data-stage=contract_sent] .col-header h3{color:#AFA9EC;}
+.col[data-stage=questionnaire_sent] .col-header{border-color:#D4537E;}
+.col[data-stage=questionnaire_sent] .col-header h3{color:#ED93B1;}
+.col[data-stage=session_confirmed] .col-header{border-color:#1D9E75;}
+.col[data-stage=session_confirmed] .col-header h3{color:#5DCAA5;}
+.col[data-stage=post_production] .col-header{border-color:#D85A30;}
+.col[data-stage=post_production] .col-header h3{color:#F0997B;}
+.col[data-stage=balance_due] .col-header{border-color:#E0A030;}
+.col[data-stage=balance_due] .col-header h3{color:#FAC775;}
+.col[data-stage=gallery_delivered] .col-header{border-color:#639922;}
+.col[data-stage=gallery_delivered] .col-header h3{color:#C0DD97;}
+.col[data-stage=completed] .col-header{border-color:#1D9E75;}
+.col[data-stage=completed] .col-header h3{color:#4ECBA0;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(10,10,10,0.88);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--dark);border:0.5px solid rgba(201,168,76,0.2);width:100%;max-width:680px;padding:2rem;position:relative;margin:auto;}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--white-dim);font-size:1.8rem;cursor:pointer;}
+.modal-close:hover{color:var(--white);}
+.modal-title{font-family:var(--serif);font-size:1.5rem;font-weight:300;color:var(--white);margin-bottom:0.3rem;}
+.modal-title em{font-style:italic;color:var(--gold);}
+.gold-rule{width:36px;height:1px;background:var(--gold);margin:0.6rem 0 1.2rem;}
+.field{margin-bottom:0.9rem;}
+.field label{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.35rem;}
+.field input,.field select,.field textarea{width:100%;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.65rem 0.8rem;outline:none;transition:border-color 0.3s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+.field select option{background:var(--dark3);}
+.field textarea{resize:vertical;min-height:70px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.7rem;}
+.btn-save{background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.75rem 2rem;cursor:pointer;transition:all 0.3s;}
+.btn-save:hover{background:var(--gold-light);}
+.btn-save:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-danger{background:rgba(224,85,85,0.15);color:var(--red);border:0.5px solid rgba(224,85,85,0.3);font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.75rem 1.5rem;cursor:pointer;transition:all 0.3s;}
+.btn-danger:hover{background:var(--red);color:var(--white);}
+.modal-footer{display:flex;gap:0.7rem;margin-top:1.5rem;flex-wrap:wrap;}
+.msg{font-size:11px;padding:0.6rem 0.8rem;margin-top:0.5rem;display:none;}
+.msg-err{background:rgba(224,85,85,0.12);border:0.5px solid rgba(224,85,85,0.3);color:var(--red);}
+.msg-ok{background:rgba(78,203,160,0.12);border:0.5px solid rgba(78,203,160,0.3);color:var(--green);}
+.stage-trigger-box{background:rgba(201,168,76,0.06);border:0.5px solid rgba(201,168,76,0.2);padding:1rem;margin-bottom:1rem;}
+.stage-trigger-title{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.5rem;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;}
+.toggle-label{font-size:11px;color:var(--white-dim);}
+.toggle-switch{position:relative;width:36px;height:20px;}
+.toggle-switch input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:rgba(245,240,232,0.15);border-radius:10px;cursor:pointer;transition:0.3s;}
+.toggle-slider:before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--white-dim);border-radius:50%;transition:0.3s;}
+.toggle-switch input:checked+.toggle-slider{background:var(--gold);}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(16px);background:var(--black);}
+.installment-row{display:grid;grid-template-columns:auto 1fr 1fr 1fr auto;gap:0.5rem;align-items:center;margin-bottom:0.5rem;font-size:11px;}
+.installment-row input{background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:11px;padding:0.4rem 0.6rem;outline:none;width:100%;}
+.inst-label{color:var(--white-dim);font-size:10px;letter-spacing:0.1em;}
+.inst-paid{color:var(--green);font-size:10px;}
+.pay-btn{background:rgba(78,203,160,0.15);color:var(--green);border:none;font-family:var(--sans);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:0.25rem 0.6rem;cursor:pointer;white-space:nowrap;}
+.pay-btn:hover{background:var(--green);color:var(--black);}
+.line-item-row{display:grid;grid-template-columns:1fr auto auto auto;gap:0.5rem;align-items:center;margin-bottom:0.4rem;}
+.line-item-row input{background:var(--dark2);border:0.5px solid rgba(201,168,76,0.15);color:var(--white);font-family:var(--sans);font-size:11px;padding:0.4rem 0.6rem;outline:none;width:100%;}
+.li-del{background:none;border:none;color:rgba(224,85,85,0.5);cursor:pointer;font-size:14px;padding:0.2rem;}
+.li-del:hover{color:var(--red);}
+.total-row{display:flex;justify-content:space-between;padding:0.5rem 0;border-top:0.5px solid rgba(201,168,76,0.15);margin-top:0.5rem;}
+.total-label{font-size:11px;color:var(--white-dim);}
+.total-val{font-size:13px;font-weight:600;color:var(--gold);}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark2);border:0.5px solid var(--gold);padding:0.8rem 1.5rem;font-size:12px;color:var(--white);z-index:999;display:none;max-width:320px;}
+.section-sep{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:1.2rem 0 0.6rem;padding-bottom:0.4rem;border-bottom:0.5px solid rgba(201,168,76,0.15);}
+@media(max-width:700px){.field-row,.field-row-3{grid-template-columns:1fr;}.installment-row{grid-template-columns:1fr 1fr;gap:0.4rem;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>BIGG SHOTS &mdash; PIPELINE</h1>
+  <div class="topbar-right">
+    <a href="/admin" class="btn-ghost">Studio Dashboard</a>
+    <button class="btn-top" id="btn-new-project" type="button">+ New Project</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="board-header">
+    <div class="board-title">Project <em>Pipeline</em></div>
+    <div class="board-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="active">Active</button>
+      <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+  </div>
+  <div class="board" id="board"></div>
+</div>
+
+<!-- NEW PROJECT MODAL -->
+<div class="modal-bg" id="modal-new">
+  <div class="modal">
+    <button class="modal-close" id="close-new">&times;</button>
+    <div class="modal-title">New <em>Project</em></div>
+    <div class="gold-rule"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Client</label>
+        <div style="display:flex;gap:0.4rem;align-items:center;">
+          <select id="np-client" style="flex:1;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.65rem 0.8rem;outline:none;">
+            <option value="">Select existing client...</option>
+            <option value="__new__">+ Add new client...</option>
+          </select>
+        </div>
+        <!-- Inline new client form -->
+        <div id="new-client-form" style="display:none;margin-top:0.6rem;background:rgba(201,168,76,0.05);border:0.5px solid rgba(201,168,76,0.2);padding:0.8rem;">
+          <div style="font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.6rem;">New Client Details</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
+            <input type="text" id="nc-first" placeholder="First name" style="background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.5rem 0.7rem;outline:none;width:100%;">
+            <input type="text" id="nc-last" placeholder="Last name" style="background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.5rem 0.7rem;outline:none;width:100%;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.6rem;">
+            <input type="email" id="nc-email" placeholder="Email address" style="background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.5rem 0.7rem;outline:none;width:100%;">
+            <input type="tel" id="nc-phone" placeholder="Phone number" style="background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.5rem 0.7rem;outline:none;width:100%;">
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <input type="checkbox" id="nc-portal" style="accent-color:var(--gold);width:auto;">
+            <label for="nc-portal" style="font-size:11px;color:var(--white-dim);">Create portal account (generates login credentials)</label>
+          </div>
+          <div id="nc-created-msg" style="font-size:11px;color:var(--green);margin-top:0.4rem;display:none;"></div>
+        </div>
+      </div>
+      <div class="field"><label>Project Title</label><input type="text" id="np-title" placeholder="e.g. Sarah and James Wedding"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Session Type</label>
+        <select id="np-type">
+          <option value="">Select type...</option>
+          <option>Wedding Photography</option>
+          <option>Portrait Session</option>
+          <option>Birthday / Event</option>
+          <option>Family Portrait</option>
+          <option>Commercial</option>
+        </select>
+      </div>
+      <div class="field"><label>Session Date</label><input type="date" id="np-date"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Location / Venue</label><input type="text" id="np-location" placeholder="Venue name or address"></div>
+      <div class="field"><label>Quoted Amount (£)</label><input type="number" id="np-amount" placeholder="0.00" step="0.01"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="np-notes" placeholder="Any initial notes..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-save" id="btn-create-project" type="button">Create Project</button>
+      <button class="btn-ghost" id="cancel-new" type="button">Cancel</button>
+    </div>
+    <div class="msg msg-err" id="np-err"></div>
+  </div>
+</div>
+
+<!-- STAGE MOVE MODAL -->
+<div class="modal-bg" id="modal-stage">
+  <div class="modal">
+    <button class="modal-close" id="close-stage">&times;</button>
+    <div class="modal-title" id="stage-modal-title">Move to <em>Stage</em></div>
+    <div class="gold-rule"></div>
+    <!-- Stage selector (shown when no target stage set) -->
+    <div id="stage-select-box" style="display:none;margin-bottom:1rem;">
+      <label style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Move to Stage</label>
+      <select id="stage-select" style="width:100%;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.65rem 0.8rem;outline:none;">
+        <option value="">Select a stage...</option>
+      </select>
+    </div>
+    <div class="stage-trigger-box" id="stage-trigger-box">
+      <div class="stage-trigger-title">What will be triggered</div>
+      <div id="stage-trigger-desc" style="font-size:12px;color:var(--white-dim);margin-bottom:0.8rem;">Select a stage above to see what will happen.</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Send automatic email to client</span>
+        <label class="toggle-switch"><input type="checkbox" id="tog-email" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row" id="tog-doc-row">
+        <span class="toggle-label" id="tog-doc-label">Auto-create document</span>
+        <label class="toggle-switch"><input type="checkbox" id="tog-doc" checked><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="field"><label>Override message to client (optional)</label>
+      <textarea id="stage-message" placeholder="Leave blank to use the default message for this stage..." rows="3"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" id="btn-confirm-stage" type="button">Confirm &amp; Move</button>
+      <button class="btn-ghost" id="cancel-stage" type="button">Cancel</button>
+    </div>
+    <div class="msg msg-err" id="stage-err"></div>
+    <div class="msg msg-ok" id="stage-ok"></div>
+  </div>
+</div>
+
+<!-- PROJECT DETAIL MODAL -->
+<div class="modal-bg" id="modal-project">
+  <div class="modal" style="max-width:760px;">
+    <button class="modal-close" id="close-project">&times;</button>
+    <div class="modal-title" id="proj-modal-name">Project <em>Details</em></div>
+    <div class="gold-rule"></div>
+
+    <div class="field-row">
+      <div class="field"><label>Client</label><div id="proj-client" style="font-size:13px;color:var(--white);padding:0.5rem 0;"></div></div>
+      <div class="field"><label>Stage</label><div id="proj-stage-badge" style="padding:0.5rem 0;font-size:11px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;"></div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Session Date</label><div id="proj-date" style="font-size:13px;color:var(--white);padding:0.5rem 0;"></div></div>
+      <div class="field"><label>Quoted Amount</label><div id="proj-amount" style="font-size:13px;color:var(--gold);font-weight:600;padding:0.5rem 0;"></div></div>
+    </div>
+
+    <!-- Payment Plan -->
+    <div class="section-sep">Payment Plan</div>
+    <div id="payment-plan-area">
+      <div id="existing-plan" style="display:none;">
+        <div id="installments-list"></div>
+      </div>
+      <div id="no-plan" style="font-size:11px;color:var(--white-dim);margin-bottom:0.8rem;">No payment plan set up yet.</div>
+      <button class="btn-ghost" id="btn-setup-plan" type="button" style="font-size:10px;">Set Up Payment Plan</button>
+      <div id="plan-builder" style="display:none;margin-top:1rem;">
+        <div class="field-row-3">
+          <div class="field"><label>Deposit %</label><input type="number" id="plan-deposit-pct" value="25" min="1" max="100" step="1"></div>
+          <div class="field"><label>Extra instalments (0-3)</label><input type="number" id="plan-instalment-count" value="1" min="0" max="3" step="1"></div>
+          <div class="field"><label>Total Amount (£)</label><input type="number" id="plan-total" step="0.01"></div>
+        </div>
+        <button class="btn-ghost" id="btn-preview-plan" type="button" style="font-size:10px;margin-bottom:0.8rem;">Preview Dates</button>
+        <div id="plan-preview" style="display:none;">
+          <div id="plan-preview-rows"></div>
+          <button class="btn-save" id="btn-save-plan" type="button" style="margin-top:0.8rem;">Save Payment Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice -->
+    <div class="section-sep">Invoices</div>
+    <div id="invoices-area">
+      <div id="invoices-list" style="font-size:11px;color:var(--white-dim);margin-bottom:0.5rem;">Loading...</div>
+      <button class="btn-ghost" id="btn-new-invoice" type="button" style="font-size:10px;">+ Create Invoice</button>
+    </div>
+
+    <!-- Invoice Builder -->
+    <div id="invoice-builder" style="display:none;margin-top:1rem;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.15);padding:1rem;">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.8rem;">New Invoice</div>
+      <div class="field-row">
+        <div class="field"><label>Invoice Type</label>
+          <select id="inv-type">
+            <option value="deposit">Deposit invoice</option>
+            <option value="balance">Balance invoice</option>
+            <option value="full">Full amount invoice</option>
+          </select>
+        </div>
+        <div class="field"><label>Due Date</label><input type="date" id="inv-due"></div>
+      </div>
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Line Items</div>
+      <div id="line-items-container"></div>
+      <button class="btn-ghost" id="btn-add-line" type="button" style="font-size:10px;margin-bottom:0.8rem;">+ Add Line</button>
+      <div id="inv-totals"></div>
+      <div class="section-sep" style="margin-top:0.8rem;">Payment Details</div>
+      <div class="field-row">
+        <div class="field"><label>Bank Name</label><input type="text" id="inv-bank-name" value="Monzo" placeholder="Monzo"></div>
+        <div class="field"><label>Sort Code</label><input type="text" id="inv-sort" placeholder="00-00-00"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Account Number</label><input type="text" id="inv-account" placeholder="00000000"></div>
+        <div class="field"><label>Monzo Payment Link (optional)</label><input type="url" id="inv-monzo" placeholder="https://monzo.me/..."></div>
+      </div>
+      <div class="field"><label>Payment Reference</label><input type="text" id="inv-ref" placeholder="e.g. BIGGSHOTS-001"></div>
+      <div class="field"><label>Message to Client</label><textarea id="inv-message" rows="2" placeholder="Thank you for your booking..."></textarea></div>
+      <div style="display:flex;gap:0.5rem;margin-top:0.8rem;">
+        <button class="btn-save" id="btn-save-invoice" type="button">Save &amp; Send Invoice</button>
+        <button class="btn-ghost" id="btn-cancel-invoice" type="button" style="font-size:10px;">Cancel</button>
+      </div>
+      <div class="msg msg-err" id="inv-err"></div>
+      <div class="msg msg-ok" id="inv-ok"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" id="btn-move-stage-from-detail" type="button">Move Stage</button>
+      <button class="btn-danger" id="btn-delete-project" type="button">Delete Project</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var STAGES=[
+  {key:"lead",            label:"Lead",               desc:"New enquiry received"},
+  {key:"quote_sent",      label:"Quote Sent",          desc:"Quote emailed to client"},
+  {key:"invoice_sent",    label:"Invoice Sent",        desc:"Deposit invoice sent"},
+  {key:"contract_sent",   label:"Contract Sent",       desc:"Contract awaiting signature"},
+  {key:"questionnaire_sent",label:"Questionnaire",     desc:"Pre-shoot form sent"},
+  {key:"session_confirmed",label:"Confirmed",          desc:"Session confirmed, all signed"},
+  {key:"post_production", label:"Post-Production",     desc:"Editing in progress"},
+  {key:"balance_due",     label:"Balance Due",         desc:"Balance invoice sent"},
+  {key:"gallery_delivered",label:"Gallery Delivered",  desc:"Client portal access granted"},
+  {key:"completed",       label:"Completed",           desc:"Session fully complete"},
+];
+var TRIGGERS={
+  quote_sent:{doc:"Quote",email:"Quote with pricing emailed to client"},
+  invoice_sent:{doc:"Deposit Invoice",email:"Deposit invoice emailed with payment details"},
+  contract_sent:{doc:"Contract",email:"Contract emailed for client signature"},
+  questionnaire_sent:{doc:"Questionnaire",email:"Pre-shoot questionnaire emailed to client"},
+  session_confirmed:{doc:null,email:"Confirmation email with session details sent"},
+  post_production:{doc:null,email:null},
+  balance_due:{doc:"Balance Invoice",email:"Balance invoice emailed with payment details"},
+  gallery_delivered:{doc:null,email:"Gallery access email with portal login sent"},
+  completed:{doc:"Receipt",email:"Thank you email with receipt sent"},
+};
+
+var projects=[];
+var currentProject=null;
+var pendingStage=null;
+var lineItems=[];
+var planPreviewData=[];
+
+function g(id){return document.getElementById(id);}
+function api(p,o){return fetch("/api"+p,Object.assign({credentials:"include"},o||{}));}
+function fmtDate(d){return d?new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"--";}
+function fmtAmt(a){return a?"£"+parseFloat(a).toFixed(2):"--";}
+function toast(m,e){var t=g("toast");t.textContent=m;t.style.borderColor=e?"var(--red)":"var(--gold)";t.style.display="block";setTimeout(function(){t.style.display="none";},3500);}
+
+// ── LOAD BOARD ────────────────────────────────────────────────────────────────
+function loadBoard(){
+  api("/projects").then(function(r){return r.json();}).then(function(data){
+    projects=Array.isArray(data)?data:[];
+    renderBoard();
+  }).catch(function(){g("board").innerHTML="<div class=\"loading-col\">Error loading projects</div>";});
+}
+
+function renderBoard(){
+  var filter=document.querySelector(".filter-btn.active").getAttribute("data-filter");
+  var board=g("board");
+  board.innerHTML="";
+  STAGES.forEach(function(stage){
+    var filtered=projects.filter(function(p){
+      if(filter==="active"&&(p.stage==="completed"||p.stage==="cancelled"))return false;
+      if(filter==="completed"&&p.stage!=="completed")return false;
+      return p.stage===stage.key;
+    });
+    var col=document.createElement("div");
+    col.className="col"; col.setAttribute("data-stage",stage.key);
+    col.innerHTML="<div class=\"col-header\"><h3>"+stage.label+"</h3><div class=\"col-count\">"+filtered.length+" project"+(filtered.length===1?"":"s")+"</div></div>"+
+      "<div class=\"col-body\" data-stage=\""+stage.key+"\">"+
+        filtered.map(function(p){return renderCard(p);}).join("")+
+        "<button class=\"add-card\" data-stage=\""+stage.key+"\">+ Add project</button>"+
+      "</div>";
+    board.appendChild(col);
+  });
+  // Attach card events
+  board.querySelectorAll(".card").forEach(function(card){
+    card.addEventListener("click",function(e){
+      if(e.target.classList.contains("card-btn"))return;
+      var id=this.getAttribute("data-id");
+      var proj=projects.find(function(p){return p.id===id;});
+      if(proj)openProjectModal(proj);
+    });
+    card.setAttribute("draggable","true");
+    card.addEventListener("dragstart",function(){this.classList.add("dragging");window._dragId=this.getAttribute("data-id");});
+    card.addEventListener("dragend",function(){this.classList.remove("dragging");});
+  });
+  board.querySelectorAll(".col-body").forEach(function(col){
+    col.addEventListener("dragover",function(e){e.preventDefault();this.classList.add("drag-over");});
+    col.addEventListener("dragleave",function(){this.classList.remove("drag-over");});
+    col.addEventListener("drop",function(e){
+      e.preventDefault();this.classList.remove("drag-over");
+      var toStage=this.getAttribute("data-stage");
+      var proj=projects.find(function(p){return p.id===window._dragId;});
+      if(proj&&proj.stage!==toStage)openStageMoveModal(proj,toStage);
+    });
+  });
+  board.querySelectorAll(".add-card").forEach(function(btn){
+    btn.addEventListener("click",function(){openNewProjectModal(this.getAttribute("data-stage"));});
+  });
+  board.querySelectorAll(".card-btn[data-action=move]").forEach(function(btn){
+    btn.addEventListener("click",function(e){
+      e.stopPropagation();
+      var id=this.getAttribute("data-id");
+      var proj=projects.find(function(p){return p.id===id;});
+      if(proj)openStageMoveModal(proj,null);
+    });
+  });
+}
+
+function renderCard(p){
+  var payBadge="";
+  if(p.deposit_paid>0&&p.balance_paid>0)payBadge="<span class=\"badge badge-paid\">Paid</span>";
+  else if(p.deposit_paid>0)payBadge="<span class=\"badge badge-partial\">Deposit paid</span>";
+  else if(p.stage==="invoice_sent"||p.stage==="balance_due")payBadge="<span class=\"badge badge-unpaid\">Awaiting payment</span>";
+  return"<div class=\"card\" data-id=\""+p.id+"\">" +
+    "<div class=\"card-client\">"+(p.first_name?p.first_name+" "+p.last_name:"Unknown client")+"</div>"+
+    "<div class=\"card-title\">"+p.title+"</div>"+
+    "<div class=\"card-meta\">"+
+      "<span class=\"card-date\">"+(p.session_date?fmtDate(p.session_date):"No date set")+"</span>"+
+      "<span class=\"card-amount\">"+(p.amount_quoted?fmtAmt(p.amount_quoted):"")+"</span>"+
+    "</div>"+
+    (payBadge?"<div class=\"card-badges\">"+payBadge+"</div>":"")+
+    "<div class=\"card-actions\">"+
+      "<button class=\"card-btn\" data-action=\"move\" data-id=\""+p.id+"\">Move stage</button>"+
+    "</div>"+
+  "</div>";
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+document.querySelectorAll(".filter-btn").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll(".filter-btn").forEach(function(b){b.classList.remove("active");});
+    this.classList.add("active");
+    renderBoard();
+  });
+});
+
+// ── NEW PROJECT MODAL ─────────────────────────────────────────────────────────
+function openNewProjectModal(stage){
+  loadClientDropdown();
+  g("np-title").value="";g("np-date").value="";g("np-location").value="";
+  g("np-amount").value="";g("np-notes").value="";g("np-err").style.display="none";
+  g("modal-new").classList.add("open");
+}
+
+g("btn-new-project").addEventListener("click",function(){openNewProjectModal("lead");});
+function closeNewModal(){
+  g("modal-new").classList.remove("open");
+  newClientId = null;
+  g("new-client-form").style.display = "none";
+  g("nc-created-msg").style.display = "none";
+}
+g("close-new").addEventListener("click", closeNewModal);
+g("cancel-new").addEventListener("click", closeNewModal);
+
+g("btn-create-project").addEventListener("click",function(){
+  // Use newClientId if adding a new client
+  var clientVal = g("np-client").value;
+  var client = clientVal === "__new__" ? newClientId : clientVal;
+  var title=g("np-title").value.trim();
+  var err=g("np-err");err.style.display="none";
+  if(!client){
+    if(clientVal === "__new__" && !newClientId){
+      // Try to create client now if not already done
+      createInlineClient();
+      setTimeout(function(){
+        if(newClientId) g("btn-create-project").click();
+        else{err.textContent="Please complete the new client details first.";err.style.display="block";}
+      }, 800);
+      return;
+    }
+    err.textContent="Please select a client.";err.style.display="block";return;
+  }
+  if(!title){err.textContent="Please enter a project title.";err.style.display="block";return;}
+  var btn=this;btn.disabled=true;btn.textContent="Creating...";
+  api("/projects",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    client_id:client,title:title,session_type:g("np-type").value||null,
+    session_date:g("np-date").value||null,session_location:g("np-location").value||null,
+    amount_quoted:parseFloat(g("np-amount").value)||null,notes:g("np-notes").value||null,
+  })}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false;btn.textContent="Create Project";
+    if(!res.ok){err.textContent=res.d.error||"Failed.";err.style.display="block";return;}
+    g("modal-new").classList.remove("open");
+    toast("Project created");loadBoard();
+  }).catch(function(){btn.disabled=false;btn.textContent="Create Project";err.textContent="Connection error.";err.style.display="block";});
+});
+
+// ── STAGE MOVE MODAL ──────────────────────────────────────────────────────────
+function updateStageTriggerUI(toStage){
+  var trigger=toStage?TRIGGERS[toStage]:null;
+  var stageLabel=toStage?STAGES.find(function(s){return s.key===toStage;}).label:null;
+  g("stage-modal-title").innerHTML="Move to <em>"+(stageLabel||"Stage")+"</em>";
+  var descEl=g("stage-trigger-desc");
+  var togDocRow=g("tog-doc-row");
+  if(trigger){
+    var desc="";
+    if(trigger.email)desc+=trigger.email+".";
+    if(trigger.doc)desc+=" "+trigger.doc+" will be auto-generated and ready to review before sending.";
+    if(!trigger.email&&!trigger.doc)desc="No automatic actions for this stage. Just moving the card.";
+    descEl.textContent=desc;
+    g("tog-email").checked=!!trigger.email;
+    togDocRow.style.display=trigger.doc?"flex":"none";
+    g("tog-doc-label").textContent="Auto-create "+(trigger.doc||"document");
+    g("tog-doc").checked=!!trigger.doc;
+  } else {
+    descEl.textContent="Select a stage above to see what will be triggered.";
+    g("tog-email").checked=false;
+    togDocRow.style.display="none";
+  }
+}
+
+function openStageMoveModal(proj,toStage){
+  currentProject=proj;
+  pendingStage=toStage;
+  g("stage-message").value="";
+  g("stage-err").style.display="none";
+  g("stage-ok").style.display="none";
+
+  if(!toStage){
+    // Show stage selector - populate with valid next stages
+    var selectBox=g("stage-select-box");
+    selectBox.style.display="block";
+    var sel=g("stage-select");
+    var curIdx=STAGES.findIndex(function(s){return s.key===proj.stage;});
+    sel.innerHTML="<option value=\"\">Select a stage...</option>";
+    STAGES.forEach(function(s,i){
+      if(s.key!==proj.stage&&s.key!=="cancelled"){
+        var opt=document.createElement("option");
+        opt.value=s.key;
+        opt.textContent=s.label+(i>curIdx?" (forward)":"  (back)");
+        if(i===curIdx+1)opt.textContent=s.label+" (next)";
+        sel.appendChild(opt);
+      }
+    });
+    g("stage-modal-title").innerHTML="Move <em>Stage</em>";
+  } else {
+    g("stage-select-box").style.display="none";
+    updateStageTriggerUI(toStage);
+  }
+
+  g("modal-stage").classList.add("open");
+}
+
+// Stage selector change handler
+g("stage-select").addEventListener("change",function(){
+  pendingStage=this.value||null;
+  if(pendingStage)updateStageTriggerUI(pendingStage);
+});
+
+g("close-stage").addEventListener("click",function(){g("modal-stage").classList.remove("open");});
+g("cancel-stage").addEventListener("click",function(){g("modal-stage").classList.remove("open");});
+
+g("btn-confirm-stage").addEventListener("click",function(){
+  if(!currentProject){toast("No project selected",true);return;}
+  if(!pendingStage){
+    var err=g("stage-err");
+    err.textContent="Please select a stage to move to.";
+    err.style.display="block";
+    return;
+  }
+  var btn=this;btn.disabled=true;btn.textContent="Moving...";
+  var err=g("stage-err");var ok=g("stage-ok");
+  err.style.display="none";ok.style.display="none";
+  api("/projects/"+currentProject.id+"/stage",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      to_stage:pendingStage,
+      skip_email:!g("tog-email").checked,
+      skip_doc:!g("tog-doc").checked,
+      override_message:g("stage-message").value.trim()||null,
+    })
+  }).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false;btn.textContent="Confirm & Move";
+    if(!res.ok){err.textContent=res.d.error||"Failed.";err.style.display="block";return;}
+    var msg="Moved to "+pendingStage.replace(/_/g," ");
+    if(res.d.doc_created)msg+=" — "+res.d.doc_created.type+" created";
+    if(res.d.email_sent)msg+=" — email sent";
+    ok.textContent=msg;ok.style.display="block";
+    toast(msg);
+    setTimeout(function(){g("modal-stage").classList.remove("open");loadBoard();},1200);
+  }).catch(function(){btn.disabled=false;btn.textContent="Confirm & Move";err.textContent="Connection error.";err.style.display="block";});
+});
+
+// ── PROJECT DETAIL MODAL ──────────────────────────────────────────────────────
+function openProjectModal(proj){
+  currentProject=proj;
+  g("proj-modal-name").innerHTML=(proj.first_name?proj.first_name+" "+proj.last_name:"Project")+" <em>Details</em>";
+  g("proj-client").textContent=(proj.first_name?proj.first_name+" "+proj.last_name:"Unknown")+(proj.email?" — "+proj.email:"");
+  g("proj-stage-badge").textContent=proj.stage.replace(/_/g," ");
+  g("proj-date").textContent=proj.session_date?fmtDate(proj.session_date):"Not set";
+  g("proj-amount").textContent=proj.amount_quoted?fmtAmt(proj.amount_quoted):"Not quoted yet";
+  g("plan-total").value=proj.amount_quoted||"";
+  g("invoice-builder").style.display="none";
+  g("plan-builder").style.display="none";
+  g("plan-preview").style.display="none";
+  resetLineItems(proj);
+  loadPaymentPlan(proj.id);
+  loadInvoices(proj.id);
+  g("modal-project").classList.add("open");
+}
+
+g("close-project").addEventListener("click",function(){g("modal-project").classList.remove("open");});
+g("btn-move-stage-from-detail").addEventListener("click",function(){
+  if(!currentProject)return;
+  var cur=STAGES.findIndex(function(s){return s.key===currentProject.stage;});
+  var next=STAGES[cur+1];
+  if(next)openStageMoveModal(currentProject,next.key);
+  else toast("Already at final stage");
+});
+g("btn-delete-project").addEventListener("click",function(){
+  if(!currentProject)return;
+  if(!confirm("Delete project \""+currentProject.title+"\"? This cannot be undone."))return;
+  api("/projects/"+currentProject.id,{method:"DELETE"}).then(function(){
+    toast("Project deleted");g("modal-project").classList.remove("open");loadBoard();
+  }).catch(function(){toast("Error deleting",true);});
+});
+
+// ── PAYMENT PLAN ──────────────────────────────────────────────────────────────
+function loadPaymentPlan(projectId){
+  api("/payment-plans/project/"+projectId).then(function(r){return r.json();}).then(function(data){
+    if(!data||!data.installments){
+      g("existing-plan").style.display="none";
+      g("no-plan").style.display="block";
+      return;
+    }
+    g("no-plan").style.display="none";
+    g("existing-plan").style.display="block";
+    renderInstallments(data.installments);
+  }).catch(function(){});
+}
+
+function renderInstallments(installments){
+  var html=installments.map(function(inst){
+    var isPaid=inst.status==="paid";
+    return"<div class=\"installment-row\">"+
+      "<span class=\"inst-label\">"+(inst.is_deposit?"Deposit":inst.label)+"</span>"+
+      "<input type=\"number\" value=\""+inst.amount+"\" style=\"width:80px;\" data-iid=\""+inst.id+"\" data-field=\"amount\" "+(isPaid?"disabled":"")+" step=\"0.01\">"+
+      "<input type=\"date\" value=\""+inst.due_date.split("T")[0]+"\" data-iid=\""+inst.id+"\" data-field=\"due_date\" "+(isPaid?"disabled":"")+ ">"+
+      (isPaid?"<span class=\"inst-paid\">Paid "+fmtAmt(inst.paid_amount)+"</span><span></span>":
+               "<span style=\"font-size:10px;color:var(--white-dim);\">"+(inst.status)+"</span><button class=\"pay-btn\" data-iid=\""+inst.id+"\" data-amt=\""+inst.amount+"\">Mark paid</button>")+
+    "</div>";
+  }).join("");
+  g("installments-list").innerHTML=html;
+  // Pay buttons
+  g("installments-list").querySelectorAll(".pay-btn").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var id=this.getAttribute("data-iid"),amt=this.getAttribute("data-amt");
+      if(!confirm("Mark £"+amt+" as paid?"))return;
+      api("/payment-plans/installments/"+id+"/mark-paid",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:amt,method:"bank_transfer"})})
+      .then(function(){toast("Payment recorded");loadPaymentPlan(currentProject.id);})
+      .catch(function(){toast("Error",true);});
+    });
+  });
+}
+
+g("btn-setup-plan").addEventListener("click",function(){
+  g("plan-builder").style.display="block";
+  this.style.display="none";
+});
+
+g("btn-preview-plan").addEventListener("click",function(){
+  var total=parseFloat(g("plan-total").value);
+  var depPct=parseFloat(g("plan-deposit-pct").value)||25;
+  var count=parseInt(g("plan-instalment-count").value)||1;
+  var sessionDate=currentProject?.session_date;
+  if(!total){toast("Enter the total amount first",true);return;}
+  if(!sessionDate){toast("Project has no session date set",true);return;}
+  api("/payment-plans/preview",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    session_date:sessionDate,total_amount:total,deposit_pct:depPct,installment_count:count
+  })}).then(function(r){return r.json();}).then(function(data){
+    planPreviewData=data.installments;
+    var html=data.installments.map(function(inst,i){
+      return"<div class=\"installment-row\">"+
+        "<span class=\"inst-label\">"+(inst.is_deposit?"Deposit":inst.label)+"</span>"+
+        "<input type=\"number\" value=\""+inst.amount+"\" data-pi=\""+i+"\" data-field=\"amount\" step=\"0.01\" style=\"width:90px;\">"+
+        "<input type=\"date\" value=\""+inst.due_date+"\" data-pi=\""+i+"\" data-field=\"due_date\">"+
+        "<span style=\"font-size:10px;color:var(--white-dim);\">"+(inst.is_deposit?"Non-refundable":"")+"</span>"+
+        "<span></span>"+
+      "</div>";
+    }).join("");
+    g("plan-preview-rows").innerHTML=html;
+    // Sync edits back to planPreviewData
+    g("plan-preview-rows").querySelectorAll("input").forEach(function(inp){
+      inp.addEventListener("change",function(){
+        var i=parseInt(this.getAttribute("data-pi")),f=this.getAttribute("data-field");
+        planPreviewData[i][f]=f==="amount"?parseFloat(this.value):this.value;
+      });
+    });
+    g("plan-preview").style.display="block";
+  }).catch(function(){toast("Error previewing plan",true);});
+});
+
+g("btn-save-plan").addEventListener("click",function(){
+  if(!planPreviewData.length){toast("Preview the plan first",true);return;}
+  var btn=this;btn.disabled=true;btn.textContent="Saving...";
+  api("/payment-plans",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    project_id:currentProject.id,client_id:currentProject.client_id,
+    total_amount:parseFloat(g("plan-total").value),installments:planPreviewData,
+  })}).then(function(r){return r.json();}).then(function(res){
+    btn.disabled=false;btn.textContent="Save Payment Plan";
+    if(!res.success){toast("Error saving plan",true);return;}
+    toast("Payment plan saved");
+    g("plan-builder").style.display="none";
+    g("plan-preview").style.display="none";
+    loadPaymentPlan(currentProject.id);
+  }).catch(function(){btn.disabled=false;btn.textContent="Save Payment Plan";toast("Connection error",true);});
+});
+
+// ── INVOICES ──────────────────────────────────────────────────────────────────
+function loadInvoices(projectId){
+  api("/invoices?project_id="+projectId).then(function(r){return r.json();}).then(function(data){
+    var list=g("invoices-list");
+    if(!Array.isArray(data)||!data.length){list.textContent="No invoices yet.";return;}
+    list.innerHTML=data.map(function(inv){
+      return"<div style=\"display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-bottom:0.5px solid rgba(245,240,232,0.05);\">" +
+        "<div><div style=\"font-size:11px;color:var(--white);\">"+inv.invoice_number+" — "+inv.invoice_type+"</div>"+
+        "<div style=\"font-size:10px;color:var(--white-dim);\">"+fmtAmt(inv.total)+" — Due "+fmtDate(inv.due_date)+"</div></div>"+
+        "<span class=\"badge badge-"+inv.status+"\">"+inv.status+"</span>"+
+      "</div>";
+    }).join("");
+  }).catch(function(){});
+}
+
+function resetLineItems(proj){
+  lineItems=[{description:proj?.title||"Photography session",quantity:1,unit_price:proj?.amount_quoted||0,total:proj?.amount_quoted||0}];
+  renderLineItems();
+}
+
+function renderLineItems(){
+  var c=g("line-items-container");
+  c.innerHTML=lineItems.map(function(li,i){
+    return"<div class=\"line-item-row\">"+
+      "<input type=\"text\" value=\""+li.description+"\" data-li=\""+i+"\" data-field=\"description\" placeholder=\"Description\">"+
+      "<input type=\"number\" value=\""+li.quantity+"\" data-li=\""+i+"\" data-field=\"quantity\" style=\"width:60px;\" min=\"1\">"+
+      "<input type=\"number\" value=\""+li.unit_price+"\" data-li=\""+i+"\" data-field=\"unit_price\" style=\"width:90px;\" step=\"0.01\" placeholder=\"£\">"+
+      "<button class=\"li-del\" data-li=\""+i+"\">&times;</button>"+
+    "</div>";
+  }).join("");
+  c.querySelectorAll("input").forEach(function(inp){
+    inp.addEventListener("input",function(){
+      var i=parseInt(this.getAttribute("data-li")),f=this.getAttribute("data-field");
+      lineItems[i][f]=f==="description"?this.value:parseFloat(this.value)||0;
+      if(f==="quantity"||f==="unit_price")lineItems[i].total=lineItems[i].quantity*lineItems[i].unit_price;
+      renderTotals();
+    });
+  });
+  c.querySelectorAll(".li-del").forEach(function(btn){
+    btn.addEventListener("click",function(){lineItems.splice(parseInt(this.getAttribute("data-li")),1);renderLineItems();renderTotals();});
+  });
+  renderTotals();
+}
+
+function renderTotals(){
+  var sub=lineItems.reduce(function(s,li){return s+(li.total||0);},0);
+  g("inv-totals").innerHTML="<div class=\"total-row\"><span class=\"total-label\">Total</span><span class=\"total-val\">"+fmtAmt(sub)+"</span></div>";
+}
+
+g("btn-add-line").addEventListener("click",function(){
+  lineItems.push({description:"",quantity:1,unit_price:0,total:0});renderLineItems();
+});
+
+g("btn-new-invoice").addEventListener("click",function(){
+  g("invoice-builder").style.display="block";
+  var due=new Date();due.setDate(due.getDate()+7);
+  g("inv-due").value=due.toISOString().split("T")[0];
+  resetLineItems(currentProject);
+  g("inv-err").style.display="none";g("inv-ok").style.display="none";
+});
+g("btn-cancel-invoice").addEventListener("click",function(){g("invoice-builder").style.display="none";});
+
+g("btn-save-invoice").addEventListener("click",function(){
+  var btn=this;btn.disabled=true;btn.textContent="Saving...";
+  var err=g("inv-err");var ok=g("inv-ok");err.style.display="none";ok.style.display="none";
+  var sub=lineItems.reduce(function(s,li){return s+(li.total||0);},0);
+  api("/invoices",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    project_id:currentProject.id,client_id:currentProject.client_id,
+    invoice_type:g("inv-type").value,line_items:lineItems,subtotal:sub,total:sub,
+    due_date:g("inv-due").value||null,
+    bank_name:g("inv-bank-name").value||"Monzo",bank_sort_code:g("inv-sort").value||null,
+    bank_account:g("inv-account").value||null,monzo_link:g("inv-monzo").value||null,
+    payment_ref:g("inv-ref").value||null,client_message:g("inv-message").value||null,
+  })}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false;btn.textContent="Save & Send Invoice";
+    if(!res.ok){err.textContent=res.d.error||"Failed.";err.style.display="block";return;}
+    // Mark as sent
+    return api("/invoices/"+res.d.invoice.id+"/send",{method:"POST",credentials:"include"}).then(function(){
+      ok.textContent="Invoice "+res.d.invoice.invoice_number+" created and marked as sent.";ok.style.display="block";
+      toast("Invoice created: "+res.d.invoice.invoice_number);
+      loadInvoices(currentProject.id);
+      setTimeout(function(){g("invoice-builder").style.display="none";},1500);
+    });
+  }).catch(function(){btn.disabled=false;btn.textContent="Save & Send Invoice";err.textContent="Connection error.";err.style.display="block";});
+});
+
+// ── CLIENT DROPDOWN + INLINE CREATE ──────────────────────────────────────────
+var allClients = [];
+var newClientId = null;
+
+function loadClientDropdown(){
+  api("/clients").then(function(r){return r.json();}).then(function(clients){
+    allClients = Array.isArray(clients) ? clients : [];
+    var sel = g("np-client");
+    sel.innerHTML = "<option value=\"\">Select existing client...</option>";
+    allClients.forEach(function(c){
+      sel.innerHTML += "<option value=\""+c.id+"\">"+c.first_name+" "+c.last_name+(c.email?" ("+c.email+")":"")+"</option>";
+    });
+    sel.innerHTML += "<option value=\"__new__\">+ Add new client...</option>";
+    g("new-client-form").style.display = "none";
+    newClientId = null;
+  }).catch(function(){});
+}
+
+g("np-client").addEventListener("change", function(){
+  if(this.value === "__new__"){
+    g("new-client-form").style.display = "block";
+    g("nc-first").focus();
+    // Auto-save client when email is filled
+  } else {
+    g("new-client-form").style.display = "none";
+    newClientId = null;
+  }
+});
+
+// Auto-create client when they tab out of email field
+g("nc-email").addEventListener("blur", function(){
+  var first = g("nc-first").value.trim();
+  var email = g("nc-email").value.trim();
+  if(!first || !email) return;
+  // Check not already created
+  if(newClientId) return;
+  createInlineClient();
+});
+
+function createInlineClient(){
+  var first = g("nc-first").value.trim();
+  var last  = g("nc-last").value.trim();
+  var email = g("nc-email").value.trim();
+  var phone = g("nc-phone").value.trim();
+  var portal = g("nc-portal").checked;
+  if(!first || !email) return;
+  api("/clients", {method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({first_name:first, last_name:last||"", email:email, phone:phone||null, create_portal:portal})
+  }).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    if(!res.ok){
+      g("nc-created-msg").textContent = res.d.error || "Failed to create client.";
+      g("nc-created-msg").style.color = "var(--red)";
+      g("nc-created-msg").style.display = "block";
+      return;
+    }
+    newClientId = res.d.client.id;
+    var msg = "Client created: "+first+" "+last;
+    if(res.d.tempPassword) msg += " | Portal: "+email+" / "+res.d.tempPassword;
+    g("nc-created-msg").textContent = msg;
+    g("nc-created-msg").style.color = "var(--green)";
+    g("nc-created-msg").style.display = "block";
+    // Add to dropdown and select
+    allClients.push(res.d.client);
+    var sel = g("np-client");
+    var opt = document.createElement("option");
+    opt.value = res.d.client.id;
+    opt.textContent = first+" "+last+(email?" ("+email+")":"");
+    // Insert before the "+ Add new" option
+    sel.insertBefore(opt, sel.lastChild);
+    sel.value = res.d.client.id;
+  }).catch(function(){
+    g("nc-created-msg").textContent = "Connection error.";
+    g("nc-created-msg").style.color = "var(--red)";
+    g("nc-created-msg").style.display = "block";
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+// Check admin session
+fetch("/api/auth/admin/me",{credentials:"include"}).then(function(r){
+  if(!r.ok)window.location.href="/admin";
+  else loadBoard();
+}).catch(function(){window.location.href="/admin";});
+</script>
+</body>
+</html>

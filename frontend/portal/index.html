@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Portal - Bigg Shots Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--black:#0A0A0A;--dark:#111111;--dark2:#1A1A1A;--dark3:#242424;--white:#F5F0E8;--white-dim:#B0A898;--green:#4ECBA0;--red:#E05555;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Montserrat",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}body{background:var(--black);color:var(--white);font-family:var(--sans);min-height:100vh;}
+.portal-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(10,10,10,0.95);backdrop-filter:blur(16px);border-bottom:0.5px solid rgba(201,168,76,0.15);}
+.nav-brand{font-size:12px;font-weight:700;letter-spacing:3px;color:var(--gold);}
+.nav-sub{font-size:10px;font-weight:300;letter-spacing:4px;color:var(--white-dim);margin-left:8px;}
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.nav-client{font-size:11px;color:var(--white-dim);}
+.btn-nav{background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;cursor:pointer;font-family:var(--sans);transition:all 0.3s;}
+.btn-nav:hover{background:var(--gold);color:var(--black);}
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+#screen-login{display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(201,168,76,0.07) 0%,transparent 70%);}
+.login-box{width:100%;max-width:400px;padding:2rem;}
+.login-logo{text-align:center;margin-bottom:2rem;}
+.login-logo h1{font-size:16px;font-weight:700;letter-spacing:4px;color:var(--gold);}
+.login-logo p{font-size:9px;letter-spacing:6px;color:var(--white-dim);margin-top:4px;}
+.login-title{font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--white);margin-bottom:0.3rem;}
+.login-title em{font-style:italic;color:var(--gold);}
+.login-sub{font-size:11px;color:var(--white-dim);margin-bottom:1.5rem;}
+.field{margin-bottom:0.8rem;}
+.field label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;}
+.field input{width:100%;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.25);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;transition:border-color 0.3s;}
+.field input:focus{border-color:var(--gold);}
+.field input::placeholder{color:rgba(176,168,152,0.4);}
+.btn-login{width:100%;background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.9rem;cursor:pointer;margin-top:0.5rem;transition:all 0.3s;}
+.btn-login:hover{background:var(--gold-light);}
+.btn-login:disabled{opacity:0.5;cursor:not-allowed;}
+.login-err{background:rgba(224,85,85,0.15);border:0.5px solid rgba(224,85,85,0.4);color:var(--red);font-size:11px;padding:0.75rem 1rem;margin-top:0.8rem;display:none;}
+#screen-welcome{position:relative;overflow:hidden;}
+.welcome-bg{position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;filter:brightness(0.18) saturate(0.4);transition:background-image 0.8s;}
+.welcome-overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(10,10,10,0.3) 0%,rgba(10,10,10,0.8) 100%);}
+.welcome-content{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;padding-top:8rem;}
+.welcome-greeting{font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.welcome-name{font-family:var(--serif);font-size:clamp(2.5rem,6vw,5rem);font-weight:300;color:var(--white);line-height:1;margin-bottom:0.5rem;}
+.welcome-name em{font-style:italic;color:var(--gold);}
+.welcome-tagline{font-family:var(--serif);font-size:1.1rem;font-style:italic;color:var(--white-dim);margin-bottom:2rem;}
+.welcome-divider{width:48px;height:1px;background:var(--gold);margin:0 auto 2rem;opacity:0.6;}
+.welcome-gallery-count{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white-dim);margin-bottom:2rem;}
+.btn-view-gallery{background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;padding:1rem 3rem;cursor:pointer;transition:all 0.3s;}
+.btn-view-gallery:hover{background:var(--gold-light);}
+#screen-galleries{padding-top:80px;}
+.page-inner{max-width:1100px;margin:0 auto;padding:3rem 2rem;}
+.page-title{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--white);}
+.page-title em{font-style:italic;color:var(--gold);}
+.gold-rule{width:40px;height:1px;background:var(--gold);margin:0.8rem 0 1.5rem;}
+.doc-card{background:var(--dark);border:0.5px solid rgba(201,168,76,0.1);padding:1rem 1.2rem;margin-bottom:1px;display:flex;align-items:center;justify-content:space-between;gap:1rem;transition:background 0.2s;}
+.doc-card:hover{background:var(--dark2);}
+.doc-card-info{}
+.doc-card-title{font-size:12px;color:var(--white);margin-bottom:0.2rem;}
+.doc-card-meta{font-size:10px;color:var(--white-dim);}
+.doc-badge{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.5rem;}
+.badge-draft{background:rgba(201,168,76,0.12);color:var(--gold);}
+.badge-sent{background:rgba(74,144,217,0.15);color:#4A90D9;}
+.badge-signed{background:rgba(78,203,160,0.15);color:var(--green);}
+.badge-completed{background:rgba(78,203,160,0.15);color:var(--green);}
+.btn-doc{background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:0.35rem 0.8rem;cursor:pointer;transition:all 0.2s;}
+.btn-doc:hover{background:var(--gold);color:var(--black);}
+.q-section-hdr{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:1.2rem 0 0.6rem;padding-bottom:0.3rem;border-bottom:0.5px solid rgba(201,168,76,0.12);}
+.q-item-portal{margin-bottom:1rem;}
+.q-label-portal{font-size:12px;color:var(--white);margin-bottom:0.4rem;}
+.q-required{color:var(--red);}
+.q-input-portal{width:100%;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.15);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.6rem 0.8rem;outline:none;transition:border-color 0.2s;}
+.q-input-portal:focus{border-color:var(--gold);}
+.q-textarea-portal{min-height:80px;resize:vertical;}
+.q-choice-portal{display:flex;flex-direction:column;gap:0.3rem;}
+.q-radio-portal{display:flex;align-items:center;gap:0.5rem;cursor:pointer;}
+.q-radio-portal input{accent-color:var(--gold);width:auto;}
+.q-radio-portal span{font-size:12px;color:var(--white-dim);}
+.page-title em{font-style:italic;color:var(--gold);}
+.gold-rule{width:40px;height:1px;background:var(--gold);margin:0.8rem 0 2rem;}
+.galleries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:rgba(201,168,76,0.1);}
+.gallery-card{background:var(--dark);padding:2rem;cursor:pointer;transition:background 0.3s;position:relative;}
+.gallery-card:hover{background:var(--dark2);}
+.gallery-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform 0.4s;}
+.gallery-card:hover::before{transform:scaleX(1);}
+.gc-title{font-family:var(--serif);font-size:1.3rem;color:var(--white);margin-bottom:0.4rem;}
+.gc-date{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;}
+.gc-stats{display:flex;gap:1.5rem;margin-bottom:1rem;}
+.gc-stat{font-size:11px;color:var(--white-dim);}
+.gc-stat strong{color:var(--white);display:block;font-size:1.1rem;font-family:var(--serif);}
+.expiry-pill{display:inline-block;font-size:10px;letter-spacing:0.1em;padding:0.3rem 0.8rem;margin-top:0.5rem;}
+.expiry-pill.ok{background:rgba(201,168,76,0.12);color:var(--gold);}
+.expiry-pill.urgent{background:rgba(224,85,85,0.12);color:var(--red);}
+.gc-open{margin-top:1rem;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);}
+#screen-gallery{padding-top:80px;}
+.gallery-expiry-bar{padding:0.6rem 2rem;font-size:11px;letter-spacing:0.1em;text-align:center;}
+.gallery-expiry-bar.ok{background:rgba(201,168,76,0.1);border-bottom:0.5px solid rgba(201,168,76,0.2);color:var(--gold);}
+.gallery-expiry-bar.urgent{background:rgba(224,85,85,0.1);border-bottom:0.5px solid rgba(224,85,85,0.3);color:var(--red);}
+.gallery-view-inner{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
+.gallery-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.btn-back{background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.2rem;cursor:pointer;transition:all 0.3s;}
+.btn-back:hover{background:var(--gold);color:var(--black);}
+.toolbar-right{display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;}
+.sel-count{font-size:11px;color:var(--white-dim);}
+.btn-action{background:transparent;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:0.5rem 1.2rem;cursor:pointer;transition:all 0.3s;}
+.btn-action:hover,.btn-action.primary{background:var(--gold);color:var(--black);}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:3px;}
+.photo-item{position:relative;overflow:hidden;background:var(--dark3);aspect-ratio:1;cursor:pointer;}
+.photo-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s,filter 0.3s;}
+.photo-item:hover img{transform:scale(1.04);filter:brightness(0.8);}
+.photo-overlay{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:0.8rem;background:linear-gradient(transparent 50%,rgba(10,10,10,0.7));opacity:0;transition:opacity 0.3s;}
+.photo-item:hover .photo-overlay,.photo-item.selected .photo-overlay{opacity:1;}
+.heart-btn{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all 0.2s;background:rgba(10,10,10,0.75);}
+.heart-btn.active{background:var(--gold);color:var(--black);}
+.heart-btn.inactive{color:rgba(245,240,232,0.7);}
+.dl-btn{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;background:rgba(10,10,10,0.75);color:rgba(245,240,232,0.7);transition:all 0.2s;}
+.dl-btn:hover{background:var(--white);color:var(--black);}
+.sel-badge{position:absolute;top:8px;right:8px;background:var(--gold);color:var(--black);font-size:9px;font-weight:700;width:20px;height:20px;border-radius:50%;display:none;align-items:center;justify-content:center;}
+.photo-item.selected .sel-badge{display:flex;}
+#lightbox{position:fixed;inset:0;z-index:200;background:rgba(10,10,10,0.97);display:none;align-items:center;justify-content:center;}
+#lightbox.open{display:flex;}
+.lb-close{position:fixed;top:1.5rem;right:1.5rem;background:none;border:none;color:var(--white-dim);font-size:2.5rem;cursor:pointer;z-index:201;}
+.lb-close:hover{color:var(--white);}
+.lb-arrow{position:fixed;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--white-dim);font-size:2.5rem;cursor:pointer;padding:1rem;z-index:201;transition:color 0.2s;}
+.lb-arrow:hover{color:var(--gold);}
+#lb-prev{left:0.5rem;}#lb-next{right:0.5rem;}
+#lb-img{max-width:90vw;max-height:82vh;object-fit:contain;}
+.lb-bottom{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1rem;z-index:201;}
+.lb-counter{color:var(--white-dim);font-size:11px;letter-spacing:0.15em;}
+.lb-btn{background:rgba(10,10,10,0.85);border:0.5px solid rgba(201,168,76,0.3);color:var(--white-dim);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.6rem 1.5rem;cursor:pointer;transition:all 0.3s;}
+.lb-btn.active,.lb-btn:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
+.btn-nav-link{background:none;border:none;color:var(--white-dim);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;padding:0.3rem 0.5rem;transition:color 0.2s;}
+.btn-nav-link:hover,.btn-nav-link.active{color:var(--gold);}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark2);border:0.5px solid var(--gold);padding:0.8rem 1.5rem;font-size:12px;color:var(--white);z-index:999;display:none;}
+.loading{text-align:center;padding:4rem;color:var(--white-dim);font-size:11px;letter-spacing:0.2em;}
+.fade-in{animation:fadeInUp 0.4s ease forwards;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.watermark-wrap{position:relative;}
+.watermark-wrap::after{content:"BIGG SHOTS MEDIA";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,2vw,14px);font-weight:700;letter-spacing:0.3em;color:rgba(255,255,255,0.35);pointer-events:none;background:rgba(10,10,10,0.15);text-align:center;}
+.no-download img{pointer-events:none;user-select:none;-webkit-user-drag:none;}
+.empty-state{text-align:center;padding:4rem;font-family:var(--serif);font-size:1.2rem;font-style:italic;color:var(--white-dim);}
+@media(max-width:600px){.portal-nav{padding:0.8rem 1rem;}.photo-grid{grid-template-columns:repeat(2,1fr);}.page-inner{padding:1.5rem 1rem;}}
+.loyalty-banner{display:none;position:fixed;top:57px;left:0;right:0;z-index:200;height:32px;overflow:hidden;}@keyframes loyaltyScroll{0%{transform:translateX(100vw);}100%{transform:translateX(-120vw);}}@keyframes awardGlow{0%,100%{box-shadow:0 0 10px rgba(201,168,76,0.2);}50%{box-shadow:0 0 30px rgba(201,168,76,0.5);}}</style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-D5FYH4SFJS"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-D5FYH4SFJS");</script>
+</head>
+<body>
+
+<nav class="portal-nav">
+  <div style="display:flex;align-items:center;gap:1.5rem;">
+    <div><span class="nav-brand">BIGG SHOTS</span><span class="nav-sub">CLIENT PORTAL</span></div>
+    <div class="nav-links" id="nav-links" style="display:none;gap:0.5rem;display:none;">
+      <button class="btn-nav-link" id="nav-to-welcome" type="button">Home</button>
+      <button class="btn-nav-link" id="nav-to-galleries" type="button">Gallery</button>
+      <button class="btn-nav-link" id="nav-to-docs" type="button">Documents</button>
+      <button class="btn-nav-link" id="nav-to-quotes" type="button">Quotes</button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="nav-client" id="nav-name"></span>
+    <button class="btn-nav" id="btn-logout" type="button" style="display:none">Sign Out</button>
+  </div>
+</nav>
+<div id="loyalty-banner" class="loyalty-banner"><div id="loyalty-inner"></div></div>
+<div id="portal-promo-banner" style="display:none;width:100%;text-align:center;position:fixed;top:89px;left:0;right:0;z-index:190;box-sizing:border-box;"></div>
+
+<div class="screen active" id="screen-login" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(201,168,76,0.07) 0%,transparent 70%);">
+  <div class="login-box">
+    <div class="login-logo"><h1>BIGG SHOTS</h1><p>MEDIA</p></div>
+    <h2 class="login-title">Client <em>Portal</em></h2>
+    <p class="login-sub">Sign in to view your private gallery</p>
+    <div class="field"><label for="em">Email Address</label><input type="email" id="em" placeholder="your@email.com" autocomplete="email"></div>
+    <div class="field"><label for="pw">Password</label><input type="password" id="pw" placeholder="..." autocomplete="current-password"></div>
+    <button class="btn-login" id="btn-login" type="button">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+    <p style="font-size:11px;text-align:center;margin-top:0.75rem;"><a href="#" onclick="showForgotPassword()" style="color:var(--gold);text-decoration:none;">Forgot your password?</a></p>
+    <div id="forgot-form" style="display:none;margin-top:1rem;">
+      <input type="email" id="forgot-email" placeholder="Your email address" style="width:100%;background:#1a1a1a;border:0.5px solid rgba(201,168,76,0.3);color:#fff;padding:10px;border-radius:2px;font-size:13px;box-sizing:border-box;margin-bottom:0.5rem;">
+      <button id="btn-forgot" type="button" style="width:100%;background:#C9A84C;color:#1a1200;border:none;padding:10px;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Send Reset Link</button>
+      <div id="forgot-msg" style="font-size:12px;color:#4ECBA0;margin-top:0.5rem;display:none;">Reset link sent — check your email.</div>
+    </div>
+    <p style="font-size:10px;color:var(--white-dim);margin-top:1.5rem;text-align:center;">Login details sent by your photographer. Need help? <a href="mailto:hello@biggshotsmedia.com" style="color:var(--gold)">hello@biggshotsmedia.com</a></p>
+  </div>
+</div>
+
+<div class="screen" id="screen-reset">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#111;border:0.5px solid rgba(201,168,76,0.2);padding:2.5rem;width:100%;max-width:400px;">
+      <h2 style="font-family:var(--serif);color:#C9A84C;font-weight:300;margin:0 0 1.5rem;">Set New Password</h2>
+      <input type="password" id="reset-pw" placeholder="New password (min 8 chars)" style="width:100%;background:#1a1a1a;border:0.5px solid rgba(201,168,76,0.3);color:#fff;padding:10px;border-radius:2px;font-size:13px;box-sizing:border-box;margin-bottom:0.5rem;">
+      <input type="password" id="reset-pw2" placeholder="Confirm new password" style="width:100%;background:#1a1a1a;border:0.5px solid rgba(201,168,76,0.3);color:#fff;padding:10px;border-radius:2px;font-size:13px;box-sizing:border-box;margin-bottom:0.75rem;">
+      <button id="btn-reset" type="button" style="width:100%;background:#C9A84C;color:#1a1200;border:none;padding:10px;font-size:12px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;">Update Password</button>
+      <div id="reset-err" style="font-size:12px;color:#E05555;margin-top:0.5rem;"></div>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-welcome">
+  <div class="welcome-bg" id="w-bg"></div>
+  <div class="welcome-overlay"></div>
+  <div class="welcome-content">
+    <p class="welcome-greeting">Welcome back</p>
+    <h1 class="welcome-name">Hello, <em id="w-name">there</em></h1>
+    <p class="welcome-tagline">Your memories are waiting for you</p>
+    <div class="welcome-divider"></div>
+    <p class="welcome-gallery-count" id="w-count"></p>
+    <button class="btn-view-gallery" id="btn-view-galleries" type="button">View My Gallery</button>
+    <button type="button" id="btn-welcome-docs" style="background:none;border:0.5px solid rgba(201,168,76,0.4);color:var(--gold);font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:0.7rem 2rem;cursor:pointer;margin-top:0.8rem;transition:all 0.3s;">My Documents &amp; Contracts</button>
+  </div>
+</div>
+
+<div class="screen" id="screen-galleries">
+  <div class="page-inner">
+    <p class="page-title">My <em>Galleries</em></p>
+    <div class="gold-rule"></div>
+    <div class="galleries-grid" id="galleries-grid"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-gallery">
+  <div class="gallery-expiry-bar" id="expiry-bar" style="display:none"></div>
+  <div class="gallery-view-inner">
+    <div class="gallery-toolbar">
+      <button class="btn-back" id="btn-back" type="button">Back to Galleries</button>
+      <div class="toolbar-right">
+        <span class="sel-count" id="sel-count"></span>
+        <button class="btn-action" id="btn-dl-all" type="button" style="display:none">&#8659; Download All</button><button class="btn-action" id="btn-dl-sel" type="button" style="display:none">Download Selected</button>
+      </div>
+    </div>
+    <div class="photo-grid" id="photo-grid"><div class="loading">Loading photos...</div></div>
+  </div>
+</div>
+
+<!-- QUOTES SCREEN -->
+<div class="screen" id="screen-quotes">
+  <div style="max-width:900px;margin:0 auto;padding:5rem 2rem 3rem;">
+    <p class="page-title">My <em>Quotes</em></p>
+    <div class="gold-rule"></div>
+    <div id="portal-quotes-list"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<!-- DOCUMENTS SCREEN -->
+<div class="screen" id="screen-docs">
+  <div style="max-width:900px;margin:0 auto;padding:5rem 2rem 3rem;">
+    <p class="page-title">My <em>Documents</em></p>
+    <div class="gold-rule"></div>
+
+    <!-- Contracts section -->
+    <div style="margin-bottom:2.5rem;">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;">Contracts</div>
+      <div id="portal-contracts-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- Invoices section -->
+    <div style="margin-bottom:2.5rem;">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;">Invoices</div>
+      <div id="portal-invoices-list"><div class="loading">Loading...</div></div>
+    </div>
+
+    <!-- Add-ons / Print Orders -->
+    <div style="margin-top:2rem;padding-top:2rem;border-top:0.5px solid rgba(201,168,76,0.1);">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;">Order Prints &amp; Products</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">
+        <!-- Prints -->
+        <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.15);padding:1.2rem;border-radius:2px;">
+          <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;">Prints</div>
+          <div id="addon-prints-list" style="font-size:12px;color:var(--white-dim);line-height:1.8;">
+            <div style="display:flex;justify-content:space-between;"><span>6x4"</span><span>£8</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>8x6"</span><span>£12</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>10x8"</span><span>£18</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>A4</span><span>£22</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>A3</span><span>£35</span></div>
+          </div>
+        </div>
+        <!-- Canvas -->
+        <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.15);padding:1.2rem;border-radius:2px;">
+          <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;">Canvas Prints</div>
+          <div style="font-size:12px;color:var(--white-dim);line-height:1.8;">
+            <div style="display:flex;justify-content:space-between;"><span>16x12"</span><span>£85</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>20x16"</span><span>£120</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>24x20"</span><span>£160</span></div>
+          </div>
+        </div>
+        <!-- Photobook -->
+        <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.15);padding:1.2rem;border-radius:2px;">
+          <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;">Photobook</div>
+          <div style="font-size:12px;color:var(--white-dim);line-height:1.8;">
+            <div style="display:flex;justify-content:space-between;"><span>20 pages</span><span>£95</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>30 pages</span><span>£130</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>40 pages</span><span>£175</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Order form -->
+      <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.15);padding:1.5rem;border-radius:2px;">
+        <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">Place an Order</div>
+        <textarea id="addon-order-details" placeholder="Tell us what you would like to order — product type, size, quantity, and any specific photos from your gallery..." style="width:100%;box-sizing:border-box;background:#0A0A0A;border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.8rem;height:100px;resize:vertical;outline:none;margin-bottom:0.8rem;"></textarea>
+        <input type="text" id="addon-shipping-name" placeholder="Full name for delivery" style="width:100%;box-sizing:border-box;background:#0A0A0A;border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.8rem;outline:none;margin-bottom:0.8rem;">
+        <textarea id="addon-shipping-address" placeholder="Delivery address" style="width:100%;box-sizing:border-box;background:#0A0A0A;border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.8rem;height:70px;resize:vertical;outline:none;margin-bottom:0.8rem;"></textarea>
+        <div id="addon-msg" style="font-size:11px;display:none;margin-bottom:0.8rem;"></div>
+        <button id="btn-addon-order" type="button" style="background:var(--gold);color:#1a1200;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.8rem 2rem;border:none;cursor:pointer;width:100%;">Request Order</button>
+      </div>
+    </div>
+    <!-- Questionnaires section -->
+    <div>
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;">Questionnaires</div>
+      <div id="portal-q-list"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGN CONTRACT SCREEN -->
+<div class="screen" id="screen-sign">
+  <div style="max-width:760px;margin:0 auto;padding:5rem 2rem 3rem;">
+    <button type="button" id="btn-back-to-docs" style="background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.2rem;cursor:pointer;margin-bottom:1.5rem;">Back to Documents</button>
+    <p class="page-title" id="sign-title">Sign <em>Contract</em></p>
+    <div class="gold-rule"></div>
+
+    <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.1);padding:1.5rem;margin-bottom:1.5rem;">
+      <div id="contract-body-display" style="font-family:Georgia,serif;font-size:13px;line-height:1.9;color:var(--white);white-space:pre-wrap;max-height:500px;overflow-y:auto;"></div>
+    </div>
+
+    <div id="sign-form" style="background:var(--dark2);border:0.5px solid rgba(201,168,76,0.15);padding:1.5rem;">
+      <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;">Sign This Contract</div>
+      <div style="margin-bottom:0.8rem;">
+        <label style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.3rem;">Your Full Name (as signature)</label>
+        <input type="text" id="sign-name" placeholder="Type your full name" style="width:100%;background:var(--dark3);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.7rem 1rem;outline:none;">
+      </div>
+      <div style="margin-bottom:0.8rem;">
+        <label style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.3rem;">Digital Signature (type your name in cursive style)</label>
+        <input type="text" id="sign-sig" placeholder="Sign here — type your name" style="width:100%;background:var(--dark3);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:Georgia,serif;font-size:22px;font-style:italic;padding:0.7rem 1rem;outline:none;letter-spacing:0.05em;">
+      </div>
+      <div style="font-size:10px;color:var(--white-dim);margin-bottom:1rem;">By signing above and clicking the button below, you confirm you have read and agree to the terms of this contract. Your signature and timestamp will be recorded.</div>
+      <button type="button" id="btn-sign-contract" style="background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:0.9rem 2rem;cursor:pointer;width:100%;">Sign Contract</button>
+      <div id="sign-msg" style="font-size:11px;margin-top:0.5rem;display:none;"></div>
+    </div>
+
+    <div id="sign-done" style="display:none;text-align:center;padding:2rem;background:rgba(78,203,160,0.08);border:0.5px solid rgba(78,203,160,0.2);margin-top:1rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">✓</div>
+      <div style="font-family:var(--serif);font-size:1.3rem;color:var(--green);">Contract Signed</div>
+      <div style="font-size:11px;color:var(--white-dim);margin-top:0.5rem;">Your signature has been recorded. A copy will be available here for your reference.</div>
+    </div>
+
+    <!-- Upload signed PDF fallback -->
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid rgba(201,168,76,0.1);">
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);font-weight:600;margin-bottom:0.5rem;">Prefer to sign on paper?</div>
+      <div style="font-size:11px;color:var(--white-dim);margin-bottom:0.7rem;">Download the contract, sign it, scan or photograph it, and upload the signed copy below.</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button type="button" id="btn-dl-contract" style="background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1rem;cursor:pointer;">Download Contract</button>
+        <label style="background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1rem;cursor:pointer;">
+          Upload Signed PDF <input type="file" id="upload-signed-pdf" accept=".pdf" style="display:none;">
+        </label>
+      </div>
+      <div id="upload-msg" style="font-size:11px;margin-top:0.5rem;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FILL QUESTIONNAIRE SCREEN -->
+<div class="screen" id="screen-questionnaire">
+  <div style="max-width:760px;margin:0 auto;padding:5rem 2rem 3rem;">
+    <button type="button" id="btn-back-to-docs2" style="background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.5rem 1.2rem;cursor:pointer;margin-bottom:1.5rem;">Back to Documents</button>
+    <p class="page-title" id="q-screen-title">Pre-Shoot <em>Questionnaire</em></p>
+    <div class="gold-rule"></div>
+    <div style="font-size:12px;color:var(--white-dim);margin-bottom:1.5rem;">Please take a moment to fill this in before your session. Your answers help me prepare and make your experience as smooth and enjoyable as possible.</div>
+    <div id="q-screen-questions"></div>
+    <div style="margin-top:1.5rem;display:flex;gap:0.7rem;">
+      <button type="button" id="btn-submit-q" style="background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:0.9rem 2rem;cursor:pointer;flex:1;">Submit Answers</button>
+    </div>
+    <div id="q-submit-msg" style="font-size:11px;margin-top:0.5rem;display:none;"></div>
+    <div id="q-done" style="display:none;text-align:center;padding:2rem;background:rgba(78,203,160,0.08);border:0.5px solid rgba(78,203,160,0.2);margin-top:1rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">✓</div>
+      <div style="font-family:var(--serif);font-size:1.3rem;color:var(--green);">Questionnaire Submitted</div>
+      <div style="font-size:11px;color:var(--white-dim);margin-top:0.5rem;">Thank you! Your photographer has been notified.</div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox">
+  <button class="lb-close" id="lb-close" type="button">&times;</button>
+  <button class="lb-arrow" id="lb-prev" type="button">&#8249;</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-arrow" id="lb-next" type="button">&#8250;</button>
+  <div class="lb-bottom">
+    <span class="lb-counter" id="lb-counter"></span>
+    <button class="lb-btn" id="lb-heart" type="button">&#9825; Favourite</button>
+    <button class="lb-btn" id="lb-dl" type="button">&#8659; Download</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API="/api/portal",client=null,galleries=[],currentGal=null,photos=[],selected=new Set(),lbIdx=0;
+function g(id){return document.getElementById(id);}
+function toast(m,e){var t=g("toast");t.textContent=m;t.style.borderColor=e?"var(--red)":"var(--gold)";t.style.display="block";setTimeout(function(){t.style.display="none";},3000);}
+function api(p,o){return fetch(API+p,Object.assign({credentials:"include"},o||{}));}
+var portalGridConfigs={
+  compact: {cols:"repeat(auto-fill,minmax(90px,1fr))",  gap:"2px"},
+  standard:{cols:"repeat(auto-fill,minmax(160px,1fr))", gap:"3px"},
+  large:   {cols:"repeat(auto-fill,minmax(260px,1fr))", gap:"4px"},
+  masonry: {cols:"repeat(auto-fill,minmax(200px,1fr))", gap:"4px"},
+  collage: {cols:"repeat(auto-fill,minmax(180px,1fr))", gap:"3px"},
+  wide:    {cols:"repeat(auto-fill,minmax(300px,1fr))", gap:"3px"},
+  tight:   {cols:"repeat(auto-fill,minmax(120px,1fr))", gap:"0px"},
+};
+function applyPortalGrid(style){
+  var grid=g("photo-grid");
+  if(!grid)return;
+  var cfg=portalGridConfigs[style]||portalGridConfigs.standard;
+  grid.style.gridTemplateColumns=cfg.cols;
+  grid.style.gap=cfg.gap;
+  if(style==="collage"){
+    grid.querySelectorAll(".photo-item").forEach(function(el,i){
+      el.style.gridColumn=(i%5===0||i%7===0)?"span 2":"";
+    });
+  } else if(style==="masonry"){
+    grid.style.gridAutoRows="10px";
+    setTimeout(function(){
+      grid.querySelectorAll(".photo-item").forEach(function(el){
+        var img=el.querySelector("img");
+        if(img&&img.naturalHeight){
+          var span=Math.ceil((el.offsetWidth*(img.naturalHeight/img.naturalWidth)+4)/10);
+          el.style.gridRowEnd="span "+span;
+          el.style.aspectRatio="";
+        }
+      });
+    },300);
+  } else {
+    grid.style.gridAutoRows="";
+    grid.querySelectorAll(".photo-item").forEach(function(el){
+      el.style.gridColumn="";el.style.gridRowEnd="";
+      el.style.aspectRatio=style==="wide"?"4/3":"1";
+    });
+  }
+}
+function rawApi(p,o){return fetch("/api"+p,Object.assign({credentials:"include"},o||{}));}
+function fmtD(d){return d?new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):""}
+function daysLeft(d){if(!d)return null;return Math.ceil((new Date(d)-new Date())/(864e5));}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(function(s){s.classList.remove("active");s.style.display="none";s.classList.remove("fade-in");});
+  var el=g(id);el.style.display="block";el.classList.add("active");
+  setTimeout(function(){el.classList.add("fade-in");},10);
+}
+
+function doLogin(){
+  var em=g("em").value.trim(),pw=g("pw").value,btn=g("btn-login"),err=g("login-err");
+  if(!em||!pw){err.textContent="Please enter email and password.";err.style.display="block";return;}
+  btn.disabled=true;btn.textContent="Signing in...";err.style.display="none";
+  api("/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:em,password:pw})})
+  .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    if(!res.ok){err.textContent=res.d.error||"Login failed.";err.style.display="block";btn.disabled=false;btn.textContent="Sign In";return;}
+    client=res.d.client;afterLogin();
+  }).catch(function(){err.textContent="Connection error.";err.style.display="block";btn.disabled=false;btn.textContent="Sign In";});
+}
+
+function afterLogin(){
+  g("nav-name").textContent=client.firstName+" "+client.lastName;
+  g("btn-logout").style.display="inline-block";if(typeof loadLoyalty==="function")loadLoyalty();
+  showNavLinks();
+  loadGalleries().then(showWelcome);if(typeof loadLoyalty==="function")loadLoyalty();
+}
+
+function doLogout(){
+  api("/logout",{method:"POST"}).finally(function(){
+    client=null;galleries=[];selected.clear();
+    g("nav-name").textContent="";g("btn-logout").style.display="none";
+    showScreen("screen-login");
+  });
+}
+
+function loadGalleries(){
+  return api("/galleries").then(function(r){return r.json();}).then(function(d){galleries=Array.isArray(d)?d=d:[];}).catch(function(){galleries=[];});
+}
+
+function showWelcome(){
+  g("w-name").textContent=client.firstName;
+  g("w-count").textContent=galleries.length===0?"Your gallery will appear here once ready":galleries.length===1?"Your gallery is ready":galleries.length+" galleries available";
+  if(galleries.length>0){
+    var coverId=galleries[0].cover_image_id;
+    var bgUrl=coverId?"/api/photos/web/"+coverId:"https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=1600&q=50&auto=format&fit=crop";
+    g("w-bg").style.backgroundImage="url('"+bgUrl+"')";
+  }
+  showScreen("screen-welcome"); loadPortalPromo();
+}
+
+function showGalleries(){
+  showScreen("screen-galleries");
+  var grid=g("galleries-grid");
+  if(!galleries.length){grid.innerHTML="<div class=\"empty-state\">No galleries yet. Check back soon.</div>";return;}
+  grid.innerHTML=galleries.map(function(gal){
+    var days=daysLeft(gal.expires_at),ep="";
+    if(days!==null){if(days<=0)ep="<span class=\"expiry-pill urgent\">Expired</span>";else if(days<=7)ep="<span class=\"expiry-pill urgent\">Expires in "+days+" day"+(days===1?"":"s")+"</span>";else ep="<span class=\"expiry-pill ok\">Expires in "+days+" days</span>";}
+    var coverSrc=gal.cover_image_id?"/api/photos/thumb/"+gal.cover_image_id:"";
+    return"<div class=\"gallery-card\" data-slug=\""+gal.slug+"\">"+
+      (coverSrc?"<div style=\"width:100%;height:160px;overflow:hidden;margin-bottom:0.8rem;\"><img src=\""+coverSrc+"\" style=\"width:100%;height:100%;object-fit:cover;\" alt=\"\" loading=\"lazy\"></div>":"<div style=\"width:100%;height:100px;background:var(--dark3);margin-bottom:0.8rem;display:flex;align-items:center;justify-content:center;\"><span style=\"font-size:10px;color:var(--white-dim);letter-spacing:0.1em;\">NO COVER SET</span></div>")+
+      "<div class=\"gc-date\">"+fmtD(gal.session_date)+"</div>"+
+      "<div class=\"gc-title\">"+gal.title+"</div>"+
+      "<div class=\"gc-stats\"><div class=\"gc-stat\"><strong>"+gal.photo_count+"</strong>Photos</div><div class=\"gc-stat\"><strong>"+gal.selected_count+"</strong>Favourited</div></div>"+
+      ep+
+      "<div class=\"gc-open\">Open Gallery</div>"+
+    "</div>";
+  }).join("");
+  setTimeout(function(){grid.querySelectorAll(".gallery-card").forEach(function(el,i){el.style.animationDelay=(i*0.05)+"s";el.classList.add("fade-in");});},10);
+  grid.querySelectorAll(".gallery-card").forEach(function(c){c.addEventListener("click",function(){openGallery(this.getAttribute("data-slug"));});});
+}
+
+function openGallery(slug){
+  currentGal=null;photos=[];selected.clear();
+  showScreen("screen-gallery");
+  g("photo-grid").innerHTML="<div class=\"loading\">Loading photos...</div>";
+  g("expiry-bar").style.display="none";
+  api("/galleries/"+slug).then(function(r){return r.json();}).then(function(gal){
+    currentGal=gal;
+    var days=daysLeft(gal.expires_at),bar=g("expiry-bar");
+    if(days!==null){
+      bar.style.display="block";
+      if(days<=0){bar.textContent="This gallery has expired.";bar.className="gallery-expiry-bar urgent";}
+      else if(days<=7){bar.textContent="Your gallery expires in "+days+" day"+(days===1?"":"s")+". Please download soon.";bar.className="gallery-expiry-bar urgent";}
+      else{bar.textContent="Your gallery is available until "+fmtD(gal.expires_at)+".";bar.className="gallery-expiry-bar ok";}
+    }
+    return api("/galleries/"+slug+"/photos").then(function(r){return r.json();});
+  }).then(function(data){
+    photos=Array.isArray(data)?data:[];
+    photos.forEach(function(p){if(p.is_selected)selected.add(p.id);});
+    renderPhotos();updateSelCount();
+    if(currentGal&&currentGal.display_style){
+      setTimeout(function(){applyPortalGrid(currentGal.display_style);},50);
+    }
+  }).catch(function(){g("photo-grid").innerHTML="<div class=\"empty-state\">Could not load photos.</div>";});
+}
+
+function renderPhotos(){
+  var grid=g("photo-grid");
+  if(!photos.length){grid.innerHTML="<div class=\"empty-state\">No photos yet.</div>";return;}
+  var canDownload=currentGal&&currentGal.allow_downloads;
+  grid.innerHTML=photos.map(function(p,i){
+    var sel=selected.has(p.id),src=p.web_path||p.thumb_path||"";
+    return"<div class=\"photo-item"+(sel?" selected":"")+(canDownload?"":" no-download watermark-wrap")+"\" data-id=\""+p.id+"\" data-i=\""+i+"\">"+
+      (true?"<img src=\""+"/api/photos/thumb/"+p.id+"\" alt=\"Photo "+(i+1)+"\" loading=\"lazy\">":'<div style="background:var(--dark3);width:100%;height:100%"></div>')+
+      "<div class=\"photo-overlay\">"+
+        "<button class=\"heart-btn "+(sel?"active":"inactive")+"\" type=\"button\">"+(sel?"&#9829;":"&#9825;")+"</button>"+
+        (canDownload?"<button class=\"dl-btn\" type=\"button\">&#8659;</button>":"")+
+      "</div>"+
+      "<div class=\"sel-badge\">&check;</div>"+
+    "</div>";
+  }).join("");
+  grid.querySelectorAll(".photo-item").forEach(function(item){
+    item.addEventListener("click",function(e){if(e.target.classList.contains("heart-btn")||e.target.classList.contains("dl-btn"))return;openLb(parseInt(this.getAttribute("data-i")));});
+    item.querySelector(".heart-btn").addEventListener("click",function(e){e.stopPropagation();toggleSel(item.getAttribute("data-id"),item);});
+    var dlb=item.querySelector(".dl-btn");
+    if(dlb)dlb.addEventListener("click",function(e){e.stopPropagation();var p=photos[parseInt(item.getAttribute("data-i"))];if(p)dlPhoto(p.web_path||p.thumb_path,p.id);});
+  });
+}
+
+function toggleSel(id,item){
+  var isSel=selected.has(id),slug=currentGal?currentGal.slug:"";
+  api("/galleries/"+slug+"/select",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({photo_id:id,selected:!isSel,list_type:"favourites"})})
+  .then(function(r){return r.json();}).then(function(res){
+    if(!res.success)return;
+    if(isSel)selected.delete(id);else selected.add(id);
+    item.classList.toggle("selected",!isSel);
+    var hb=item.querySelector(".heart-btn");
+    if(hb){hb.className="heart-btn "+(!isSel?"active":"inactive");hb.innerHTML=!isSel?"&#9829;":"&#9825;";}
+    if(photos[lbIdx]&&photos[lbIdx].id===id){var lbh=g("lb-heart");if(lbh){lbh.className="lb-btn"+(!isSel?" active":"");lbh.innerHTML=(!isSel?"&#9829;":"&#9825;")+" Favourite";}}
+    updateSelCount();
+    toast(!isSel?"Added to favourites":"Removed");
+  }).catch(function(){toast("Could not update.",true);});
+}
+
+function updateSelCount(){
+  var n=selected.size;
+  g("sel-count").textContent=n>0?n+" photo"+(n===1?"":"s")+" favourited":"";
+  g("btn-dl-sel").style.display=(n>0&&currentGal&&currentGal.allow_downloads)?"inline-block":"none";
+  var dlAll=g("btn-dl-all"); if(dlAll) dlAll.style.display=(currentGal&&currentGal.allow_downloads&&photos.length>0)?"inline-block":"none";
+}
+
+function dlPhoto(src,id){
+  if(!id){toast("Not available.",true);return;}
+  var url="/api/photos/web/"+id+"?dl=1";
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="biggshots-"+id+".jpg";
+  a.target="_blank";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast("Downloading...");
+  trackDownload(id, currentGal ? currentGal.slug : null, "photo");
+}
+
+function openLb(idx){lbIdx=idx;g("lightbox").classList.add("open");renderLb();}
+function renderLb(){
+  var p=photos[lbIdx];if(!p)return;
+  var src="/api/photos/web/"+p.id;
+    var thumbSrc="/api/photos/thumb/"+p.id;
+    var canDownload=currentGal&&currentGal.allow_downloads;
+  g("lb-img").src=src;
+  g("lb-counter").textContent=(lbIdx+1)+" / "+photos.length;
+  var sel=selected.has(p.id),lbh=g("lb-heart");
+  lbh.className="lb-btn"+(sel?" active":"");lbh.innerHTML=(sel?"&#9829;":"&#9825;")+" Favourite";
+  g("lb-dl").style.display=(currentGal&&currentGal.allow_downloads&&src)?"inline-block":"none";
+}
+function closeLb(){g("lightbox").classList.remove("open");}
+function lbPrev(){lbIdx=(lbIdx-1+photos.length)%photos.length;renderLb();}
+function lbNext(){lbIdx=(lbIdx+1)%photos.length;renderLb();}
+
+g("btn-login").addEventListener("click",doLogin);
+g("pw").addEventListener("keydown",function(e){if(e.key==="Enter")doLogin();});
+g("em").addEventListener("keydown",function(e){if(e.key==="Enter")doLogin();});
+g("btn-logout").addEventListener("click",doLogout);
+g("btn-view-galleries").addEventListener("click",showGalleries);
+g("btn-back").addEventListener("click",showGalleries);
+g("lb-close").addEventListener("click",closeLb);
+g("lb-prev").addEventListener("click",lbPrev);
+g("lb-next").addEventListener("click",lbNext);
+g("lb-heart").addEventListener("click",function(){if(photos[lbIdx])toggleSel(photos[lbIdx].id,document.querySelector(".photo-item[data-id=\""+photos[lbIdx].id+"\"]")||{classList:{toggle:function(){},contains:function(){return false;}},querySelector:function(){return null;}});});
+g("lb-dl").addEventListener("click",function(){var p=photos[lbIdx];if(p)dlPhoto(p.web_path||p.thumb_path,p.id);});
+g("btn-dl-sel").addEventListener("click",function(){var sel=photos.filter(function(p){return selected.has(p.id);});sel.forEach(function(p,i){setTimeout(function(){dlPhoto(p.web_path||p.thumb_path,p.id);},i*400);});});
+var dlAllBtn=g("btn-dl-all");if(dlAllBtn){dlAllBtn.addEventListener("click",function(){if(!photos.length)return;toast("Downloading "+photos.length+" photos...");photos.forEach(function(p,i){setTimeout(function(){dlPhoto(p.web_path||p.thumb_path,p.id);},i*500);});});}
+g("lightbox").addEventListener("click",function(e){if(e.target===this)closeLb();});
+document.addEventListener("keydown",function(e){if(!g("lightbox").classList.contains("open"))return;if(e.key==="ArrowLeft")lbPrev();if(e.key==="ArrowRight")lbNext();if(e.key==="Escape")closeLb();});
+
+api("/me").then(function(r){return r.ok?r.json():Promise.reject();}).then(function(d){
+  client={id:d.id,firstName:d.first_name,lastName:d.last_name,email:d.email};
+  g("nav-name").textContent=d.first_name+" "+d.last_name;
+  g("btn-logout").style.display="inline-block";
+  showNavLinks();
+  loadGalleries().then(showWelcome);if(typeof loadLoyalty==="function")loadLoyalty();
+}).catch(function(){});
+
+// Welcome docs button
+var _wdBtn=g("btn-welcome-docs");if(_wdBtn)_wdBtn.addEventListener("click",function(){showDocs();});
+
+// ── DOCUMENT NAVIGATION ───────────────────────────────────────────────────────
+var currentContractId = null;
+var currentQId = null;
+
+function showNavLinks(){
+  var links = g("nav-links");
+  if(links){ links.style.display = "flex"; }
+}
+
+g("nav-to-welcome").addEventListener("click", function(){
+  showWelcome();
+  document.querySelectorAll(".btn-nav-link").forEach(function(b){b.classList.remove("active");});
+  this.classList.add("active");
+});
+
+g("nav-to-galleries").addEventListener("click", function(){
+  showGalleries();
+  document.querySelectorAll(".btn-nav-link").forEach(function(b){b.classList.remove("active");});
+  this.classList.add("active");
+});
+
+g("nav-to-docs").addEventListener("click", function(){
+  showDocs();
+  document.querySelectorAll(".btn-nav-link").forEach(function(b){b.classList.remove("active");});
+  this.classList.add("active");
+});
+
+g("nav-to-quotes").addEventListener("click", function(){
+  showQuotes();
+  document.querySelectorAll(".btn-nav-link").forEach(function(b){b.classList.remove("active");});
+  this.classList.add("active");
+});
+
+g("btn-back-to-docs").addEventListener("click", function(){ showDocs(); });
+g("btn-back-to-docs2").addEventListener("click", function(){ showDocs(); });
+
+function showDocs(){
+  showScreen("screen-docs");
+  loadPortalContracts();
+  loadPortalQuestionnaires();
+  loadPortalInvoices();
+}
+
+// ── DOCUMENTS SCREEN ──────────────────────────────────────────────────────────
+function showQuotes(){
+  showScreen("screen-quotes");
+  loadPortalQuotes();
+}
+
+function loadPortalQuotes(){
+  var list=document.getElementById('portal-quotes-list');
+  if(!list)return;
+  list.innerHTML='<div class="loading">Loading...</div>';
+  fetch('/api/portal/quotes?t='+Date.now(),{credentials:'include'}).then(function(r){return r.json();}).then(function(quotes){
+    if(!quotes.length){list.innerHTML='<div style="font-size:12px;color:var(--white-dim);padding:1rem 0;">No quotes yet.</div>';return;}
+    var statusColors={draft:'#888780',sent:'#3B8BD4',accepted:'#1D9E75',declined:'#E05555',expired:'#C9A84C'};
+    list.innerHTML=quotes.map(function(q){
+      var st=q.status||'draft';
+      var stColor=statusColors[st]||'#888780';
+      var items=[];
+      try{items=typeof q.line_items==='string'?JSON.parse(q.line_items):q.line_items||[];}catch(e){}
+      return '<div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.12);padding:1.5rem;margin-bottom:1rem;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">'+
+          '<div><div style="font-family:var(--serif);font-size:1.2rem;color:var(--white);">'+(q.quote_number||'Quote')+'</div>'+
+          '<div style="font-size:10px;color:var(--white-dim);margin-top:0.2rem;">Valid until: '+(q.valid_until?new Date(q.valid_until).toLocaleDateString('en-GB'):'--')+'</div></div>'+
+          '<span style="font-size:9px;background:'+stColor+'22;color:'+stColor+';border:0.5px solid '+stColor+'55;padding:0.2rem 0.6rem;border-radius:2px;letter-spacing:0.08em;text-transform:uppercase;">'+st+'</span>'+
+        '</div>'+
+        (q.client_message?'<div style="font-size:12px;color:var(--white-dim);margin-bottom:1rem;font-style:italic;">'+q.client_message+'</div>':'')+
+        '<div style="margin-bottom:1rem;">'+
+          items.map(function(i){
+            return '<div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:0.5px solid rgba(201,168,76,0.06);">'+
+              '<span style="font-size:12px;color:var(--white);">'+i.name+'</span>'+
+              '<span style="font-size:12px;color:var(--gold);">£'+parseFloat(i.total||i.price||0).toFixed(2)+'</span>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0;border-top:0.5px solid rgba(201,168,76,0.15);margin-bottom:1rem;">'+
+          '<span style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);">Total</span>'+
+          '<span style="font-family:var(--serif);font-size:1.5rem;color:var(--gold);">£'+parseFloat(q.total||0).toFixed(2)+'</span>'+
+        '</div>'+
+        (st==='sent'?
+          '<div style="display:flex;gap:0.8rem;">'+
+            '<button onclick="acceptQuote(\''+q.id+'\')" style="flex:2;background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Accept Quote</button>'+
+            '<button onclick="declineQuote(\''+q.id+'\')" style="flex:1;background:none;border:0.5px solid rgba(224,85,85,0.4);color:#E05555;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Decline</button>'+
+          '</div>':
+          ''
+        )+
+      '</div>';
+    }).join('');
+  }).catch(function(){list.innerHTML='<div style="color:#E05555;font-size:12px;">Error loading quotes.</div>';});
+}
+
+function acceptQuote(id){
+  if(!confirm('Accept this quote? We\'ll be in touch to confirm your booking.'))return;
+  fetch('/api/portal/quotes/'+id+'/accept',{method:'POST',credentials:'include'})
+  .then(function(r){return r.json();}).then(function(res){
+    if(res.success){loadPortalQuotes();alert('Quote accepted! We\'ll be in touch shortly.');}
+    else{alert(res.error||'Failed to accept quote.');}
+  });
+}
+
+function declineQuote(id){
+  if(!confirm('Are you sure you want to decline this quote?'))return;
+  fetch('/api/portal/quotes/'+id+'/decline',{method:'POST',credentials:'include'})
+  .then(function(r){return r.json();}).then(function(res){
+    if(res.success){loadPortalQuotes();}
+    else{alert(res.error||'Failed.');}
+  });
+}
+
+function loadPortalContracts(){
+  var list = g("portal-contracts-list");
+  if(!client){ list.innerHTML = ""; return; }
+  rawApi("/contracts/client/" + client.id)
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data) || !data.length){
+      list.innerHTML = "<div style=\"font-size:12px;color:var(--white-dim);padding:1rem 0;\">No contracts yet. They will appear here when sent by your photographer.</div>";
+      return;
+    }
+    list.innerHTML = data.map(function(c){
+      var canSign = c.status === "sent";
+      return "<div class=\"doc-card\">" +
+        "<div class=\"doc-card-info\">" +
+          "<div class=\"doc-card-title\">" + (c.title || "Photography Contract") + "</div>" +
+          "<div class=\"doc-card-meta\">" + (c.signed_at ? "Signed " + fmtD(c.signed_at) : "Awaiting your signature") + "</div>" +
+        "</div>" +
+        "<div style=\"display:flex;align-items:center;gap:0.5rem;\">" +
+          "<span class=\"doc-badge badge-" + c.status + "\">" + c.status + "</span>" +
+          (canSign ? "<button class=\"btn-doc\" data-cid=\"" + c.id + "\">Read & Sign</button>" :
+                     "<button class=\"btn-doc\" data-cid=\"" + c.id + "\" data-view=\"1\">View</button>") +
+        "</div>" +
+      "</div>";
+    }).join("");
+    list.querySelectorAll("[data-cid]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openPortalContract(this.getAttribute("data-cid"), !!this.getAttribute("data-view"));
+      });
+    });
+  }).catch(function(){
+    list.innerHTML = "<div style=\"font-size:12px;color:var(--white-dim);\">Could not load contracts.</div>";
+  });
+}
+
+function loadPortalQuestionnaires(){
+  var list = g("portal-q-list");
+  if(!client){ list.innerHTML = ""; return; }
+  rawApi("/questionnaires/client/" + client.id)
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data) || !data.length){
+      list.innerHTML = "<div style=\"font-size:12px;color:var(--white-dim);padding:1rem 0;\">No questionnaires yet. They will appear here when sent by your photographer.</div>";
+      return;
+    }
+    list.innerHTML = data.map(function(q){
+      var canFill = q.status === "sent";
+      return "<div class=\"doc-card\">" +
+        "<div class=\"doc-card-info\">" +
+          "<div class=\"doc-card-title\">" + (q.title || "Pre-Shoot Questionnaire") + "</div>" +
+          "<div class=\"doc-card-meta\">" + (q.completed_at ? "Completed " + fmtD(q.completed_at) : "Please fill this in before your session") + "</div>" +
+        "</div>" +
+        "<div style=\"display:flex;align-items:center;gap:0.5rem;\">" +
+          "<span class=\"doc-badge badge-" + q.status + "\">" + q.status + "</span>" +
+          "<button class=\"btn-doc\" data-qid=\"" + q.id + "\">" + (canFill ? "Fill In" : "View") + "</button>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+    list.querySelectorAll("[data-qid]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        openPortalQ(this.getAttribute("data-qid"));
+      });
+    });
+  }).catch(function(){
+    list.innerHTML = "<div style=\"font-size:12px;color:var(--white-dim);\">Could not load questionnaires.</div>";
+  });
+}
+
+// ── CONTRACT SIGNING ──────────────────────────────────────────────────────────
+function openPortalContract(id, viewOnly){
+  rawApi("/contracts/" + id).then(function(r){ return r.json(); }).then(function(c){
+    currentContractId = id;
+    g("sign-title").innerHTML = (c.title || "Contract") + " <em>" + (viewOnly ? "View" : "Sign") + "</em>";
+    g("contract-body-display").textContent = c.body || "";
+    g("sign-msg").style.display = "none";
+    if(c.status === "signed"){
+      g("sign-form").style.display = "none";
+      g("sign-done").style.display = "block";
+    } else {
+      g("sign-form").style.display = "block";
+      g("sign-done").style.display = "none";
+      g("sign-name").value = client ? client.firstName + " " + client.lastName : "";
+      g("sign-sig").value = "";
+    }
+    showScreen("screen-sign");
+  }).catch(function(){ toast("Could not load contract", true); });
+}
+
+g("btn-sign-contract").addEventListener("click", function(){
+  var name = g("sign-name").value.trim();
+  var sig  = g("sign-sig").value.trim();
+  var msg  = g("sign-msg");
+  msg.style.display = "none";
+  if(!name || !sig){ msg.textContent = "Please enter your full name and signature."; msg.style.color = "var(--red)"; msg.style.display = "block"; return; }
+  var btn = this; btn.disabled = true; btn.textContent = "Signing...";
+  rawApi("/contracts/" + currentContractId + "/sign", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ client_name: name, signature: sig })
+  }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+  .then(function(res){
+    btn.disabled = false; btn.textContent = "Sign Contract";
+    if(!res.ok){ msg.textContent = res.d.error || "Failed to sign."; msg.style.color = "var(--red)"; msg.style.display = "block"; return; }
+    g("sign-form").style.display = "none";
+    g("sign-done").style.display = "block";
+    toast("Contract signed successfully");
+    loadPortalContracts();
+  }).catch(function(){ btn.disabled = false; btn.textContent = "Sign Contract"; msg.textContent = "Connection error."; msg.style.color = "var(--red)"; msg.style.display = "block"; });
+});
+
+g("btn-dl-contract").addEventListener("click", function(){
+  if(!currentContractId) return;
+  api("/contracts/" + currentContractId).then(function(r){ return r.json(); }).then(function(c){
+    var win = window.open("","_blank");
+    win.document.write("<html><head><title>" + (c.title||"Contract") + "</title><style>body{font-family:Georgia,serif;max-width:700px;margin:2rem auto;line-height:1.9;font-size:13px;}pre{white-space:pre-wrap;font-family:Georgia,serif;}</style></head><body><h2>" + (c.title||"Contract") + "</h2><hr><pre>" + (c.body||"") + "</pre></body></html>");
+    win.document.close(); win.print();
+  });
+});
+
+g("upload-signed-pdf").addEventListener("change", function(){
+  var file = this.files[0];
+  if(!file || !currentContractId) return;
+  var msg = g("upload-msg");
+  msg.textContent = "Uploading..."; msg.style.color = "var(--gold)"; msg.style.display = "block";
+  var fd = new FormData(); fd.append("signed_pdf", file);
+  rawApi("/contracts/" + currentContractId + "/upload-signed", { method: "POST", body: fd })
+  .then(function(r){ return r.json(); }).then(function(res){
+    if(!res.success){ msg.textContent = "Upload failed."; msg.style.color = "var(--red)"; return; }
+    msg.textContent = "Signed copy uploaded successfully."; msg.style.color = "var(--green)";
+    g("sign-form").style.display = "none";
+    g("sign-done").style.display = "block";
+    loadPortalContracts();
+  }).catch(function(){ msg.textContent = "Upload error."; msg.style.color = "var(--red)"; });
+});
+
+// ── QUESTIONNAIRE ─────────────────────────────────────────────────────────────
+function openPortalQ(id){
+  rawApi("/questionnaires/" + id).then(function(r){ return r.json(); }).then(function(q){
+    currentQId = id;
+    g("q-screen-title").innerHTML = (q.title || "Questionnaire") + " <em>Form</em>";
+    g("q-submit-msg").style.display = "none";
+
+    if(q.status === "completed"){
+      g("q-done").style.display = "block";
+      g("btn-submit-q").style.display = "none";
+    } else {
+      g("q-done").style.display = "none";
+      g("btn-submit-q").style.display = "block";
+    }
+
+    var questions = typeof q.questions === "string" ? JSON.parse(q.questions) : q.questions || [];
+    var answers   = typeof q.answers === "string" ? JSON.parse(q.answers) : q.answers || {};
+    var sections = {};
+    questions.forEach(function(qn){
+      var sec = qn.section || "General";
+      if(!sections[sec]) sections[sec] = [];
+      sections[sec].push(qn);
+    });
+
+    var html = "";
+    Object.keys(sections).forEach(function(sec){
+      html += "<div class=\"q-section-hdr\">" + sec + "</div>";
+      sections[sec].forEach(function(qn){
+        var val = answers[qn.id] || "";
+        html += "<div class=\"q-item-portal\">";
+        html += "<div class=\"q-label-portal\">" + qn.question + (qn.required ? "<span class=\"q-required\"> *</span>" : "") + "</div>";
+        if(qn.type === "choice" && qn.options){
+          html += "<div class=\"q-choice-portal\">";
+          qn.options.forEach(function(opt){
+            html += "<label class=\"q-radio-portal\"><input type=\"radio\" name=\"pq_" + qn.id + "\" value=\"" + opt + "\" " + (val === opt ? "checked" : "") + " data-qid=\"" + qn.id + "\"><span>" + opt + "</span></label>";
+          });
+          html += "</div>";
+        } else if(qn.type === "textarea"){
+          html += "<textarea class=\"q-input-portal q-textarea-portal\" data-qid=\"" + qn.id + "\">" + val + "</textarea>";
+        } else {
+          html += "<input type=\"text\" class=\"q-input-portal\" data-qid=\"" + qn.id + "\" value=\"" + val + "\">";
+        }
+        html += "</div>";
+      });
+    });
+    g("q-screen-questions").innerHTML = html;
+    showScreen("screen-questionnaire");
+  }).catch(function(){ toast("Could not load questionnaire", true); });
+}
+
+function getPortalQAnswers(){
+  var answers = {};
+  g("q-screen-questions").querySelectorAll("[data-qid]").forEach(function(el){
+    var id = el.getAttribute("data-qid");
+    if(el.type === "radio"){ if(el.checked) answers[id] = el.value; }
+    else { answers[id] = el.value; }
+  });
+  return answers;
+}
+
+g("btn-submit-q").addEventListener("click", function(){
+  var answers = getPortalQAnswers();
+  var btn = this; btn.disabled = true; btn.textContent = "Submitting...";
+  var msg = g("q-submit-msg"); msg.style.display = "none";
+  rawApi("/questionnaires/" + currentQId + "/answers", {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ answers: answers, completed: true })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    btn.disabled = false; btn.textContent = "Submit Answers";
+    if(!res.success){ msg.textContent = "Failed to submit."; msg.style.color = "var(--red)"; msg.style.display = "block"; return; }
+    g("q-done").style.display = "block";
+    btn.style.display = "none";
+    toast("Questionnaire submitted — thank you!");
+    loadPortalQuestionnaires();
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = "Submit Answers";
+    msg.textContent = "Connection error."; msg.style.color = "var(--red)"; msg.style.display = "block";
+  });
+});
+var loyaltyData=null,bannerMode=0;
+function loadLoyalty(){
+  api("/loyalty").then(function(r){return r.json();}).then(function(d){
+    loyaltyData=d;
+    if(!d||d.current_cycle===undefined)return;
+    showLoyaltyBanner(d);
+  }).catch(function(){});
+}
+function showLoyaltyBanner(d){
+  var b=document.getElementById("loyalty-banner");
+  var inn=document.getElementById("loyalty-inner");
+  if(!b||!inn)return;
+  var name=client?client.firstName:"";
+  var toGo=d.to_go||0;
+  var disc=d.discount_pct||10;
+  var ready=d.award_count>0&&d.to_go===0;
+  var pct=(d.current_cycle/d.threshold*100).toFixed(0)||0;
+  var cycle=d.current_cycle||0;
+  var thr=d.threshold||3;
+  var msgs=[
+    "✨ "+name+", just "+toGo+" session"+(toGo===1?"":"s")+" away from your exclusive "+disc+"% Loyal Client Reward ✨",
+    "📸 "+toGo+" more session"+(toGo===1?"":"s")+" unlocks your "+disc+"% Loyal Client discount · " + cycle + "/" + thr + " sessions",
+    "⭐ Your loyalty is valued, "+name+" - "+toGo+" session"+(toGo===1?"":"s")+" remaining ⭐"
+  ];
+  var msg=ready?"🏆 Congratulations "+name+"! Loyal Client Reward ready - "+disc+"% off next session. Mention when booking.":msgs[Math.floor(Date.now()/15000)%msgs.length];
+  var prog="<div style=height:2px;background:rgba(201,168,76,0.15)><div style=height:100%;width:"+pct+"%;background:#C9A84C;transition:width 1s></div></div>";
+  b.style.cssText=ready?"display:block;background:rgba(201,168,76,0.1);border-bottom:1px solid #C9A84C;":"display:block;background:rgba(201,168,76,0.05);border-bottom:0.5px solid rgba(201,168,76,0.2);";
+  var wrap=bannerMode%2===0&&!ready?
+    "<marquee behavior=scroll direction=left scrollamount=4 style=font-size:12px;color:#C9A84C;line-height:32px;><span style=padding:0 3rem>"+msg+"</span></marquee>"
+    :"<div style='padding:0.5rem 2rem;text-align:center'><span style='font-size:12px;color:#C9A84C'>"+msg+"</span></div>";
+  inn.innerHTML=wrap+prog;
+  setTimeout(function(){bannerMode++;if(loyaltyData)showLoyaltyBanner(loyaltyData);},20000);
+}</script>
+</body>
+</html><script>
+function loadPortalPromo() {
+  fetch('/api/promotions/active')
+    .then(function(r){ return r.json(); })
+    .then(function(promos) {
+      var banners = promos.filter(function(p){ return p.type === 'banner'; });
+      if (!banners.length) return;
+      var promo = banners[0];
+      var DISMISS_KEY = 'bsm_promo_dismissed';
+      try {
+        var d = JSON.parse(localStorage.getItem(DISMISS_KEY) || '{}');
+        if (d[promo.id] && Date.now() < d[promo.id]) return;
+      } catch(e) {}
+      var THEMES = {
+        gold:   { bg:'#C9A84C', text:'#1a1200', sub:'#5C4010', btn:'#1a1200', btnText:'#C9A84C' },
+        dark:   { bg:'#111111', text:'#C9A84C', sub:'#888888', btn:'#C9A84C', btnText:'#111111' },
+        purple: { bg:'#26215C', text:'#EEEDFE', sub:'#AFA9EC', btn:'#C9A84C', btnText:'#1a1200' },
+        coral:  { bg:'#993C1D', text:'#FAECE7', sub:'#F5C4B3', btn:'#FAECE7', btnText:'#993C1D' },
+        teal:   { bg:'#0F6E56', text:'#E1F5EE', sub:'#9FE1CB', btn:'#C9A84C', btnText:'#1a1200' }
+      };
+      var t = THEMES[promo.bg_colour] || THEMES.gold;
+      var wrap = document.getElementById('portal-promo-banner');
+      if (!wrap) return;
+      wrap.style.background = t.bg;
+      wrap.style.padding = '14px 32px';
+      wrap.style.display = 'block';
+      var close = '<button onclick="dismissPortalPromo('+promo.id+')" style="position:absolute;top:8px;right:14px;background:none;border:none;font-size:20px;color:'+t.sub+';cursor:pointer;line-height:1;">&times;</button>';
+      var eyebrow = promo.eyebrow ? '<div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:'+t.sub+';margin-bottom:4px;">'+promo.eyebrow+'</div>' : '';
+      var headline = '<div style="font-size:clamp(15px,2.5vw,20px);font-weight:500;color:'+t.text+';font-family:Georgia,serif;">'+promo.message+'</div>';
+      var cta = promo.cta_label && promo.cta_link ? '<a href="'+promo.cta_link+'" style="display:inline-block;background:'+t.btn+';color:'+t.btnText+';font-size:12px;font-weight:600;padding:7px 20px;border-radius:4px;text-decoration:none;margin-top:8px;letter-spacing:0.05em;">'+promo.cta_label+'</a>' : '';
+      wrap.innerHTML = '<div style="position:relative;">'+close+eyebrow+headline+cta+'</div>';
+      var nav = document.querySelector('.portal-nav');
+      var navH = nav ? nav.offsetHeight : 57;
+      wrap.style.top = navH + 'px';
+      document.body.style.paddingTop = (navH + wrap.offsetHeight + 8) + 'px';
+    })
+    .catch(function(e){ console.warn('[portal promo]', e.message); });
+}
+function dismissPortalPromo(id) {
+  try {
+    var d = JSON.parse(localStorage.getItem('bsm_promo_dismissed') || '{}');
+    d[id] = Date.now() + 24*60*60*1000;
+    localStorage.setItem('bsm_promo_dismissed', JSON.stringify(d));
+  } catch(e) {}
+  var wrap = document.getElementById('portal-promo-banner');
+  if (wrap) { wrap.style.display = 'none'; document.body.style.paddingTop = ''; }
+}
+</script>
+<script>
+function showForgotPassword(){var f=document.getElementById('forgot-form');f.style.display=f.style.display==='none'?'block':'none';}
+document.addEventListener('DOMContentLoaded',function(){
+  var btnForgot=document.getElementById('btn-forgot');
+  if(btnForgot){btnForgot.addEventListener('click',function(){var email=document.getElementById('forgot-email').value.trim();if(!email)return;btnForgot.disabled=true;fetch('/api/portal/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})}).then(r=>r.json()).then(()=>{document.getElementById('forgot-msg').style.display='block';btnForgot.disabled=false;}).catch(()=>{btnForgot.disabled=false;});});}
+  var resetToken=new URLSearchParams(window.location.search).get('reset');
+  if(resetToken){document.getElementById('screen-login').style.display='none';document.getElementById('screen-reset').style.display='block';var btnReset=document.getElementById('btn-reset');if(btnReset){btnReset.addEventListener('click',function(){var pw=document.getElementById('reset-pw').value;var pw2=document.getElementById('reset-pw2').value;var errEl=document.getElementById('reset-err');if(pw.length<8){errEl.textContent='Password must be at least 8 characters.';return;}if(pw!==pw2){errEl.textContent='Passwords do not match.';return;}btnReset.disabled=true;fetch('/api/portal/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:resetToken,password:pw})}).then(r=>r.json()).then(res=>{if(res.success){errEl.style.color='#4ECBA0';errEl.textContent='Password updated! Redirecting...';setTimeout(()=>{window.location.href='/portal';},2000);}else{errEl.textContent=res.error||'Failed.';btnReset.disabled=false;}}).catch(()=>{errEl.textContent='Error.';btnReset.disabled=false;});});}}
+});
+</script>
+<script>
+function loadPortalInvoices(){
+  var list = document.getElementById('portal-invoices-list');
+  if(!list) return;
+  rawApi('/invoices').then(function(r){ return r.json(); }).then(function(data){
+    if(!Array.isArray(data)||!data.length){
+      list.innerHTML='<div style="font-size:12px;color:var(--white-dim);padding:1rem 0;">No invoices yet. They will appear here once raised by your photographer.</div>';
+      return;
+    }
+    list.innerHTML=data.map(function(inv){
+      var balance=parseFloat(inv.total||0)-parseFloat(inv.amount_paid||0);
+      var statusCol=inv.status==='paid'?'#4ECBA0':inv.status==='overdue'?'#E05555':'#C9A84C';
+      var dueStr=inv.due_date?'Due '+fmtD(inv.due_date):'';
+      var paidStr=inv.paid_at?'Paid '+fmtD(inv.paid_at):'';
+      return '<div class="doc-card">'
+        +'<div class="doc-card-info">'
+          +'<div class="doc-card-title">Invoice '+inv.invoice_number+'</div>'
+          +'<div class="doc-card-meta">'+(paidStr||dueStr||'')+'</div>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:0.75rem;">'
+          +'<div style="text-align:right;">'
+            +'<div style="font-size:14px;font-weight:600;color:#F5F0E8;">£'+parseFloat(inv.total).toFixed(2)+'</div>'
+            +(balance>0?'<div style="font-size:11px;color:#C9A84C;">£'+balance.toFixed(2)+' outstanding</div>':'')
+          +'</div>'
+          +'<span style="font-size:10px;padding:3px 8px;border-radius:2px;background:rgba(0,0,0,0.3);color:'+statusCol+';letter-spacing:0.1em;text-transform:uppercase;">'+inv.status+'</span>'
+          +'<a href="/api/portal/invoices/'+inv.id+'/pdf" target="_blank" style="background:none;border:0.5px solid rgba(201,168,76,0.4);color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 0.8rem;text-decoration:none;cursor:pointer;">Download PDF</a>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  }).catch(function(){
+    list.innerHTML='<div style="font-size:12px;color:var(--white-dim);">Could not load invoices.</div>';
+  });
+}
+
+  // Add-ons order
+  var btnAddon = document.getElementById('btn-addon-order');
+  if (btnAddon) {
+    btnAddon.addEventListener('click', function() {
+      var details = document.getElementById('addon-order-details').value.trim();
+      var name = document.getElementById('addon-shipping-name').value.trim();
+      var address = document.getElementById('addon-shipping-address').value.trim();
+      var msg = document.getElementById('addon-msg');
+      if (!details) { msg.textContent = 'Please describe your order.'; msg.style.color = 'var(--red)'; msg.style.display = 'block'; return; }
+      btnAddon.disabled = true; btnAddon.textContent = 'Sending...';
+      rawApi('/portal/addon-order', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_details: details, shipping_name: name, shipping_address: address })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        btnAddon.disabled = false; btnAddon.textContent = 'Request Order';
+        if (d.success) {
+          msg.textContent = 'Order request sent! We will be in touch to confirm and arrange payment.';
+          msg.style.color = 'var(--gold)'; msg.style.display = 'block';
+          document.getElementById('addon-order-details').value = '';
+          document.getElementById('addon-shipping-name').value = '';
+          document.getElementById('addon-shipping-address').value = '';
+        } else {
+          msg.textContent = d.error || 'Failed to send order.'; msg.style.color = 'var(--red)'; msg.style.display = 'block';
+        }
+      }).catch(function() {
+        btnAddon.disabled = false; btnAddon.textContent = 'Request Order';
+        msg.textContent = 'Connection error.'; msg.style.color = 'var(--red)'; msg.style.display = 'block';
+      });
+    });
+  }
+
+function trackDownload(photoId, gallerySlug, downloadType) {
+  fetch('/api/portal/track-download', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ photo_id: photoId, gallery_slug: gallerySlug, download_type: downloadType || 'photo' })
+  }).catch(function() {}); // silent fail - never interrupt download
+}
+function trackGalleryView(gallerySlug) {
+  fetch('/api/portal/track-download', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ gallery_slug: gallerySlug, download_type: 'gallery_view' })
+  }).catch(function() {});
+}
+</script>

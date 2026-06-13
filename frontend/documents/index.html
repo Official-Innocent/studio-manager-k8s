@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documents — Bigg Shots Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--black:#0A0A0A;--dark:#111111;--dark2:#1A1A1A;--dark3:#242424;--white:#F5F0E8;--white-dim:#B0A898;--green:#4ECBA0;--red:#E05555;--blue:#4A90D9;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Montserrat",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:var(--sans);min-height:100vh;}
+.topbar{background:var(--dark);border-bottom:0.5px solid rgba(201,168,76,0.15);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;}
+.topbar h1{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--gold);}
+.btn-top{background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;cursor:pointer;transition:all 0.2s;}
+.btn-ghost{background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-family:var(--sans);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:0.4rem 1rem;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-ghost:hover{background:var(--gold);color:var(--black);}
+.main{margin-top:56px;padding:2rem;}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid rgba(201,168,76,0.15);margin-bottom:2rem;}
+.tab{background:none;border:none;color:var(--white-dim);font-family:var(--sans);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem 1.5rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;}
+.tab:hover{color:var(--white);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;}
+.section-title{font-family:var(--serif);font-size:1.8rem;font-weight:300;}
+.section-title em{font-style:italic;color:var(--gold);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+.panel{background:var(--dark);border:0.5px solid rgba(201,168,76,0.1);padding:1.5rem;}
+.panel-title{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:1rem;}
+.field{margin-bottom:0.8rem;}
+.field label{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.3rem;}
+.field input,.field select,.field textarea{width:100%;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.65rem 0.8rem;outline:none;transition:border-color 0.3s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+.field select option{background:var(--dark3);}
+.field textarea{resize:vertical;min-height:80px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.btn-save{background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.7rem 1.5rem;cursor:pointer;transition:all 0.3s;}
+.btn-save:hover{background:var(--gold-light);}
+.btn-save:disabled{opacity:0.5;cursor:not-allowed;}
+.doc-list{display:grid;gap:1px;background:rgba(201,168,76,0.08);}
+.doc-item{background:var(--dark);padding:1rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;transition:background 0.2s;}
+.doc-item:hover{background:var(--dark2);}
+.doc-info{}
+.doc-title{font-size:12px;color:var(--white);margin-bottom:0.2rem;}
+.doc-meta{font-size:10px;color:var(--white-dim);}
+.doc-actions{display:flex;gap:0.4rem;flex-shrink:0;}
+.badge{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.15rem 0.5rem;}
+.badge-draft{background:rgba(201,168,76,0.12);color:var(--gold);}
+.badge-sent{background:rgba(74,144,217,0.15);color:var(--blue);}
+.badge-signed{background:rgba(78,203,160,0.15);color:var(--green);}
+.badge-completed{background:rgba(78,203,160,0.15);color:var(--green);}
+.btn-sm{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:0.3rem 0.7rem;border:0.5px solid rgba(201,168,76,0.3);background:none;color:var(--gold);cursor:pointer;font-family:var(--sans);transition:all 0.2s;}
+.btn-sm:hover{background:var(--gold);color:var(--black);}
+.btn-sm.danger{border-color:rgba(224,85,85,0.3);color:var(--red);}
+.btn-sm.danger:hover{background:var(--red);color:var(--white);}
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(10,10,10,0.9);display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--dark);border:0.5px solid rgba(201,168,76,0.2);width:100%;max-width:800px;padding:2rem;position:relative;margin:auto;}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--white-dim);font-size:1.8rem;cursor:pointer;}
+.modal-title{font-family:var(--serif);font-size:1.5rem;font-weight:300;margin-bottom:0.3rem;}
+.modal-title em{font-style:italic;color:var(--gold);}
+.gold-rule{width:36px;height:1px;background:var(--gold);margin:0.6rem 0 1.2rem;}
+.contract-preview{background:var(--dark2);padding:1.5rem;font-size:12px;line-height:1.8;color:var(--white);white-space:pre-wrap;font-family:Georgia,serif;max-height:400px;overflow-y:auto;border:0.5px solid rgba(201,168,76,0.1);}
+.q-section{margin-bottom:1.2rem;}
+.q-section-title{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.6rem;padding-bottom:0.3rem;border-bottom:0.5px solid rgba(201,168,76,0.1);}
+.q-item{margin-bottom:0.8rem;}
+.q-label{font-size:11px;color:var(--white);margin-bottom:0.3rem;}
+.q-required{color:var(--red);margin-left:3px;}
+.q-input{width:100%;background:var(--dark3);border:0.5px solid rgba(201,168,76,0.15);color:var(--white);font-family:var(--sans);font-size:12px;padding:0.5rem 0.7rem;outline:none;transition:border-color 0.2s;}
+.q-input:focus{border-color:var(--gold);}
+.q-textarea{min-height:70px;resize:vertical;}
+.q-choice{display:flex;flex-direction:column;gap:0.3rem;}
+.q-radio{display:flex;align-items:center;gap:0.5rem;cursor:pointer;}
+.q-radio input{accent-color:var(--gold);width:auto;}
+.q-radio span{font-size:11px;color:var(--white-dim);}
+.admin-note{background:rgba(201,168,76,0.05);border:0.5px solid rgba(201,168,76,0.1);padding:0.5rem 0.7rem;margin-top:0.3rem;}
+.admin-note input{width:100%;background:none;border:none;color:rgba(201,168,76,0.7);font-family:var(--sans);font-size:10px;outline:none;}
+.admin-note label{font-size:8px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(201,168,76,0.5);display:block;margin-bottom:0.2rem;}
+.msg{font-size:11px;padding:0.6rem 0.8rem;margin-top:0.5rem;display:none;}
+.msg-err{background:rgba(224,85,85,0.12);border:0.5px solid rgba(224,85,85,0.3);color:var(--red);}
+.msg-ok{background:rgba(78,203,160,0.12);border:0.5px solid rgba(78,203,160,0.3);color:var(--green);}
+.loading{text-align:center;padding:2rem;color:var(--white-dim);font-size:11px;letter-spacing:0.15em;}
+.empty{text-align:center;padding:2rem;font-family:var(--serif);font-size:1rem;font-style:italic;color:var(--white-dim);}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--dark2);border:0.5px solid var(--gold);padding:0.8rem 1.5rem;font-size:12px;color:var(--white);z-index:999;display:none;max-width:320px;}
+.fade-in{animation:fadeInUp 0.35s ease forwards;}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}.field-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>BIGG SHOTS &mdash; DOCUMENTS</h1>
+  <div style="display:flex;gap:0.5rem;">
+    <a href="/admin" class="btn-ghost">Admin</a>
+    <a href="/pipeline" class="btn-ghost" target="_blank">Pipeline</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" data-tab="contracts">Contracts</button>
+    <button class="tab" data-tab="questionnaires">Questionnaires</button>
+    <button class="tab" data-tab="templates">Templates</button>
+  </div>
+
+  <!-- CONTRACTS TAB -->
+  <div class="tab-content active" id="tab-contracts">
+    <div class="section-header">
+      <div class="section-title">Client <em>Contracts</em></div>
+      <button class="btn-save" id="btn-new-contract" type="button">+ New Contract</button>
+    </div>
+    <div class="doc-list" id="contracts-list"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- QUESTIONNAIRES TAB -->
+  <div class="tab-content" id="tab-questionnaires">
+    <div class="section-header">
+      <div class="section-title">Client <em>Questionnaires</em></div>
+      <button class="btn-save" id="btn-new-questionnaire" type="button">+ New Questionnaire</button>
+    </div>
+    <div class="doc-list" id="questionnaires-list"><div class="loading">Loading...</div></div>
+  </div>
+
+  <!-- TEMPLATES TAB -->
+  <div class="tab-content" id="tab-templates">
+    <div class="two-col">
+      <div>
+        <div class="section-title" style="margin-bottom:1rem;">Contract <em>Templates</em></div>
+        <div class="doc-list" id="contract-templates-list"><div class="loading">Loading...</div></div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:1rem;">Questionnaire <em>Templates</em></div>
+        <div class="doc-list" id="q-templates-list"><div class="loading">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CONTRACT MODAL -->
+<div class="modal-bg" id="modal-new-contract">
+  <div class="modal">
+    <button class="modal-close" id="close-new-contract">&times;</button>
+    <div class="modal-title">New <em>Contract</em></div>
+    <div class="gold-rule"></div>
+    <div class="field-row">
+      <div class="field"><label>Client</label><select id="nc-client"><option value="">Select client...</option></select></div>
+      <div class="field"><label>Project</label><select id="nc-project"><option value="">Select project (optional)...</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Contract Template</label>
+        <select id="nc-template"><option value="">Select template...</option></select>
+      </div>
+      <div class="field"><label>Contract Title</label>
+        <input type="text" id="nc-title" placeholder="e.g. Wedding Photography Contract">
+      </div>
+    </div>
+    <div class="field"><label>Contract Body (auto-filled from template, edit as needed)</label>
+      <textarea id="nc-body" rows="12" placeholder="Select a template above to auto-fill..."></textarea>
+    </div>
+    <div style="display:flex;gap:0.7rem;margin-top:1rem;">
+      <button class="btn-save" id="btn-create-contract" type="button">Create &amp; Preview</button>
+      <button class="btn-ghost" id="cancel-new-contract" type="button">Cancel</button>
+    </div>
+    <div class="msg msg-err" id="nc-err"></div>
+  </div>
+</div>
+
+<!-- VIEW/EDIT CONTRACT MODAL -->
+<div class="modal-bg" id="modal-view-contract">
+  <div class="modal" style="max-width:900px;">
+    <button class="modal-close" id="close-view-contract">&times;</button>
+    <div class="modal-title" id="vc-title">Contract <em>Preview</em></div>
+    <div class="gold-rule"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <span class="badge" id="vc-badge"></span>
+      <div style="display:flex;gap:0.4rem;">
+        <button class="btn-sm" id="vc-btn-send" type="button">Mark as Sent</button>
+        <button class="btn-sm" id="vc-btn-edit" type="button">Edit</button>
+        <button class="btn-sm" id="vc-btn-print" type="button">Print / PDF</button>
+      </div>
+    </div>
+    <div class="contract-preview" id="vc-body"></div>
+
+    <!-- Edit mode -->
+    <div id="vc-edit-area" style="display:none;margin-top:1rem;">
+      <div class="field"><label>Edit Contract Body</label>
+        <textarea id="vc-edit-body" rows="15"></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+        <button class="btn-save" id="vc-btn-save-edit" type="button">Save Changes</button>
+        <button class="btn-ghost" id="vc-btn-cancel-edit" type="button">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Upload signed PDF -->
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid rgba(201,168,76,0.1);">
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.5rem;">Upload Signed Copy (PDF)</div>
+      <input type="file" id="vc-pdf-upload" accept=".pdf" style="color:var(--white-dim);font-size:11px;">
+      <button class="btn-sm" id="vc-btn-upload-pdf" type="button" style="margin-top:0.4rem;">Upload Signed PDF</button>
+    </div>
+    <div class="msg msg-err" id="vc-err"></div>
+    <div class="msg msg-ok" id="vc-ok"></div>
+  </div>
+</div>
+
+<!-- NEW QUESTIONNAIRE MODAL -->
+<div class="modal-bg" id="modal-new-q">
+  <div class="modal">
+    <button class="modal-close" id="close-new-q">&times;</button>
+    <div class="modal-title">New <em>Questionnaire</em></div>
+    <div class="gold-rule"></div>
+    <div class="field-row">
+      <div class="field"><label>Client</label><select id="nq-client"><option value="">Select client...</option></select></div>
+      <div class="field"><label>Project</label><select id="nq-project"><option value="">Select project (optional)...</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Questionnaire Template</label>
+        <select id="nq-template"><option value="">Select template...</option></select>
+      </div>
+      <div class="field"><label>Title (optional override)</label>
+        <input type="text" id="nq-title" placeholder="Leave blank to use template name">
+      </div>
+    </div>
+    <div style="display:flex;gap:0.7rem;margin-top:1rem;">
+      <button class="btn-save" id="btn-create-q" type="button">Create Questionnaire</button>
+      <button class="btn-ghost" id="cancel-new-q" type="button">Cancel</button>
+    </div>
+    <div class="msg msg-err" id="nq-err"></div>
+  </div>
+</div>
+
+<!-- FILL QUESTIONNAIRE MODAL -->
+<div class="modal-bg" id="modal-fill-q">
+  <div class="modal" style="max-width:860px;">
+    <button class="modal-close" id="close-fill-q">&times;</button>
+    <div class="modal-title" id="fq-title">Questionnaire <em>Answers</em></div>
+    <div class="gold-rule"></div>
+    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <span class="badge" id="fq-badge"></span>
+      <button class="btn-sm" id="fq-btn-send" type="button">Mark as Sent to Client</button>
+      <button class="btn-sm" id="fq-btn-complete" type="button" style="background:rgba(78,203,160,0.1);color:var(--green);border-color:rgba(78,203,160,0.3);">Mark Complete</button>
+    </div>
+    <div id="fq-questions"></div>
+    <div class="field" style="margin-top:1.5rem;padding-top:1rem;border-top:0.5px solid rgba(201,168,76,0.1);">
+      <label>Admin Notes (private — client does not see this)</label>
+      <textarea id="fq-admin-notes" rows="3" placeholder="Your private notes about this client's session..."></textarea>
+    </div>
+    <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+      <button class="btn-save" id="fq-btn-save" type="button">Save Answers</button>
+      <button class="btn-ghost" id="fq-btn-cancel" type="button">Close</button>
+    </div>
+    <div class="msg msg-err" id="fq-err"></div>
+    <div class="msg msg-ok" id="fq-ok"></div>
+  </div>
+</div>
+
+<!-- VIEW TEMPLATE MODAL -->
+<div class="modal-bg" id="modal-view-template">
+  <div class="modal" style="max-width:860px;">
+    <button class="modal-close" id="close-view-template">&times;</button>
+    <div class="modal-title" id="vt-title">Contract <em>Template</em></div>
+    <div class="gold-rule"></div>
+    <div class="contract-preview" id="vt-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var currentContract=null, currentQ=null, clients=[], projects=[], cTemplates=[], qTemplates=[];
+function g(id){return document.getElementById(id);}
+function api(p,o){return fetch("/api"+p,Object.assign({credentials:"include"},o||{}));}
+function fmtD(d){return d?new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):"--";}
+function toast(m,e){var t=g("toast");t.textContent=m;t.style.borderColor=e?"var(--red)":"var(--gold)";t.style.display="block";setTimeout(function(){t.style.display="none";},3500);}
+function fadeEl(el){el.classList.remove("fade-in");void el.offsetWidth;el.classList.add("fade-in");}
+
+// Tabs
+document.querySelectorAll(".tab").forEach(function(btn){
+  btn.addEventListener("click",function(){
+    document.querySelectorAll(".tab").forEach(function(b){b.classList.remove("active");});
+    document.querySelectorAll(".tab-content").forEach(function(c){c.classList.remove("active");});
+    this.classList.add("active");
+    var tc=g("tab-"+this.getAttribute("data-tab"));
+    tc.classList.add("active");
+    fadeEl(tc);
+    if(this.getAttribute("data-tab")==="templates")loadTemplates();
+  });
+});
+
+// Load clients and projects
+function loadClientsAndProjects(){
+  api("/clients").then(function(r){return r.json();}).then(function(d){
+    clients=Array.isArray(d)?d:[];
+    ["nc-client","nq-client"].forEach(function(id){
+      var sel=g(id);
+      sel.innerHTML="<option value=\"\">Select client...</option>";
+      clients.forEach(function(c){sel.innerHTML+="<option value=\""+c.id+"\">"+c.first_name+" "+c.last_name+"</option>";});
+    });
+  });
+  api("/projects").then(function(r){return r.json();}).then(function(d){
+    projects=Array.isArray(d)?d:[];
+    ["nc-project","nq-project"].forEach(function(id){
+      var sel=g(id);
+      sel.innerHTML="<option value=\"\">No project (optional)</option>";
+      projects.forEach(function(p){sel.innerHTML+="<option value=\""+p.id+"\">"+p.title+"</option>";});
+    });
+  });
+}
+
+// ── CONTRACTS ─────────────────────────────────────────────────────────────────
+function loadContracts(){
+  api("/contracts").then(function(r){return r.json();}).then(function(d){
+    var list=g("contracts-list");
+    if(!d||!d.length){list.innerHTML="<div class=\"empty\">No contracts yet. Create one from the pipeline or the button above.</div>";return;}
+    list.innerHTML=d.map(function(c){
+      return"<div class=\"doc-item\">"+
+        "<div class=\"doc-info\">"+
+          "<div class=\"doc-title\">"+c.title+"</div>"+
+          "<div class=\"doc-meta\">"+(c.first_name?c.first_name+" "+c.last_name:"")+
+            (c.project_title?" &middot; "+c.project_title:"")+
+            " &middot; Created "+fmtD(c.created_at)+"</div>"+
+        "</div>"+
+        "<div class=\"doc-actions\">"+
+          "<span class=\"badge badge-"+c.status+"\">"+c.status+"</span>"+
+          "<button class=\"btn-sm\" data-action=\"view\" data-id=\""+c.id+"\">View</button>"+
+        "</div>"+
+      "</div>";
+    }).join("");
+    list.querySelectorAll("[data-action=view]").forEach(function(btn){
+      btn.addEventListener("click",function(){viewContract(this.getAttribute("data-id"));});
+    });
+    list.querySelectorAll("[data-action=del-contract]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        if(!confirm("Delete this contract? This cannot be undone."))return;
+        var id=this.getAttribute("data-id");
+        api("/contracts/"+id,{method:"DELETE",credentials:"include"}).then(function(){
+          toast("Contract deleted");loadContracts();
+        }).catch(function(){toast("Error deleting",true);});
+      });
+    });
+  }).catch(function(){g("contracts-list").innerHTML="<div class=\"empty\">Error loading</div>";});
+}
+
+function viewContract(id){
+  api("/contracts/"+id).then(function(r){return r.json();}).then(function(c){
+    currentContract=c;
+    g("vc-title").innerHTML=(c.title||"Contract")+" <em>Preview</em>";
+    g("vc-badge").textContent=c.status;
+    g("vc-badge").className="badge badge-"+c.status;
+    g("vc-body").textContent=c.body||"";
+    g("vc-edit-body").value=c.body||"";
+    g("vc-edit-area").style.display="none";
+    g("vc-err").style.display="none";g("vc-ok").style.display="none";
+    g("modal-view-contract").classList.add("open");
+    fadeEl(g("modal-view-contract").querySelector(".modal"));
+  });
+}
+
+g("btn-new-contract").addEventListener("click",function(){
+  loadClientsAndProjects();
+  loadContractTemplates().then(function(){
+    g("nc-body").value="";g("nc-title").value="";g("nc-err").style.display="none";
+    g("modal-new-contract").classList.add("open");
+  });
+});
+
+function loadContractTemplates(){
+  return api("/settings/contract-templates").then(function(r){return r.json();}).then(function(d){
+    cTemplates=Array.isArray(d)?d:[];
+    var sel=g("nc-template");
+    sel.innerHTML="<option value=\"\">Select template...</option>";
+    cTemplates.forEach(function(t){sel.innerHTML+="<option value=\""+t.id+"\">"+t.name+"</option>";});
+  });
+}
+
+g("nc-template").addEventListener("change",function(){
+  var id=this.value;
+  if(!id)return;
+  api("/settings/contract-templates/"+id).then(function(r){return r.json();}).then(function(t){
+    g("nc-body").value=t.body;
+    if(!g("nc-title").value)g("nc-title").value=t.name;
+  });
+});
+
+g("btn-create-contract").addEventListener("click",function(){
+  var client=g("nc-client").value,title=g("nc-title").value.trim(),body=g("nc-body").value.trim();
+  var err=g("nc-err");err.style.display="none";
+  if(!client){err.textContent="Please select a client.";err.style.display="block";return;}
+  if(!body){err.textContent="Please enter or select a contract body.";err.style.display="block";return;}
+  var btn=this;btn.disabled=true;btn.textContent="Creating...";
+  api("/contracts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    client_id:client,
+    project_id:g("nc-project").value||null,
+    template_id:g("nc-template").value||null,
+    title:title||"Photography Contract",
+    custom_body:g("nc-template").value?null:body,
+  })}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false;btn.textContent="Create & Preview";
+    if(!res.ok){err.textContent=res.d.error||"Failed.";err.style.display="block";return;}
+    g("modal-new-contract").classList.remove("open");
+    toast("Contract created");loadContracts();
+    viewContract(res.d.contract.id);
+  }).catch(function(){btn.disabled=false;btn.textContent="Create & Preview";err.textContent="Connection error.";err.style.display="block";});
+});
+
+g("vc-btn-send").addEventListener("click",function(){
+  if(!currentContract)return;
+  api("/contracts/"+currentContract.id+"/send",{method:"POST",credentials:"include"}).then(function(){
+    toast("Contract marked as sent");currentContract.status="sent";
+    g("vc-badge").textContent="sent";g("vc-badge").className="badge badge-sent";
+    loadContracts();
+  });
+});
+
+g("vc-btn-edit").addEventListener("click",function(){
+  var area=g("vc-edit-area");
+  area.style.display=area.style.display==="none"?"block":"none";
+});
+
+g("vc-btn-save-edit").addEventListener("click",function(){
+  if(!currentContract)return;
+  var body=g("vc-edit-body").value;
+  api("/contracts/"+currentContract.id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({body:body})})
+  .then(function(){
+    g("vc-body").textContent=body;g("vc-edit-area").style.display="none";
+    toast("Contract saved");loadContracts();
+  });
+});
+
+g("vc-btn-cancel-edit").addEventListener("click",function(){g("vc-edit-area").style.display="none";});
+
+g("vc-btn-print").addEventListener("click",function(){
+  if(!currentContract)return;
+  var win=window.open("","_blank");
+  win.document.write("<html><head><title>"+currentContract.title+"</title><style>body{font-family:Georgia,serif;max-width:700px;margin:2rem auto;line-height:1.8;font-size:13px;white-space:pre-wrap;}</style></head><body>"+
+    "<h2 style=\"font-family:Georgia,serif;font-weight:400;\">"+currentContract.title+"</h2><hr><pre style=\"font-family:Georgia,serif;white-space:pre-wrap;\">"+
+    (currentContract.body||"")+"</pre></body></html>");
+  win.document.close();win.print();
+});
+
+g("vc-btn-upload-pdf").addEventListener("click",function(){
+  var file=g("vc-pdf-upload").files[0];
+  if(!file){toast("Please select a PDF file first",true);return;}
+  var fd=new FormData();fd.append("signed_pdf",file);
+  api("/contracts/"+currentContract.id+"/upload-signed",{method:"POST",body:fd})
+  .then(function(r){return r.json();}).then(function(res){
+    if(!res.success){toast("Upload failed",true);return;}
+    toast("Signed PDF uploaded — contract marked as signed");
+    currentContract.status="signed";
+    g("vc-badge").textContent="signed";g("vc-badge").className="badge badge-signed";
+    loadContracts();
+  }).catch(function(){toast("Upload error",true);});
+});
+
+g("close-new-contract").addEventListener("click",function(){g("modal-new-contract").classList.remove("open");});
+g("cancel-new-contract").addEventListener("click",function(){g("modal-new-contract").classList.remove("open");});
+g("close-view-contract").addEventListener("click",function(){g("modal-view-contract").classList.remove("open");});
+
+// ── QUESTIONNAIRES ────────────────────────────────────────────────────────────
+function loadQuestionnaires(){
+  api("/questionnaires").then(function(r){return r.json();}).then(function(d){
+    var list=g("questionnaires-list");
+    if(!d||!d.length){list.innerHTML="<div class=\"empty\">No questionnaires yet.</div>";return;}
+    list.innerHTML=d.map(function(q){
+      return"<div class=\"doc-item\">"+
+        "<div class=\"doc-info\">"+
+          "<div class=\"doc-title\">"+q.title+"</div>"+
+          "<div class=\"doc-meta\">"+(q.first_name?q.first_name+" "+q.last_name:"")+
+            (q.project_title?" &middot; "+q.project_title:"")+
+            " &middot; "+q.status+"</div>"+
+        "</div>"+
+        "<div class=\"doc-actions\">"+
+          "<span class=\"badge badge-"+q.status+"\">"+q.status+"</span>"+
+          "<button class=\"btn-sm\" data-action=\"fill\" data-id=\""+q.id+"\">Open</button>"+
+        "</div>"+
+      "</div>";
+    }).join("");
+    list.querySelectorAll("[data-action=fill]").forEach(function(btn){
+      btn.addEventListener("click",function(){openFillQ(this.getAttribute("data-id"));});
+    });
+  }).catch(function(){g("questionnaires-list").innerHTML="<div class=\"empty\">Error loading</div>";});
+}
+
+g("btn-new-questionnaire").addEventListener("click",function(){
+  loadClientsAndProjects();
+  api("/settings/questionnaire-templates").then(function(r){return r.json();}).then(function(d){
+    qTemplates=Array.isArray(d)?d:[];
+    var sel=g("nq-template");
+    sel.innerHTML="<option value=\"\">Select template...</option>";
+    qTemplates.forEach(function(t){sel.innerHTML+="<option value=\""+t.id+"\">"+t.name+"</option>";});
+    g("nq-err").style.display="none";
+    g("modal-new-q").classList.add("open");
+  });
+});
+
+g("btn-create-q").addEventListener("click",function(){
+  var client=g("nq-client").value,template=g("nq-template").value;
+  var err=g("nq-err");err.style.display="none";
+  if(!client){err.textContent="Please select a client.";err.style.display="block";return;}
+  if(!template){err.textContent="Please select a template.";err.style.display="block";return;}
+  var btn=this;btn.disabled=true;btn.textContent="Creating...";
+  api("/questionnaires",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    client_id:client,project_id:g("nq-project").value||null,
+    template_id:template,title:g("nq-title").value.trim()||null,
+  })}).then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+  .then(function(res){
+    btn.disabled=false;btn.textContent="Create Questionnaire";
+    if(!res.ok){err.textContent=res.d.error||"Failed.";err.style.display="block";return;}
+    g("modal-new-q").classList.remove("open");
+    toast("Questionnaire created");loadQuestionnaires();
+    openFillQ(res.d.questionnaire.id);
+  }).catch(function(){btn.disabled=false;btn.textContent="Create Questionnaire";err.textContent="Connection error.";err.style.display="block";});
+});
+
+function openFillQ(id){
+  api("/questionnaires/"+id).then(function(r){return r.json();}).then(function(q){
+    currentQ=q;
+    g("fq-title").innerHTML=(q.title||"Questionnaire")+" <em>Answers</em>";
+    g("fq-badge").textContent=q.status;g("fq-badge").className="badge badge-"+q.status;
+    g("fq-admin-notes").value=q.admin_notes||"";
+    g("fq-err").style.display="none";g("fq-ok").style.display="none";
+    // Render questions grouped by section
+    var questions=typeof q.questions==="string"?JSON.parse(q.questions):q.questions||[];
+    var answers=typeof q.answers==="string"?JSON.parse(q.answers):q.answers||{};
+    var sections={};
+    questions.forEach(function(qn){
+      var sec=qn.section||"General";
+      if(!sections[sec])sections[sec]=[];
+      sections[sec].push(qn);
+    });
+    var html="";
+    Object.keys(sections).forEach(function(sec){
+      html+="<div class=\"q-section\"><div class=\"q-section-title\">"+sec+"</div>";
+      sections[sec].forEach(function(qn){
+        var val=answers[qn.id]||"";
+        html+="<div class=\"q-item\">";
+        html+="<div class=\"q-label\">"+qn.question+(qn.required?"<span class=\"q-required\">*</span>":"")+"</div>";
+        if(qn.type==="choice"&&qn.options){
+          html+="<div class=\"q-choice\">";
+          qn.options.forEach(function(opt){
+            html+="<label class=\"q-radio\"><input type=\"radio\" name=\"q_"+qn.id+"\" value=\""+opt+"\" "+(val===opt?"checked":"")+" data-qid=\""+qn.id+"\"><span>"+opt+"</span></label>";
+          });
+          html+="</div>";
+        } else if(qn.type==="textarea"){
+          html+="<textarea class=\"q-input q-textarea\" data-qid=\""+qn.id+"\">"+val+"</textarea>";
+        } else {
+          html+="<input type=\"text\" class=\"q-input\" data-qid=\""+qn.id+"\" value=\""+val+"\">";
+        }
+        html+="<div class=\"admin-note\"><label>Admin note</label><input type=\"text\" data-note=\""+qn.id+"\" placeholder=\"Private note...\" value=\""+((q.notes_map||{})[qn.id]||"")+"\"></div>";
+        html+="</div>";
+      });
+      html+="</div>";
+    });
+    g("fq-questions").innerHTML=html;
+    g("modal-fill-q").classList.add("open");
+    fadeEl(g("modal-fill-q").querySelector(".modal"));
+  });
+}
+
+function getQAnswers(){
+  var answers={};
+  g("fq-questions").querySelectorAll("[data-qid]").forEach(function(el){
+    var id=el.getAttribute("data-qid");
+    if(el.type==="radio"){if(el.checked)answers[id]=el.value;}
+    else{answers[id]=el.value;}
+  });
+  return answers;
+}
+
+g("fq-btn-save").addEventListener("click",function(){
+  if(!currentQ)return;
+  var btn=this;btn.disabled=true;btn.textContent="Saving...";
+  api("/questionnaires/"+currentQ.id+"/answers",{method:"PATCH",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({answers:getQAnswers(),admin_notes:g("fq-admin-notes").value})
+  }).then(function(){
+    btn.disabled=false;btn.textContent="Save Answers";
+    g("fq-ok").textContent="Answers saved.";g("fq-ok").style.display="block";
+    toast("Answers saved");loadQuestionnaires();
+  }).catch(function(){btn.disabled=false;btn.textContent="Save Answers";g("fq-err").textContent="Error.";g("fq-err").style.display="block";});
+});
+
+g("fq-btn-send").addEventListener("click",function(){
+  if(!currentQ)return;
+  api("/questionnaires/"+currentQ.id+"/send",{method:"POST",credentials:"include"}).then(function(){
+    toast("Questionnaire marked as sent to client");
+    g("fq-badge").textContent="sent";g("fq-badge").className="badge badge-sent";
+    loadQuestionnaires();
+  });
+});
+
+g("fq-btn-complete").addEventListener("click",function(){
+  if(!currentQ)return;
+  api("/questionnaires/"+currentQ.id+"/answers",{method:"PATCH",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({answers:getQAnswers(),admin_notes:g("fq-admin-notes").value,completed:true})
+  }).then(function(){
+    toast("Questionnaire marked as complete");
+    g("fq-badge").textContent="completed";g("fq-badge").className="badge badge-completed";
+    g("modal-fill-q").classList.remove("open");loadQuestionnaires();
+  });
+});
+
+g("close-new-q").addEventListener("click",function(){g("modal-new-q").classList.remove("open");});
+g("cancel-new-q").addEventListener("click",function(){g("modal-new-q").classList.remove("open");});
+g("close-fill-q").addEventListener("click",function(){g("modal-fill-q").classList.remove("open");});
+g("fq-btn-cancel").addEventListener("click",function(){g("modal-fill-q").classList.remove("open");});
+
+// ── TEMPLATES ─────────────────────────────────────────────────────────────────
+function loadTemplates(){
+  api("/settings/contract-templates").then(function(r){return r.json();}).then(function(d){
+    var list=g("contract-templates-list");
+    list.innerHTML=(Array.isArray(d)&&d.length)?d.map(function(t){
+      return"<div class=\"doc-item\">"+
+        "<div class=\"doc-info\"><div class=\"doc-title\">"+t.name+"</div>"+
+        "<div class=\"doc-meta\">"+t.contract_type+(t.is_default?" &middot; Default":"")+"</div></div>"+
+        "<div class=\"doc-actions\"><button class=\"btn-sm\" data-action=\"view-ct\" data-id=\""+t.id+"\">View</button></div>"+
+      "</div>";
+    }).join(""):"<div class=\"empty\">No templates</div>";
+    list.querySelectorAll("[data-action=view-ct]").forEach(function(btn){
+      btn.addEventListener("click",function(){
+        api("/settings/contract-templates/"+this.getAttribute("data-id")).then(function(r){return r.json();}).then(function(t){
+          g("vt-title").innerHTML=t.name+" <em>Template</em>";
+          g("vt-body").textContent=t.body;
+          g("modal-view-template").classList.add("open");
+        });
+      });
+    });
+  });
+  api("/settings/questionnaire-templates").then(function(r){return r.json();}).then(function(d){
+    var list=g("q-templates-list");
+    list.innerHTML=(Array.isArray(d)&&d.length)?d.map(function(t){
+      return"<div class=\"doc-item\">"+
+        "<div class=\"doc-info\"><div class=\"doc-title\">"+t.name+"</div>"+
+        "<div class=\"doc-meta\">"+(t.session_type||"General")+"</div></div>"+
+      "</div>";
+    }).join(""):"<div class=\"empty\">No templates</div>";
+  });
+}
+
+g("close-view-template").addEventListener("click",function(){g("modal-view-template").classList.remove("open");});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+fetch("/api/auth/admin/me",{credentials:"include"}).then(function(r){
+  if(!r.ok)window.location.href="/admin";
+  else{ loadContracts(); loadQuestionnaires(); }
+}).catch(function(){window.location.href="/admin";});
+</script>
+</body>
+</html>

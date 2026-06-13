@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bigg Shots Media — Photography & Videography | The Midlands</title>
+<meta name="description" content="Award-winning photography and videography studio based in The Midlands. Weddings, portraits, families, events, and films. Serving Northampton, Kettering, Bedford and beyond.">
+<meta name="keywords" content="photographer Rushden, videographer Northamptonshire, family photographer Northamptonshire, portrait photographer Northampton, wedding photographer Northamptonshire, wedding videographer, gift voucher photography, Bigg Shots Media">
+<meta name="author" content="Adak José — Bigg Shots Media">
+<meta property="og:title" content="Bigg Shots Media — Photography & Videography">
+<meta property="og:description" content="Capturing moments that last a lifetime. Based in The Midlands.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://biggshotsmedia.com">
+<link rel="canonical" href="https://biggshotsmedia.com">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/favicon.png">
+<meta name="theme-color" content="#0a0a0a">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:rgba(201,168,76,0.15);
+  --black:#0A0A0A;--dark:#111111;--dark2:#1A1A1A;--dark3:#222222;
+  --white:#F5F0E8;--white-dim:#B0A898;--white-faint:rgba(245,240,232,0.06);
+  --serif:"Cormorant Garamond",Georgia,serif;--sans:"Montserrat",sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--sans);overflow-x:hidden;font-variant-numeric:lining-nums;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:all 0.4s;}
+nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(12px);border-bottom:0.5px solid rgba(201,168,76,0.1);}
+nav.promo-active{background:rgba(10,10,10,0.97)!important;backdrop-filter:blur(12px)!important;border-bottom:0.5px solid rgba(201,168,76,0.1)!important;}
+.nav-brand{font-family:var(--serif);font-size:1.3rem;font-weight:400;letter-spacing:0.15em;color:var(--white);text-decoration:none;}
+.nav-brand span{color:var(--gold);}
+.nav-links{display:flex;gap:2rem;align-items:center;}
+.nav-links a{color:var(--white-dim);text-decoration:none;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;transition:color 0.3s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-book{background:var(--gold);color:var(--black)!important;font-size:10px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.6rem 1.4rem;text-decoration:none;transition:all 0.3s;border:1.5px solid var(--gold);}
+.nav-book:hover{background:transparent;color:var(--gold)!important;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+.hamburger span{display:block;width:22px;height:1.5px;background:var(--white);transition:all 0.3s;}
+.mobile-menu{display:none;position:fixed;inset:0;background:rgba(10,10,10,0.98);z-index:300;flex-direction:column;align-items:center;justify-content:center;gap:2.5rem;}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{color:var(--white);text-decoration:none;font-family:var(--serif);font-size:2rem;font-weight:300;letter-spacing:0.1em;}
+.mobile-menu a:hover{color:var(--gold);}
+.mobile-close{position:absolute;top:1.5rem;right:2rem;font-size:1.5rem;cursor:pointer;color:var(--white-dim);}
+
+/* ── PROMO ZONE (reserved space, fixed height — banner OR default trust strip lives here) ── */
+.promo-zone{height:140px;background:var(--dark);border-bottom:0.5px solid rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.promo-zone-default{display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;justify-content:center;padding:0 3rem;max-width:1100px;}
+.promo-zone-default .trust-item-text{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);}
+.promo-zone-default .trust-item-icon{color:var(--gold);font-size:1rem;}
+.promo-zone-default .trust-item{display:flex;align-items:center;gap:0.7rem;}
+.promo-zone-default .trust-divider{width:0.5px;height:20px;background:rgba(201,168,76,0.2);}
+.promo-zone-cta{font-family:var(--serif);font-style:italic;font-size:1.05rem;color:var(--white-dim);}
+.promo-zone-cta a{color:var(--gold);text-decoration:none;font-style:normal;font-family:var(--sans);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;border-bottom:0.5px solid rgba(201,168,76,0.4);padding-bottom:2px;margin-left:0.8rem;transition:border-color 0.3s;}
+.promo-zone-cta a:hover{border-color:var(--gold);}
+
+/* ── CINEMATIC HERO — carousel below the promo zone ── */
+.hero-cinematic{position:relative;aspect-ratio:21/9;min-height:400px;max-height:90vh;overflow:hidden;display:flex;align-items:flex-end;}
+
+.hero-carousel-bg{position:absolute;inset:0;display:flex;gap:0;animation:heroPan 80s linear infinite;width:max-content;height:100%;}
+/* OPTION 3 FALLBACK (cover, no letterbox):
+.hero-carousel-bg img{height:100%;width:auto;min-width:100vw;object-fit:cover;object-position:center top;flex-shrink:0;display:block;}
+*/
+.hero-slide{position:relative;height:100%;width:100vw;min-width:100vw;flex-shrink:0;overflow:hidden;background:#0a0a0a;}
+.hero-slide-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(30px) brightness(0.45);transform:scale(1.15);}
+.hero-carousel-bg img{position:relative;z-index:2;height:100%;width:100%;object-fit:contain;object-position:center;display:block;}
+
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(
+  to bottom,
+  rgba(10,10,10,0.3) 0%,
+  rgba(10,10,10,0.1) 30%,
+  rgba(10,10,10,0.15) 55%,
+  rgba(10,10,10,0.85) 80%,
+  rgba(10,10,10,0.97) 100%
+);}
+
+.hero-grain{position:absolute;inset:0;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;}
+
+.hero-content{position:relative;z-index:2;width:100%;padding:0 3rem 5rem;}
+.hero-content-inner{max-width:900px;}
+.hero-eyebrow{font-size:9px;letter-spacing:0.5em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;opacity:0;animation:fadeUp 0.8s 0.3s ease forwards;}
+.hero-title{font-family:var(--serif);font-size:clamp(3.2rem,8vw,7.5rem);font-weight:300;line-height:0.95;color:var(--white);margin-bottom:1.2rem;opacity:0;animation:fadeUp 0.8s 0.5s ease forwards;}
+.hero-title em{font-style:italic;color:var(--gold);}
+.hero-tagline{font-family:var(--serif);font-size:clamp(1rem,2vw,1.4rem);font-weight:300;font-style:italic;color:var(--white-dim);margin-bottom:2.5rem;opacity:0;animation:fadeUp 0.8s 0.7s ease forwards;}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.8s 0.9s ease forwards;}
+
+.hero-scroll-cue{position:absolute;bottom:2rem;right:3rem;z-index:2;display:flex;flex-direction:column;align-items:center;gap:0.5rem;opacity:0;animation:fadeUp 0.8s 1.4s ease forwards;}
+.hero-scroll-cue span{font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(245,240,232,0.4);}
+.scroll-line{width:0.5px;height:36px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollPulse 2s ease infinite;}
+
+.hero-progress{position:absolute;bottom:0;left:0;right:0;z-index:3;height:1.5px;background:rgba(201,168,76,0.1);}
+.hero-progress-fill{height:100%;background:var(--gold);animation:progressFill 80s linear infinite;}
+
+@keyframes heroPan{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+@keyframes progressFill{0%{width:0%;}100%{width:100%;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes scrollPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+
+.hero-no-photos .hero-carousel-bg{display:none;}
+.hero-no-photos .hero-overlay{background:linear-gradient(135deg,#0a0a0a 0%,#1a1208 40%,#0a0a0a 100%);}
+
+/* ── TRUST BAR (below hero) ── */
+.trust-bar{background:var(--dark);border-top:0.5px solid rgba(201,168,76,0.12);border-bottom:0.5px solid rgba(201,168,76,0.12);padding:1.4rem 3rem;}
+.trust-bar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.trust-item{display:flex;align-items:center;gap:0.7rem;}
+.trust-item-icon{color:var(--gold);font-size:1rem;}
+.trust-item-text{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);}
+.trust-divider{width:0.5px;height:20px;background:rgba(201,168,76,0.2);}
+
+/* ── ABOUT ── */
+.about{padding:9rem 3rem;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;}
+.about-label{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+.about-title{font-family:var(--serif);font-size:clamp(2.2rem,4vw,3.5rem);font-weight:300;line-height:1.15;margin-bottom:2rem;}
+.about-title em{font-style:italic;color:var(--gold);}
+.about-body{font-size:13px;line-height:2.2;color:var(--white-dim);margin-bottom:1.5rem;}
+.about-signature{font-family:var(--serif);font-size:1.8rem;font-style:italic;color:var(--gold);margin-top:2rem;}
+.about-visual{position:relative;}
+.about-frame{aspect-ratio:3/4;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.15);position:relative;overflow:hidden;}
+.about-frame-inner{position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.04) 0%,transparent 60%);}
+.about-frame-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
+.about-frame-placeholder span{font-family:var(--serif);font-size:1rem;color:rgba(201,168,76,0.3);letter-spacing:0.1em;text-align:center;padding:0 2rem;}
+.about-accent{position:absolute;bottom:-1.5rem;right:-1.5rem;width:60%;aspect-ratio:1;border:0.5px solid rgba(201,168,76,0.15);z-index:-1;}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(201,168,76,0.08);margin-top:2rem;}
+.about-stat{background:var(--black);padding:1.5rem;text-align:center;}
+.about-stat-num{font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--gold);}
+.about-stat-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white-dim);margin-top:0.3rem;}
+
+/* ── SERVICES ── */
+.services{padding:8rem 3rem;background:var(--dark);}
+.section-header{text-align:center;margin-bottom:5rem;}
+.section-label{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.section-title{font-family:var(--serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:300;}
+.section-title em{font-style:italic;color:var(--gold);}
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(201,168,76,0.08);max-width:1400px;margin:0 auto;}
+.service-card{position:relative;overflow:hidden;aspect-ratio:4/5;cursor:pointer;}
+.service-bg{position:absolute;inset:0;transition:transform 0.6s ease;}
+.service-card:hover .service-bg{transform:scale(1.05);}
+.service-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,10,0.95) 0%,rgba(10,10,10,0.4) 60%,rgba(10,10,10,0.2) 100%);transition:background 0.4s;}
+.service-card:hover .service-overlay{background:linear-gradient(to top,rgba(10,10,10,0.98) 0%,rgba(10,10,10,0.6) 60%,rgba(10,10,10,0.3) 100%);}
+.service-content{position:absolute;bottom:0;left:0;right:0;padding:2rem;}
+.service-icon-line{width:30px;height:0.5px;background:var(--gold);margin-bottom:1rem;}
+.service-name{font-family:var(--serif);font-size:1.4rem;font-weight:300;color:var(--white);margin-bottom:0.5rem;}
+.service-desc{font-size:11px;color:var(--white-dim);line-height:1.8;max-height:0;overflow:hidden;transition:max-height 0.4s ease,opacity 0.4s ease;opacity:0;}
+.service-card:hover .service-desc{max-height:120px;opacity:1;}
+.service-link{display:inline-block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-top:1rem;opacity:0;transition:opacity 0.3s;}
+.service-card:hover .service-link{opacity:1;}
+.service-actions{display:flex;flex-direction:column;gap:0.6rem;margin-top:1rem;}
+.service-btn-deposit{display:inline-block;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--dark);background:var(--gold);padding:0.5rem 1rem;font-weight:600;opacity:0;transition:opacity 0.3s;text-decoration:none;width:fit-content;}
+.service-card:hover .service-btn-deposit{opacity:1;}
+.service-btn-deposit:hover{background:#e0b84a;}
+.service-card.gift-card{background:linear-gradient(135deg,rgba(201,168,76,0.06) 0%,transparent 100%);}
+.service-ribbon{position:absolute;top:1.2rem;right:1.2rem;background:var(--gold);color:var(--black);font-size:8px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.35rem 0.8rem;z-index:2;}
+
+/* Service backgrounds */
+.svc-wedding .service-bg{background:url("/assets/portfolio/opt_1780052614293_p7539.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-family .service-bg{background:linear-gradient(135deg,#0d1f1a 0%,#1a0d1f 100%);}
+.svc-birthday .service-bg{background:url("/assets/portfolio/Karima_Family_Shoot@40_383.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-portrait .service-bg{background:url("/assets/portfolio/opt_1780053443095_ma6hm.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-commercial .service-bg{background:linear-gradient(135deg,#0a0a1a 0%,#0f0f2d 100%);}
+.svc-collab .service-bg{background:linear-gradient(135deg,#1a1a0a 0%,#2d2d0f 100%);}
+.svc-maternity .service-bg{background:url("/assets/portfolio/opt_1780053442674_g4ude.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-video .service-bg{background:linear-gradient(135deg,#0d0d0d 0%,#1f1810 100%);}
+.svc-video .service-bg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(201,168,76,0.04) 38px,rgba(201,168,76,0.04) 40px);}
+.svc-gift .service-bg{background:linear-gradient(135deg,#1f1810 0%,#0d0d0d 100%);}
+.svc-gift .service-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 70% 30%,rgba(201,168,76,0.10) 0%,transparent 60%);}
+
+/* ── OCCASIONS ── */
+.occasions{padding:5rem 3rem;background:var(--black);text-align:center;border-bottom:0.5px solid rgba(201,168,76,0.08);}
+.occasions-text{font-family:var(--serif);font-size:1.15rem;font-style:italic;color:var(--white-dim);max-width:760px;margin:0 auto 2rem;line-height:1.9;}
+.occasions-tags{display:flex;flex-wrap:wrap;gap:0.6rem;justify-content:center;max-width:800px;margin:0 auto;}
+.occasion-tag{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white-dim);border:0.5px solid rgba(245,240,232,0.1);padding:0.6rem 1.3rem;transition:all 0.3s;cursor:default;}
+.occasion-tag:hover{border-color:rgba(201,168,76,0.4);color:var(--gold);}
+
+/* ── PACKAGES ── */
+.pkg-card{background:#1A1A1A;padding:2rem;position:relative;transition:background 0.3s;}
+.pkg-card:hover{background:#1f1f1f;}
+.pkg-tier{font-size:8px;letter-spacing:0.4em;text-transform:uppercase;color:#C9A84C;margin-bottom:0.5rem;}
+.pkg-price{font-size:2rem;font-weight:700;color:#F5F0E8;margin-bottom:0.2rem;}
+.pkg-price span{font-size:0.9rem;font-weight:300;color:#B0A898;}
+.pkg-deposit{font-size:10px;color:#C9A84C;letter-spacing:0.1em;margin-bottom:1.5rem;}
+.pkg-divider{width:30px;height:0.5px;background:#C9A84C;margin-bottom:1.5rem;}
+.pkg-feature{font-size:11px;color:#B0A898;line-height:1.8;padding:0.3rem 0;border-bottom:0.5px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;}
+.pkg-feature:last-of-type{border-bottom:none;}
+.pkg-feature strong{color:#F5F0E8;}
+.pkg-feature-label{color:rgba(176,168,152,0.6);font-size:10px;}
+.pkg-btn{display:block;text-align:center;background:#C9A84C;color:#0A0A0A;font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.9rem;text-decoration:none;margin-top:1.5rem;transition:background 0.2s;}
+.pkg-btn:hover{background:#e0b84a;}
+.pkg-btn-enquire{display:block;text-align:center;background:transparent;color:#C9A84C;font-size:9px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;padding:0.7rem;text-decoration:none;border:0.5px solid rgba(201,168,76,0.3);margin-top:0.5rem;transition:all 0.2s;}
+.pkg-btn-enquire:hover{border-color:#C9A84C;background:rgba(201,168,76,0.08);}
+.pkg-popular{position:absolute;top:0;left:50%;transform:translateX(-50%);background:#C9A84C;color:#0A0A0A;font-size:7px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;padding:0.3rem 1rem;}
+@keyframes pkgFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#pkg-modal-inner{animation:pkgFadeIn 0.35s ease;}
+
+.packages{padding:10rem 3rem;max-width:1200px;margin:0 auto;}
+.packages-intro{text-align:center;font-family:var(--serif);font-size:1.1rem;font-style:italic;color:var(--white-dim);max-width:600px;margin:0 auto 5rem;line-height:1.8;}
+.packages-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.08);}
+.package-card{background:var(--dark);padding:3.5rem 2.5rem;position:relative;transition:background 0.3s;}
+.package-card:hover{background:var(--dark2);}
+.package-card.featured{background:var(--dark2);border-top:1.5px solid var(--gold);}
+.package-badge{position:absolute;top:-1px;right:2rem;background:var(--gold);color:var(--black);font-size:8px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.3rem 0.8rem;}
+.package-tier{font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.package-name{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--white);margin-bottom:1.5rem;}
+.package-price{font-family:var(--serif);font-size:3.5rem;font-weight:300;color:var(--white);line-height:1;}
+.package-price-from{font-size:0.85rem;color:var(--white-dim);font-family:var(--sans);font-weight:300;letter-spacing:0.05em;vertical-align:top;margin-top:0.5rem;display:inline-block;}
+.package-price-currency{font-size:1.5rem;vertical-align:top;margin-top:0.5rem;display:inline-block;color:var(--gold);}
+.package-duration{font-size:10px;letter-spacing:0.15em;color:var(--white-dim);margin-top:0.5rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:0.5px solid rgba(245,240,232,0.06);}
+.package-features{list-style:none;margin-bottom:2.5rem;}
+.package-features li{font-size:12px;color:var(--white-dim);padding:0.6rem 0;border-bottom:0.5px solid rgba(245,240,232,0.04);display:flex;align-items:flex-start;gap:0.8rem;line-height:1.5;}
+.package-features li::before{content:"";width:4px;height:4px;background:var(--gold);border-radius:50%;flex-shrink:0;margin-top:6px;}
+.package-btn{display:block;text-align:center;background:none;border:0.5px solid rgba(201,168,76,0.35);color:var(--gold);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:1rem;text-decoration:none;cursor:pointer;width:100%;transition:all 0.3s;}
+.package-btn:hover,.package-card.featured .package-btn{background:var(--gold);color:var(--black);border-color:var(--gold);}
+.package-bespoke{text-align:center;margin-top:3rem;padding:2.5rem;border:0.5px solid rgba(201,168,76,0.12);background:var(--dark);}
+.package-bespoke p{font-family:var(--serif);font-size:1.3rem;font-weight:300;color:var(--white-dim);margin-bottom:1.5rem;line-height:1.6;}
+
+/* ── TESTIMONIALS ── */
+.testimonials{padding:9rem 3rem;background:var(--dark);}
+.testimonials-track{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.08);max-width:1100px;margin:0 auto;}
+.testimonial-card{background:var(--dark2);padding:3rem 2.5rem;}
+.testimonial-stars{color:var(--gold);font-size:0.9rem;letter-spacing:0.15em;margin-bottom:1.5rem;}
+.testimonial-text{font-family:var(--serif);font-size:1.1rem;font-weight:300;font-style:italic;color:var(--white-dim);line-height:1.9;margin-bottom:2rem;}
+.testimonial-author{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--white);}
+.testimonial-session{font-size:10px;letter-spacing:0.15em;color:var(--gold);margin-top:0.3rem;}
+
+/* ── CONTACT ── */
+.contact-split{padding:9rem 3rem;max-width:1100px;margin:0 auto;}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,168,76,0.08);margin-top:4rem;}
+.contact-option{background:var(--dark);padding:3rem 2.5rem;cursor:pointer;transition:background 0.3s;border:0.5px solid transparent;}
+.contact-option:hover{background:var(--dark2);border-color:rgba(201,168,76,0.15);}
+.contact-option-title{font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--white);margin-bottom:1rem;}
+.contact-option-desc{font-size:12px;color:var(--white-dim);line-height:1.9;margin-bottom:1.5rem;}
+.contact-option-cta{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);}
+
+/* ── FORMS ── */
+.form-section{display:none;padding:7rem 3rem;background:var(--dark);border-top:0.5px solid rgba(201,168,76,0.1);}
+.form-section.active{display:block;}
+.form-inner{max-width:720px;margin:0 auto;}
+.form-back{background:none;border:none;color:var(--white-dim);font-size:11px;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;margin-bottom:2.5rem;padding:0;display:flex;align-items:center;gap:0.5rem;font-family:var(--sans);}
+.form-back:hover{color:var(--gold);}
+.form-title{font-family:var(--serif);font-size:2.8rem;font-weight:300;margin-bottom:0.8rem;}
+.form-title em{font-style:italic;color:var(--gold);}
+.form-subtitle{font-size:12px;color:var(--white-dim);line-height:1.9;margin-bottom:3rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-group{margin-bottom:1.2rem;}
+.form-group label{display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white-dim);margin-bottom:0.6rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:rgba(245,240,232,0.04);border:0.5px solid rgba(245,240,232,0.1);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.9rem 1rem;outline:none;transition:border-color 0.3s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:rgba(201,168,76,0.4);}
+.form-group textarea{min-height:130px;resize:vertical;}
+.form-group select option{background:var(--dark2);}
+.form-submit{background:var(--gold);color:var(--black);font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:1.1rem 3rem;border:none;cursor:pointer;transition:background 0.3s;margin-top:0.5rem;}
+.form-submit:hover{background:var(--gold-light);}
+.form-msg{font-size:12px;margin-top:1rem;padding:0.8rem 1rem;display:none;}
+.form-msg.ok{background:rgba(63,185,80,0.1);border:0.5px solid rgba(63,185,80,0.3);color:#3fb950;}
+.form-msg.err{background:rgba(248,81,73,0.1);border:0.5px solid rgba(248,81,73,0.3);color:#f85149;}
+
+/* ── INSTAGRAM ── */
+.instagram-section{padding:7rem 3rem;text-align:center;background:var(--black);border-top:0.5px solid rgba(201,168,76,0.08);}
+.instagram-handle{font-family:var(--serif);font-size:2.5rem;font-weight:300;margin:0.8rem 0;}
+.instagram-handle a{color:var(--gold);text-decoration:none;}
+.instagram-cta{font-size:12px;color:var(--white-dim);margin-bottom:2rem;letter-spacing:0.05em;}
+.instagram-btn{display:inline-flex;align-items:center;gap:0.6rem;background:none;border:0.5px solid rgba(201,168,76,0.35);color:var(--gold);font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.9rem 2rem;text-decoration:none;transition:all 0.3s;}
+.instagram-btn:hover{background:rgba(201,168,76,0.08);}
+.instagram-icon{width:14px;height:14px;fill:currentColor;}
+
+/* ── COVERAGE ── */
+.coverage{padding:6rem 3rem;background:var(--dark);text-align:center;}
+.coverage-text{font-size:13px;color:var(--white-dim);max-width:600px;margin:1.5rem auto 2.5rem;line-height:1.9;}
+.coverage-areas{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;max-width:700px;margin:0 auto;}
+.coverage-tag{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--white-dim);border:0.5px solid rgba(245,240,232,0.1);padding:0.5rem 1rem;transition:all 0.3s;}
+.coverage-tag:hover{border-color:rgba(201,168,76,0.4);color:var(--gold);}
+
+/* ── FOOTER ── */
+footer{background:var(--dark2);border-top:0.5px solid rgba(201,168,76,0.1);}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:4rem;padding:5rem 3rem 3rem;max-width:1100px;margin:0 auto;}
+.footer-brand{font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--white);margin-bottom:0.8rem;}
+.footer-brand em{font-style:italic;color:var(--gold);}
+.footer-tagline{font-size:11px;color:var(--white-dim);line-height:1.9;}
+.footer-col-title{font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+.footer-links{display:flex;flex-direction:column;gap:0.8rem;}
+.footer-links a{font-size:12px;color:var(--white-dim);text-decoration:none;transition:color 0.3s;}
+.footer-links a:hover{color:var(--gold);}
+.footer-contact-info{font-size:12px;color:var(--white-dim);line-height:2;}
+.footer-contact-info a{color:var(--white-dim);text-decoration:none;transition:color 0.3s;}
+.footer-contact-info a:hover{color:var(--gold);}
+.footer-bottom{border-top:0.5px solid rgba(245,240,232,0.05);padding:1.5rem 3rem;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.footer-copy{font-size:10px;color:rgba(176,168,152,0.4);letter-spacing:0.05em;}
+.footer-social{display:flex;gap:1.5rem;}
+.footer-social a{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);text-decoration:none;transition:color 0.3s;}
+.footer-social a:hover{color:var(--gold);}
+
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:500;align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+.lightbox-img{max-width:88vw;max-height:88vh;object-fit:contain;}
+.lightbox-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;color:var(--white-dim);font-size:1.4rem;cursor:pointer;}
+.lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--white-dim);font-size:2.5rem;cursor:pointer;padding:1rem;transition:color 0.3s;}
+.lightbox-prev:hover,.lightbox-next:hover{color:var(--gold);}
+.lightbox-prev{left:1.5rem;}
+.lightbox-next{right:1.5rem;}
+.lightbox-counter{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:0.2em;color:var(--white-dim);}
+
+/* ── PACKAGE MODAL ── */
+#pkg-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:400;overflow-y:auto;padding:3rem;}
+#pkg-modal-inner{max-width:1100px;margin:0 auto;background:var(--dark2);padding:3rem;}
+#pkg-label{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;}
+#pkg-title{font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--white);margin-bottom:0.8rem;}
+#pkg-subtitle{font-size:12px;color:var(--white-dim);margin-bottom:0.5rem;line-height:1.8;}
+#pkg-note{font-size:10px;color:rgba(201,168,76,0.6);margin-bottom:2.5rem;letter-spacing:0.05em;}
+#pkg-cards{display:grid;gap:1px;background:rgba(201,168,76,0.08);}
+.pkg-modal-close{float:right;background:none;border:none;color:var(--white-dim);font-size:1.2rem;cursor:pointer;font-family:var(--sans);}
+
+/* ── GIFT VOUCHER MODAL ── */
+#gift-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:400;overflow-y:auto;padding:3rem;align-items:center;justify-content:center;}
+#gift-modal.open{display:flex;}
+#gift-modal-inner{max-width:680px;width:100%;background:var(--dark2);padding:3rem;position:relative;animation:pkgFadeIn 0.35s ease;}
+.gift-amounts{display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin:2rem 0;}
+.gift-amount{background:var(--dark);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--serif);font-size:1.4rem;font-weight:300;padding:1.2rem;text-align:center;text-decoration:none;transition:all 0.25s;}
+.gift-amount:hover{border-color:var(--gold);background:rgba(201,168,76,0.08);color:var(--gold);}
+.gift-note{font-size:11px;color:rgba(201,168,76,0.6);line-height:1.8;margin-top:2rem;letter-spacing:0.03em;}
+
+/* ── BUTTONS ── */
+.btn-primary{background:var(--gold);color:var(--black);font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:1.1rem 2.8rem;text-decoration:none;transition:all 0.3s;border:none;cursor:pointer;display:inline-block;}
+.btn-primary:hover{background:var(--gold-light);}
+.btn-secondary{background:none;color:var(--white);font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;padding:1.1rem 2.8rem;text-decoration:none;border:0.5px solid rgba(245,240,232,0.25);transition:all 0.3s;display:inline-block;}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+.btn-ghost{background:none;color:var(--white-dim);font-family:var(--sans);font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;padding:1.1rem 2.8rem;text-decoration:none;border:0.5px solid rgba(176,168,152,0.2);transition:all 0.3s;display:inline-block;}
+.btn-ghost:hover{border-color:rgba(201,168,76,0.4);color:var(--gold);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .services-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:900px){
+  .about{grid-template-columns:1fr;gap:3rem;padding:6rem 2rem;}
+  .about-visual{display:none;}
+  .packages-grid{grid-template-columns:1fr;}
+  .testimonials-track{grid-template-columns:1fr;}
+  .contact-grid{grid-template-columns:1fr;}
+  .footer-top{grid-template-columns:1fr;gap:2rem;padding:3rem 2rem;}
+  .trust-bar-inner{justify-content:center;}
+  .trust-divider{display:none;}
+  .promo-zone-default{gap:1rem;}
+  .promo-zone-default .trust-divider{display:none;}
+  nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  .hero-content{padding:0 1.5rem 4rem;}
+  .form-row{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;gap:1rem;text-align:center;}
+  .gift-amounts{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .services-grid{grid-template-columns:1fr;}
+  .about-stats{grid-template-columns:1fr 1fr;}
+  .promo-zone{height:auto;min-height:140px;padding:1rem 0;}
+  .hero-cinematic{aspect-ratio:4/5;max-height:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-carousel-bg{animation:none;}
+  .hero-progress-fill{animation:none;}
+  .scroll-line{animation:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="/" class="nav-brand">Bigg <span>Shots</span> Media</a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#packages">Packages</a>
+    <a href="#testimonials">Stories</a>
+    <a href="#contact" class="nav-book" onclick="showForm('booking')">Book a Session</a>
+  </div>
+  <div class="hamburger" onclick="document.getElementById('mobile-menu').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <span class="mobile-close" onclick="document.getElementById('mobile-menu').classList.remove('open')">&#x2715;</span>
+  <a href="#about" onclick="document.getElementById('mobile-menu').classList.remove('open')">About</a>
+  <a href="#services" onclick="document.getElementById('mobile-menu').classList.remove('open')">Services</a>
+  <a href="#packages" onclick="document.getElementById('mobile-menu').classList.remove('open')">Packages</a>
+  <a href="#testimonials" onclick="document.getElementById('mobile-menu').classList.remove('open')">Stories</a>
+  <a href="#contact" onclick="document.getElementById('mobile-menu').classList.remove('open');showForm('booking')">Book a Session</a>
+</div>
+
+<!-- PROMO ZONE — reserved space. promo_banner.js renders into #promo-zone when active.
+     #promo-zone-default shows when no promo is running. -->
+<div class="promo-zone" id="promo-zone">
+  <div class="promo-zone-default" id="promo-zone-default">
+    <div class="trust-item"><span class="trust-item-icon">★★★★★</span><span class="trust-item-text">5-Star Rated</span></div>
+    <div class="trust-divider"></div>
+    <div class="promo-zone-cta">Now booking — limited availability for upcoming sessions <a href="#contact" onclick="showForm('booking')">Check Dates →</a></div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><span class="trust-item-icon">📍</span><span class="trust-item-text">The Midlands · UK-Wide</span></div>
+  </div>
+</div>
+
+<!-- CINEMATIC HERO — portfolio carousel as background -->
+<section class="hero-cinematic" id="hero">
+  <div class="hero-carousel-bg" id="hero-carousel-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-progress"><div class="hero-progress-fill"></div></div>
+
+  <div class="hero-content">
+    <div class="hero-content-inner">
+      <div class="hero-eyebrow">Photography · Videography · Northamptonshire & Beyond</div>
+      <h1 class="hero-title">Moments<br>Worth <em>Keeping</em></h1>
+      <p class="hero-tagline">Photography & films across The Midlands & beyond</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn-primary" onclick="showForm('booking')">Book Your Session</a>
+        <a href="#services" class="btn-secondary">Explore Services</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll-cue">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item">
+      <span class="trust-item-icon">★★★★★</span>
+      <span class="trust-item-text">5-Star Rated</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-item-icon">📅</span>
+      <span class="trust-item-text">Response within 24 hours</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-item-icon">🖼</span>
+      <span class="trust-item-text">Private online gallery delivery</span>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <span class="trust-item-icon">📍</span>
+      <span class="trust-item-text">The Midlands · Available UK-Wide</span>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div>
+    <div class="about-label">The Studio</div>
+    <h2 class="about-title">Every frame tells<br>a <em>story</em></h2>
+    <p class="about-body">I'm Adak José — a photographer and filmmaker based in The Midlands, and the founder of Bigg Shots Media. I specialise in creating images and films that feel genuine rather than posed; the kind you'll return to years from now and feel exactly what you felt in that moment.</p>
+    <p class="about-body">Behind every Bigg Shots session is a small, dedicated team — photographers, a videographer, and an editor — working together so nothing about your day goes uncaptured. Whatever the occasion, you get the same care, the same eye for detail, and one point of contact from first enquiry to final delivery.</p>
+    <p class="about-body">Whether it's a wedding day, a growing family, a new arrival, a graduation, or a professional portrait — we bring the same patience and creative eye to every session.</p>
+    <div class="about-signature">Adak José</div>
+    <div class="about-stats">
+      <div class="about-stat"><div class="about-stat-num">100+</div><div class="about-stat-label">Sessions Delivered</div></div>
+      <div class="about-stat"><div class="about-stat-num">5★</div><div class="about-stat-label">Average Rating</div></div>
+      <div class="about-stat"><div class="about-stat-num">24h</div><div class="about-stat-label">Response Time</div></div>
+      <div class="about-stat"><div class="about-stat-num">UK</div><div class="about-stat-label">Wide Coverage</div></div>
+    </div>
+  </div>
+  <div class="about-visual">
+    <div class="about-frame">
+      <div class="about-frame-inner"></div>
+      <div class="about-frame-placeholder">
+        <span>Adak José<br>Bigg Shots Media</span>
+      </div>
+    </div>
+    <div class="about-accent"></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="section-header">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Choose Your <em>Session</em></h2>
+  </div>
+  <div class="services-grid">
+    <div class="service-card svc-wedding" onclick="openPackageModal('wedding')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Wedding Photography</div>
+        <div class="service-desc">Full-day or partial coverage. Every detail, every emotion, every moment documented with care.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-family" onclick="openPackageModal('portrait')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Family Portraits</div>
+        <div class="service-desc">Relaxed, natural sessions that capture your family exactly as they are — and exactly as you love them.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-maternity" onclick="openPackageModal('maternity')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Maternity Sessions</div>
+        <div class="service-desc">Handled with warmth and sensitivity. A celebration of one of life's most beautiful chapters.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-commercial" onclick="openPackageModal('headshots')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Headshots</div>
+        <div class="service-desc">Professional headshots for individuals and teams. Fast turnaround, high-resolution delivery.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-portrait" onclick="openPackageModal('portrait')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Portrait Sessions</div>
+        <div class="service-desc">Individual portraits that show who you really are. Studio or outdoor — always on your terms.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-video" onclick="openPackageModal('bespoke')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Videography & Films</div>
+        <div class="service-desc">Wedding films, highlight reels, and brand video — captured alongside your photography or as a standalone service.</div>
+        <div class="service-actions">
+          <span class="service-link">Get in touch →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-birthday" onclick="openPackageModal('events')">
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Events & Celebrations</div>
+        <div class="service-desc">Birthdays, parties, milestones. Candid energy and posed elegance, all in one session.</div>
+        <div class="service-actions">
+          <span class="service-link">View packages →</span>
+        </div>
+      </div>
+    </div>
+    <div class="service-card svc-gift gift-card" onclick="openGiftModal()">
+      <div class="service-ribbon">Gift</div>
+      <div class="service-bg"></div>
+      <div class="service-overlay"></div>
+      <div class="service-content">
+        <div class="service-icon-line"></div>
+        <div class="service-name">Gift Vouchers</div>
+        <div class="service-desc">Give the gift of a session. From £75, redeemable on any package, valid for 12 months from purchase.</div>
+        <div class="service-actions">
+          <span class="service-link">Choose an amount →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OCCASIONS -->
+<section class="occasions">
+  <p class="occasions-text">Celebrating a graduation, an engagement, a registry wedding, or any milestone worth marking? However big or small the occasion — if it's worth remembering, it's worth photographing.</p>
+  <div class="occasions-tags">
+    <span class="occasion-tag">Graduations</span>
+    <span class="occasion-tag">Engagements</span>
+    <span class="occasion-tag">Pre-Wedding Shoots</span>
+    <span class="occasion-tag">Registry Weddings</span>
+    <span class="occasion-tag">Anniversaries</span>
+    <span class="occasion-tag">Baby Showers</span>
+    <span class="occasion-tag">Milestone Birthdays</span>
+    <span class="occasion-tag">Brand & Product</span>
+  </div>
+</section>
+
+<!-- PACKAGE MODAL -->
+<div id="pkg-modal">
+  <div id="pkg-modal-inner">
+    <button class="pkg-modal-close" onclick="closePackageModal()">&#x2715; Close</button>
+    <div id="pkg-label"></div>
+    <div id="pkg-title"></div>
+    <div id="pkg-subtitle"></div>
+    <div id="pkg-note"></div>
+    <div id="pkg-cards"></div>
+  </div>
+</div>
+
+<!-- GIFT VOUCHER MODAL -->
+<div id="gift-modal" onclick="if(event.target===this)closeGiftModal()">
+  <div id="gift-modal-inner">
+    <button class="pkg-modal-close" onclick="closeGiftModal()">&#x2715; Close</button>
+    <div id="pkg-label">Gift Experiences</div>
+    <div id="pkg-title" style="font-family:var(--serif);font-size:2.5rem;font-weight:300;color:var(--white);margin-bottom:0.8rem;">Give the Gift of a <em style="font-style:italic;color:var(--gold);">Session</em></div>
+    <p style="font-size:12px;color:var(--white-dim);line-height:1.8;">A Bigg Shots gift voucher can be put toward any session — portraits, family, maternity, weddings, or events. Choose an amount below to get started; we'll be in touch to arrange delivery and confirm the recipient's details.</p>
+    <div class="gift-amounts">
+      <a href="#contact" class="gift-amount" onclick="closeGiftModal();showForm('enquiry')">£75</a>
+      <a href="#contact" class="gift-amount" onclick="closeGiftModal();showForm('enquiry')">£150</a>
+      <a href="#contact" class="gift-amount" onclick="closeGiftModal();showForm('enquiry')">£300</a>
+      <a href="#contact" class="gift-amount" onclick="closeGiftModal();showForm('enquiry')">Custom</a>
+    </div>
+    <p class="gift-note">Vouchers are non-refundable and transferable, valid for 12 months from the date of purchase, and redeemable against any session package.</p>
+  </div>
+</div>
+
+<!-- PACKAGES -->
+<section class="packages" id="packages">
+  <div class="section-header">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Simple, Transparent <em>Packages</em></h2>
+  </div>
+  <p class="packages-intro">Every package includes a private online gallery, hi-resolution downloads, and a 48-hour sneak peek. No hidden extras.</p>
+  <div class="packages-grid">
+    <div class="package-card">
+      <div class="package-tier">Entry</div>
+      <div class="package-name">Essential</div>
+      <div class="package-price"><span class="package-price-from">from </span><span class="package-price-currency">£</span>350</div>
+      <div class="package-duration">Up to 2 hours · 1 location</div>
+      <ul class="package-features">
+        <li>60 edited digital images</li>
+        <li>Private online gallery</li>
+        <li>Hi-resolution downloads</li>
+        <li>14-day delivery</li>
+      </ul>
+      <a href="#contact" class="package-btn" onclick="showForm('booking')">Book Essential</a>
+    </div>
+    <div class="package-card featured">
+      <div class="package-badge">Most Popular</div>
+      <div class="package-tier">Signature</div>
+      <div class="package-name">Signature</div>
+      <div class="package-price"><span class="package-price-from">from </span><span class="package-price-currency">£</span>650</div>
+      <div class="package-duration">Up to 4 hours · 2 locations</div>
+      <ul class="package-features">
+        <li>120 edited digital images</li>
+        <li>Private online gallery</li>
+        <li>Hi-resolution downloads</li>
+        <li>1 outfit change</li>
+        <li>10-day delivery</li>
+      </ul>
+      <a href="#contact" class="package-btn" onclick="showForm('booking')">Book Signature</a>
+    </div>
+    <div class="package-card">
+      <div class="package-tier">Premium</div>
+      <div class="package-name">Luxury</div>
+      <div class="package-price"><span class="package-price-from">from </span><span class="package-price-currency">£</span>1,200</div>
+      <div class="package-duration">Full day · Multiple locations</div>
+      <ul class="package-features">
+        <li>200+ edited digital images</li>
+        <li>Private online gallery</li>
+        <li>Hi-resolution downloads</li>
+        <li>Multiple outfit changes</li>
+        <li>7-day priority delivery</li>
+        <li>Printed photo book</li>
+      </ul>
+      <a href="#contact" class="package-btn" onclick="showForm('booking')">Book Luxury</a>
+    </div>
+  </div>
+  <div class="package-bespoke">
+    <p>Have something <em>unique</em> in mind? Whether it's a bespoke creative concept, a large-scale event, a film, or a custom package — get in touch and let's build something just for you.</p>
+    <a href="#contact" class="btn-secondary" onclick="showForm('enquiry')">Request a Custom Quote</a>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="section-header">
+    <div class="section-label">Client Stories</div>
+    <h2 class="section-title">What People <em>Say</em></h2>
+  </div>
+  <div class="testimonials-track">
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">Adak made our family session so relaxed and fun. The photos are absolutely stunning — we couldn't choose our favourites. The private gallery was such a beautiful way to receive them.</p>
+      <div class="testimonial-author">The Akinbo Family</div>
+      <div class="testimonial-session">Family Portrait Session</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">I was so nervous about having my photos taken but Adak put me completely at ease. The results were beyond what I imagined. I finally have photos I'm proud to share.</p>
+      <div class="testimonial-author">Sarah M.</div>
+      <div class="testimonial-session">Portrait Session</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">The attention to detail, the lighting, the way every shot was composed — you can tell this is a team that truly loves their craft. Our birthday photos are treasured memories.</p>
+      <div class="testimonial-author">The Johnson Family</div>
+      <div class="testimonial-session">Birthday Celebration</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SPLIT -->
+<section class="contact-split" id="contact">
+  <div class="section-header">
+    <div class="section-label">Get in Touch</div>
+    <h2 class="section-title">How Can We <em>Connect?</em></h2>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-option" onclick="showForm('booking')">
+      <div class="contact-option-title">Book a Session</div>
+      <div class="contact-option-desc">Ready to book? Choose your session type, package, and preferred date. We'll confirm availability within 24 hours.</div>
+      <span class="contact-option-cta">Book Now →</span>
+    </div>
+    <div class="contact-option" onclick="showForm('enquiry')">
+      <div class="contact-option-title">General Enquiry</div>
+      <div class="contact-option-desc">Have a question about pricing, locations, gift vouchers, or what to expect? Or just want to say hello before committing? Reach out.</div>
+      <span class="contact-option-cta">Send a Message →</span>
+    </div>
+    <div class="contact-option" onclick="showForm('collab')">
+      <div class="contact-option-title">Collaborate</div>
+      <div class="contact-option-desc">Model looking for TFP? MUA wanting to build a portfolio together? Creative vendor interested in a partnership? Let's talk.</div>
+      <span class="contact-option-cta">Let's Collaborate →</span>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING FORM -->
+<div class="form-section" id="form-booking">
+  <div class="form-inner">
+    <button class="form-back" onclick="hideAllForms()">← Back</button>
+    <h2 class="form-title">Book a <em>Session</em></h2>
+    <p class="form-subtitle">Fill in the details below and we'll be in touch within 24 hours to confirm availability and next steps.</p>
+    <form id="booking-form">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" name="first_name" placeholder="Your first name" required></div>
+        <div class="form-group"><label>Last Name</label><input type="text" name="last_name" placeholder="Your last name" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email Address</label><input type="email" name="email" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" name="phone" placeholder="+44 7700 000000"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Session Type</label>
+          <select name="session_type" required id="session-type-select" onchange="updatePackageOptions(this.value)">
+            <option value="">Select session type...</option>
+            <option value="Wedding Photography">Wedding Photography</option>
+            <option value="Family Portraits">Family Portraits</option>
+            <option value="Birthday &amp; Events">Birthday &amp; Events</option>
+            <option value="Portrait Session">Portrait Session</option>
+            <option value="Maternity Session">Maternity Session</option>
+            <option value="Headshots">Headshots</option>
+            <option value="Videography / Film">Videography / Film</option>
+            <option value="Graduation">Graduation</option>
+            <option value="Pre-Wedding Shoot">Pre-Wedding Shoot</option>
+            <option value="Registry Wedding">Registry Wedding</option>
+            <option value="Bespoke &amp; Custom">Bespoke &amp; Custom</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Preferred Date</label><input type="date" name="session_date"></div>
+      </div>
+      <div class="form-group"><label>Package</label>
+        <select name="package_name" id="package-select">
+          <option value="">Select session type first...</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Location / Venue</label><input type="text" name="location" placeholder="City, town or venue name"></div>
+      <div class="form-group"><label>Tell Me About Your Session</label><textarea name="notes" placeholder="What's the occasion? Any special requirements or ideas you'd like to discuss?"></textarea></div>
+      <div class="form-group" id="enquiry-source-group">
+        <label>How did you find us?</label>
+        <select name="enquiry_source" id="enquiry-source-select">
+          <option value="">-- Please select --</option>
+          <option value="google">Google Search</option>
+          <option value="instagram">Instagram</option>
+          <option value="facebook">Facebook</option>
+          <option value="referral">Word of mouth / Referral</option>
+          <option value="bark">Bark.com</option>
+          <option value="wedding_fair">Wedding Fair / Event</option>
+          <option value="returning_client">Returning client</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group" id="enquiry-detail-group" style="display:none">
+        <label>Please tell us more</label>
+        <input type="text" name="enquiry_source_detail" id="enquiry-source-detail" placeholder="e.g. recommended by a friend, saw your work at an event...">
+      </div>
+      <button type="submit" class="form-submit" id="booking-submit-btn" data-label="Send Booking Request">Send Booking Request</button>
+      <div class="form-msg" id="booking-form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ENQUIRY FORM -->
+<div class="form-section" id="form-enquiry">
+  <div class="form-inner">
+    <button class="form-back" onclick="hideAllForms()">← Back</button>
+    <h2 class="form-title">General <em>Enquiry</em></h2>
+    <p class="form-subtitle">No pressure, no commitment. Just say hello and ask whatever's on your mind — including gift vouchers.</p>
+    <form id="enquiry-form">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" name="first_name" placeholder="Your first name" required></div>
+        <div class="form-group"><label>Last Name</label><input type="text" name="last_name" placeholder="Your last name" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email Address</label><input type="email" name="email" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Phone (optional)</label><input type="tel" name="phone" placeholder="+44 7700 000000"></div>
+      </div>
+      <div class="form-group"><label>What's on your mind?</label><textarea name="notes" placeholder="Ask anything — pricing, availability, what to expect, gift vouchers, custom ideas..." style="min-height:160px;"></textarea></div>
+      <input type="hidden" name="session_type" value="General Enquiry">
+      <button type="submit" class="form-submit" id="enquiry-submit-btn" data-label="Send Message">Send Message</button>
+      <div class="form-msg" id="enquiry-form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- COLLABORATION FORM -->
+<div class="form-section" id="form-collab">
+  <div class="form-inner">
+    <button class="form-back" onclick="hideAllForms()">← Back</button>
+    <h2 class="form-title">Let's <em>Collaborate</em></h2>
+    <p class="form-subtitle">Models, MUAs, stylists, other creatives — if you have a vision, let's make it happen together.</p>
+    <form id="collab-form">
+      <div class="form-row">
+        <div class="form-group"><label>Your Name</label><input type="text" name="first_name" placeholder="First name" required></div>
+        <div class="form-group"><label>Last Name</label><input type="text" name="last_name" placeholder="Last name" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email Address</label><input type="email" name="email" placeholder="your@email.com" required></div>
+        <div class="form-group"><label>Instagram Handle</label><input type="text" name="phone" placeholder="@yourhandle"></div>
+      </div>
+      <div class="form-group"><label>Type of Collaboration</label>
+        <select name="session_type" required>
+          <option value="">Select...</option>
+          <option>TFP / Time for Print</option>
+          <option>Model Portfolio</option>
+          <option>MUA Partnership</option>
+          <option>Stylist Collaboration</option>
+          <option>Creative / Conceptual Shoot</option>
+          <option>Brand / Vendor Partnership</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Tell Me About Your Vision</label><textarea name="notes" placeholder="Describe your idea, concept, or what you're looking to create. The more detail the better." style="min-height:160px;"></textarea></div>
+      <button type="submit" class="form-submit" id="collab-submit-btn" data-label="Send Collaboration Request">Send Collaboration Request</button>
+      <div class="form-msg" id="collab-form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- INSTAGRAM -->
+<section class="instagram-section">
+  <div class="section-label">Follow Along</div>
+  <div class="instagram-handle"><a href="https://instagram.com/biggshotsmedia" target="_blank" rel="noopener">@biggshotsmedia</a></div>
+  <p class="instagram-cta">Behind the scenes, latest sessions, and creative inspiration</p>
+  <a href="https://instagram.com/biggshotsmedia" target="_blank" rel="noopener" class="instagram-btn">
+    <svg class="instagram-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    Follow on Instagram
+  </a>
+</section>
+
+<!-- COVERAGE -->
+<section class="coverage">
+  <div class="section-label">Location</div>
+  <h2 class="section-title">The Midlands &amp; <em>Beyond</em></h2>
+  <p class="coverage-text">Based in The Midlands. Available for sessions across the Midlands and further afield. Destination shoots considered — travel and accommodation may apply for locations beyond 30 miles.</p>
+  <div class="coverage-areas">
+    <span class="coverage-tag">Northampton</span>
+    <span class="coverage-tag">Kettering</span>
+    <span class="coverage-tag">Wellingborough</span>
+    <span class="coverage-tag">Bedford</span>
+    <span class="coverage-tag">Milton Keynes</span>
+    <span class="coverage-tag">Leicester</span>
+    <span class="coverage-tag">UK-Wide</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand-block">
+      <div class="footer-brand">Bigg Shots <em>Media</em></div>
+      <p class="footer-tagline">Photography & Videography<br>The Midlands<br>Serving the Midlands &amp; Beyond</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigate</div>
+      <div class="footer-links">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#packages">Packages</a>
+        <a href="#testimonials">Client Stories</a>
+        <a href="/portal">Client Portal</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Contact</div>
+      <div class="footer-contact-info">
+        <a href="mailto:hello@biggshotsmedia.com">hello@biggshotsmedia.com</a><br>
+        The Midlands<br>
+        Available UK-Wide
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">&copy; 2026 Bigg Shots Media. All rights reserved. | <a href="/portal" style="color:rgba(176,168,152,0.4);text-decoration:none;">Client Portal</a></div>
+    <div class="footer-social">
+      <a href="https://instagram.com/biggshotsmedia" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+  <button class="lightbox-prev" onclick="lightboxNav(-1)">&#8249;</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  <button class="lightbox-next" onclick="lightboxNav(1)">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<!-- LEAD CAPTURE OVERLAY -->
+<div id="lead-capture-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,10,0.85);align-items:center;justify-content:center;">
+  <div style="background:#111;border:0.5px solid rgba(201,168,76,0.3);border-radius:4px;max-width:480px;width:90%;padding:2.5rem;position:relative;">
+    <button onclick="dismissLeadCapture()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:#888;font-size:1.2rem;cursor:pointer;">&#x2715;</button>
+    <p style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin:0 0 0.5rem;">Free Download</p>
+    <h3 style="font-family:Georgia,serif;font-size:1.6rem;font-weight:300;color:#F5F0E8;margin:0 0 0.8rem;">Get Our <em style="color:#C9A84C;">Package Guide</em></h3>
+    <p style="font-size:13px;color:#B0A898;margin:0 0 1.5rem;">Packages, pricing and everything you need to know — delivered straight to your inbox.</p>
+    <div id="lead-capture-form">
+      <input type="text" id="lc-name" placeholder="Your first name" style="width:100%;box-sizing:border-box;background:#0A0A0A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;padding:0.8rem;font-family:Georgia,serif;font-size:13px;margin-bottom:0.7rem;outline:none;">
+      <input type="email" id="lc-email" placeholder="Your email address" style="width:100%;box-sizing:border-box;background:#0A0A0A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;padding:0.8rem;font-family:Georgia,serif;font-size:13px;margin-bottom:1rem;outline:none;">
+      <button onclick="submitLeadCapture()" style="width:100%;background:#C9A84C;color:#1a1200;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.9rem;border:none;cursor:pointer;">Send Me The Guide</button>
+      <div id="lc-msg" style="font-size:11px;margin-top:0.7rem;text-align:center;display:none;"></div>
+    </div>
+    <p style="font-size:10px;color:#666;margin:1rem 0 0;text-align:center;">No spam. Unsubscribe anytime.</p>
+  </div>
+</div>
+
+<script>
+// ── Navbar scroll ──
+window.addEventListener('scroll',function(){
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// ── Hero carousel — same photos as portfolio, used as fullscreen background ──
+var heroPhotos=[];
+function buildHeroCarousel(photos){
+  var bg=document.getElementById('hero-carousel-bg');
+  var hero=document.querySelector('.hero-cinematic');
+  if(!photos||!photos.length){
+    hero.classList.add('hero-no-photos');
+    return;
+  }
+  heroPhotos=photos;
+  var all=photos.concat(photos);
+  bg.innerHTML=all.map(function(src){
+    return '<div class="hero-slide"><div class="hero-slide-bg" style="background-image:url(' + src + ')"></div><img src="'+src+'" alt="Bigg Shots Media photography" loading="eager"></div>';
+  }).join('');
+}
+
+// ── Portfolio lightbox ──
+var portfolioPhotos=[];
+function openLightbox(i){
+  portfolioPhotos=heroPhotos;
+  var lb=document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src=portfolioPhotos[i];
+  document.getElementById('lightbox-counter').textContent=(i+1)+' / '+portfolioPhotos.length;
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+var lightboxIndex=0;
+function lightboxNav(dir){
+  lightboxIndex=(lightboxIndex+dir+portfolioPhotos.length)%portfolioPhotos.length;
+  document.getElementById('lightbox-img').src=portfolioPhotos[lightboxIndex];
+  document.getElementById('lightbox-counter').textContent=(lightboxIndex+1)+' / '+portfolioPhotos.length;
+}
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('lightbox').classList.contains('open'))return;
+  if(e.key==='ArrowLeft')lightboxNav(-1);
+  if(e.key==='ArrowRight')lightboxNav(1);
+  if(e.key==='Escape')closeLightbox();
+});
+
+// ── Load photos ──
+fetch('/api/portfolio?t='+Date.now())
+  .then(function(r){return r.json();})
+  .then(function(d){buildHeroCarousel(d.photos||[]);})
+  .catch(function(){buildHeroCarousel([]);});
+
+// ── Form switching ──
+function showForm(type){
+  hideAllForms();
+  var el=document.getElementById('form-'+type);
+  if(el){el.classList.add('active');setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},100);}
+}
+function hideAllForms(){
+  ['booking','enquiry','collab'].forEach(function(t){
+    var el=document.getElementById('form-'+t);
+    if(el)el.classList.remove('active');
+  });
+}
+
+// ── Package options ──
+function updatePackageOptions(t){
+  var s=document.getElementById('package-select');
+  var o={
+    'Wedding Photography':['Onyx - 4hrs, 175 photos, £800','Gold - 6hrs, 275 photos, £1,200','Platinum - 8hrs, 375 photos, £1,600','Diamond - Full day, 525+ photos, £2,200'],
+    'Family Portraits':['Onyx - 1hr, 25 photos, £175','Gold - 2hrs, 40 photos, £300','Platinum - 3hrs, 60 photos, £420'],
+    'Portrait Session':['Onyx - 1hr, 25 photos, £175','Gold - 2hrs, 40 photos, £300','Platinum - 3hrs, 60 photos, £420'],
+    'Maternity Session':['Onyx - 1hr, 20 photos, £200','Gold - 1.5hrs, 30 photos, £300','Platinum - 2hrs, 45 photos, £400'],
+    'Birthday & Events':['Onyx - 2hrs, 75 photos, £325','Gold - 4hrs, 125 photos, £525','Platinum - 6hrs, 200 photos, £725'],
+    'Headshots':['Onyx - 30mins, 10 photos, £155','Gold - 1hr, 20 photos, £255','Platinum - 1.5hrs, 30 photos, £355'],
+    'Videography / Film':['Half Day - up to 4hrs, from £400','Full Day - up to 8hrs, from £700','Multi-Day - POA'],
+    'Graduation':['Onyx - 1hr, 25 photos, £175','Gold - 2hrs, 40 photos, £300'],
+    'Pre-Wedding Shoot':['Onyx - 1hr, 25 photos, £175','Gold - 2hrs, 40 photos, £300','Platinum - 3hrs, 60 photos, £420'],
+    'Registry Wedding':['Onyx - 2hrs, 75 photos, £325','Gold - 4hrs, 125 photos, £525'],
+    'Bespoke & Custom':['Half Day - up to 4hrs, from £400','Full Day - up to 8hrs, from £700','Multi-Day - POA']
+  };
+  var p=o[t]||[];
+  s.innerHTML='<option value="">Select a package...</option>'+p.map(function(x){return '<option value="'+x+'">'+x+'</option>';}).join('');
+}
+
+// ── Enquiry source detail toggle ──
+document.getElementById('enquiry-source-select').addEventListener('change',function(){
+  var show=['referral','wedding_fair','other','bark'].indexOf(this.value)>-1;
+  document.getElementById('enquiry-detail-group').style.display=show?'block':'none';
+});
+
+// ── Generic form submit ──
+function handleFormSubmit(formId,btnId,msgId){
+  var form=document.getElementById(formId);
+  if(!form)return;
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=document.getElementById(btnId);
+    var msg=document.getElementById(msgId);
+    btn.disabled=true;btn.textContent='Sending...';
+    msg.style.display='none';
+    var data={};
+    new FormData(form).forEach(function(v,k){data[k]=v;});
+    fetch('/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
+      .then(function(res){
+        btn.disabled=false;btn.textContent=btn.dataset.label||'Send';
+        if(res.ok){
+          msg.textContent='Thank you! Your message has been received. We will be in touch within 24 hours.';
+          msg.className='form-msg ok';msg.style.display='block';
+          form.reset();
+        } else {
+          msg.textContent=res.d.error||'Something went wrong. Please try again.';
+          msg.className='form-msg err';msg.style.display='block';
+        }
+      }).catch(function(){
+        btn.disabled=false;btn.textContent=btn.dataset.label||'Send';
+        msg.textContent='Connection error. Please try again.';
+        msg.className='form-msg err';msg.style.display='block';
+      });
+  });
+}
+handleFormSubmit('booking-form','booking-submit-btn','booking-form-msg');
+handleFormSubmit('enquiry-form','enquiry-submit-btn','enquiry-form-msg');
+handleFormSubmit('collab-form','collab-submit-btn','collab-form-msg');
+
+// ── Package modal ──
+var PACKAGES={wedding:{label:'Wedding Photography',title:'Wedding Photography',subtitle:'Full day or partial coverage — second photographer included on Platinum & Diamond.<br>USB + Photobook included on all packages. Additional hours at £150/hr.',note:'Travel within 30 miles of Rushden, Northamptonshire included. Beyond 30 miles quoted separately.',cols:4,packages:[{tier:'Onyx',price:'£800',deposit:'£250 deposit to secure your date',features:[{label:'Coverage',value:'4 hours'},{label:'Photographers',value:'1'},{label:'Edited Photos',value:'175'},{label:'Photobook',value:'20 pages'},{label:'Album',value:'—'},{label:'Online Gallery',value:'✓'},{label:'USB',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'3 weeks'}],link:'https://buy.stripe.com/00w5kv9sPan47ZR1Wc5Vu08',popular:false},{tier:'Gold',price:'£1,200',deposit:'£350 deposit to secure your date',features:[{label:'Coverage',value:'6 hours'},{label:'Photographers',value:'1'},{label:'Edited Photos',value:'275'},{label:'Photobook',value:'25 pages'},{label:'Album',value:'—'},{label:'Online Gallery',value:'✓'},{label:'USB',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'3 weeks'}],link:'https://buy.stripe.com/eVqeV50Wj0Mudkb6cs5Vu09',popular:false},{tier:'Platinum',price:'£1,600',deposit:'£450 deposit to secure your date',features:[{label:'Coverage',value:'8 hours'},{label:'Photographers',value:'2'},{label:'Edited Photos',value:'375'},{label:'Photobook',value:'30 pages'},{label:'Album',value:'Included'},{label:'Online Gallery',value:'✓'},{label:'USB',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'4 weeks'}],link:'https://buy.stripe.com/00wdR16gD0Mua7Z9oE5Vu0a',popular:true},{tier:'Diamond',price:'£2,200',deposit:'£600 deposit to secure your date',features:[{label:'Coverage',value:'Full day to first dance'},{label:'Photographers',value:'2'},{label:'Edited Photos',value:'525+'},{label:'Photobook',value:'40 pages'},{label:'Album',value:'Included'},{label:'Online Gallery',value:'✓'},{label:'USB',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'4 weeks'}],link:'https://buy.stripe.com/bJe14fcF1dzg93V0S85Vu01',popular:false}]},portrait:{label:'Portrait Sessions',title:'Portrait Sessions',subtitle:'Studio & outdoor available. Digital delivery via private online gallery.<br>Additional hours at £60/hr.',note:'Travel within 30 miles of Rushden, Northamptonshire included. Beyond 30 miles quoted separately.',cols:3,packages:[{tier:'Onyx',price:'£175',deposit:'£75 deposit to secure your session',features:[{label:'Duration',value:'1 hour'},{label:'Edited Photos',value:'25'},{label:'Outfit Changes',value:'1'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/4gM14feN9gLs3JB58o5Vu0b',popular:false},{tier:'Gold',price:'£300',deposit:'£100 deposit to secure your session',features:[{label:'Duration',value:'2 hours'},{label:'Edited Photos',value:'40'},{label:'Outfit Changes',value:'2'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/3cI3cn34r9j05RJ7gw5Vu0c',popular:true},{tier:'Platinum',price:'£420',deposit:'£150 deposit to secure your session',features:[{label:'Duration',value:'3 hours'},{label:'Edited Photos',value:'60'},{label:'Outfit Changes',value:'3'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/5kQ9AL6gD9j02Fx1Wc5Vu07',popular:false}]},maternity:{label:'Maternity Sessions',title:'Maternity Sessions',subtitle:'Handled with care, warmth, and the utmost sensitivity.<br>Partner & family welcome from Gold onwards.',note:'Travel within 30 miles of Rushden, Northamptonshire included. Beyond 30 miles quoted separately.',cols:3,packages:[{tier:'Onyx',price:'£200',deposit:'£75 deposit to secure your session',features:[{label:'Duration',value:'1 hour'},{label:'Edited Photos',value:'20'},{label:'Outfit Changes',value:'1'},{label:'Partner / Family',value:'—'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/6oUcMX0Wj7aScg77gw5Vu0d',popular:false},{tier:'Gold',price:'£300',deposit:'£100 deposit to secure your session',features:[{label:'Duration',value:'1.5 hours'},{label:'Edited Photos',value:'30'},{label:'Outfit Changes',value:'2'},{label:'Partner / Family',value:'Included'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/00wdR120n0Mu7ZR8kA5Vu0e',popular:true},{tier:'Platinum',price:'£400',deposit:'£150 deposit to secure your session',features:[{label:'Duration',value:'2 hours'},{label:'Edited Photos',value:'45'},{label:'Outfit Changes',value:'2'},{label:'Partner / Family',value:'Included'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/8x25kv0Wjdzg6VN44k5Vu06',popular:false}]},events:{label:'Events & Celebrations',title:'Events & Celebrations',subtitle:'Birthdays, parties and milestone events. Candid and posed coverage.<br>Additional hours at £60/hr.',note:'Travel within 30 miles of Rushden, Northamptonshire included. Beyond 30 miles quoted separately.',cols:3,packages:[{tier:'Onyx',price:'£325',deposit:'£100 deposit to secure your date',features:[{label:'Coverage',value:'2 hours'},{label:'Edited Photos',value:'75'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/28E5kvawTgLsa7ZdEU5Vu0j',popular:false},{tier:'Gold',price:'£525',deposit:'£175 deposit to secure your date',features:[{label:'Coverage',value:'4 hours'},{label:'Edited Photos',value:'125'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/4gMdR1fRd1Qy7ZRfN25Vu03',popular:true},{tier:'Platinum',price:'£725',deposit:'£250 deposit to secure your date',features:[{label:'Coverage',value:'6 hours'},{label:'Edited Photos',value:'200'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'2 weeks'}],link:'https://buy.stripe.com/00w6ozfRd0Mua7Z6cs5Vu0f',popular:false}]},headshots:{label:'Headshots',title:'Headshots',subtitle:'Professional headshots for individuals and businesses.<br>Fast turnaround with high-resolution digital delivery.',note:'Travel within 30 miles of Rushden, Northamptonshire included. Beyond 30 miles quoted separately.',cols:3,packages:[{tier:'Onyx',price:'£155',deposit:'£50 deposit to secure your session',features:[{label:'Duration',value:'30 minutes'},{label:'Edited Photos',value:'10'},{label:'Looks / Outfits',value:'1'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'1 week'}],link:'https://buy.stripe.com/8x27sD48v2UCgwnasI5Vu0g',popular:false},{tier:'Gold',price:'£255',deposit:'£100 deposit to secure your session',features:[{label:'Duration',value:'1 hour'},{label:'Edited Photos',value:'20'},{label:'Looks / Outfits',value:'2'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'1 week'}],link:'https://buy.stripe.com/fZu7sDcF19j0dkb0S85Vu0h',popular:true},{tier:'Platinum',price:'£355',deposit:'£125 deposit to secure your session',features:[{label:'Duration',value:'1.5 hours'},{label:'Edited Photos',value:'30'},{label:'Looks / Outfits',value:'3'},{label:'Online Gallery',value:'✓'},{label:'Sneak Peek',value:'48 hours'},{label:'Turnaround',value:'1 week'}],link:'https://buy.stripe.com/28E8wHdJ59j0eofbwM5Vu0i',popular:false}]},bespoke:{label:'Videography & Bespoke',title:'Videography & Films',subtitle:'Wedding films, highlight reels, brand video, concerts, TFP & model portfolios.<br>All projects require a pre-shoot consultation. Everything agreed in writing before shoot day.',note:'Raw files, additional usage rights, and extended editing quoted separately. Travel within 30 miles included.',cols:3,packages:[{tier:'Half Day',price:'£400+',deposit:'£150 holding deposit to confirm your project',features:[{label:'Coverage',value:'Up to 4 hours'},{label:'Consultation',value:'Included'},{label:'Edited Delivery',value:'Agreed per project'},{label:'Commercial Licence',value:'Quoted separately'},{label:'Online Gallery',value:'✓'},{label:'Travel',value:'Within 30mi free'},{label:'Turnaround',value:'Agreed per project'}],link:'https://buy.stripe.com/14AbITcF17aS93V0S85Vu05',popular:false},{tier:'Full Day',price:'£700+',deposit:'£150 holding deposit to confirm your project',features:[{label:'Coverage',value:'Up to 8 hours'},{label:'Consultation',value:'Included'},{label:'Edited Delivery',value:'Agreed per project'},{label:'Commercial Licence',value:'Quoted separately'},{label:'Online Gallery',value:'✓'},{label:'Travel',value:'Within 30mi free'},{label:'Turnaround',value:'Agreed per project'}],link:'https://buy.stripe.com/14AbITcF17aS93V0S85Vu05',popular:true},{tier:'Multi-Day',price:'POA',deposit:'£150 holding deposit to confirm your project',features:[{label:'Coverage',value:'Per day rate'},{label:'Consultation',value:'Included'},{label:'Edited Delivery',value:'Agreed per project'},{label:'Commercial Licence',value:'Quoted separately'},{label:'Online Gallery',value:'✓'},{label:'Travel',value:'Quoted per project'},{label:'Turnaround',value:'Agreed per project'}],link:'https://buy.stripe.com/14AbITcF17aS93V0S85Vu05',popular:false}]}};
+
+function openPackageModal(type){
+  var data=PACKAGES[type];if(!data)return;
+  document.getElementById('pkg-label').textContent=data.label;
+  document.getElementById('pkg-title').textContent=data.title;
+  document.getElementById('pkg-subtitle').innerHTML=data.subtitle;
+  document.getElementById('pkg-note').textContent=data.note;
+  var cols=data.cols;
+  var cards=document.getElementById('pkg-cards');
+  cards.style.gridTemplateColumns=cols===4?'repeat(4,1fr)':cols===3?'repeat(3,1fr)':'1fr';
+  cards.innerHTML=data.packages.map(function(pkg){
+    var featuresHtml=pkg.features.map(function(f){
+      return '<div class="pkg-feature"><span class="pkg-feature-label">'+f.label+'</span><strong>'+f.value+'</strong></div>';
+    }).join('');
+    return '<div class="pkg-card" style="'+(pkg.popular?'border-top:2px solid #C9A84C;':'')+'">'+(pkg.popular?'<div class="pkg-popular">Most Popular</div>':'')+'<div class="pkg-tier">'+pkg.tier+'</div><div class="pkg-price">'+(pkg.price==='POA'?'<span style="font-size:1.4rem;font-weight:300;line-height:1.4;">Price on<br>Application</span>':pkg.price+'<span> total</span>')+'</div><div class="pkg-deposit">'+pkg.deposit+'</div><div class="pkg-divider"></div>'+featuresHtml+'<a href="'+pkg.link+'" target="_blank" class="pkg-btn">Pay Deposit &amp; Book</a><a href="#contact" onclick="closePackageModal();showForm(\'booking\')" class="pkg-btn-enquire">Enquire Instead</a></div>';
+  }).join('');
+  document.getElementById('pkg-modal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closePackageModal(){
+  document.getElementById('pkg-modal').style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── Gift voucher modal ──
+function openGiftModal(){
+  document.getElementById('gift-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeGiftModal(){
+  document.getElementById('gift-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePackageModal();closeLightbox();closeGiftModal();}});
+document.getElementById('pkg-modal').addEventListener('click',function(e){if(e.target===this)closePackageModal();});
+
+// ── Lead capture ──
+(function(){
+  var dismissed=localStorage.getItem('lc_dismissed');
+  if(dismissed)return;
+  setTimeout(function(){var el=document.getElementById('lead-capture-overlay');if(el)el.style.display='flex';},30000);
+})();
+function dismissLeadCapture(){
+  var el=document.getElementById('lead-capture-overlay');
+  if(el)el.style.display='none';
+  localStorage.setItem('lc_dismissed','1');
+}
+function submitLeadCapture(){
+  var email=document.getElementById('lc-email').value.trim();
+  var name=document.getElementById('lc-name').value.trim();
+  var msg=document.getElementById('lc-msg');
+  if(!email){msg.textContent='Please enter your email.';msg.style.color='#E05555';msg.style.display='block';return;}
+  fetch('/api/bookings/lead-capture',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,name:name})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.success){
+        document.getElementById('lead-capture-form').innerHTML='<p style="text-align:center;color:#C9A84C;font-family:Georgia,serif;font-size:1.1rem;">Check your inbox!</p><p style="text-align:center;color:#B0A898;font-size:13px;">Your package guide is on its way.</p>';
+        localStorage.setItem('lc_dismissed','1');
+        setTimeout(dismissLeadCapture,3000);
+      } else {
+        msg.textContent='Something went wrong. Please try again.';msg.style.color='#E05555';msg.style.display='block';
+      }
+    }).catch(function(){msg.textContent='Connection error. Please try again.';msg.style.color='#E05555';msg.style.display='block';});
+}
+
+// ── CMS content ──
+fetch('/api/site-content')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var heroTag=document.querySelector('.hero-tagline');
+    if(heroTag&&d.hero_tagline)heroTag.textContent=d.hero_tagline;
+    var aboutTitle=document.querySelector('.about-title');
+    if(aboutTitle&&d.about_title)aboutTitle.innerHTML=d.about_title;
+    var aboutBody=document.querySelectorAll('.about-body');
+    if(aboutBody[0]&&d.about_body)aboutBody[0].textContent=d.about_body;
+    var aboutSig=document.querySelector('.about-signature');
+    if(aboutSig&&d.about_signature)aboutSig.textContent=d.about_signature;
+    if(d.instagram_url)document.querySelectorAll('a[href*="instagram.com"]').forEach(function(a){a.href=d.instagram_url;});
+    [1,2,3].forEach(function(n){
+      var t=document.querySelector('.testimonial-card:nth-child('+n+')');
+      if(!t)return;
+      var text=t.querySelector('.testimonial-text');
+      var author=t.querySelector('.testimonial-author');
+      var session=t.querySelector('.testimonial-session');
+      if(text&&d['testimonial_'+n+'_text'])text.textContent=d['testimonial_'+n+'_text'];
+      if(author&&d['testimonial_'+n+'_author'])author.textContent=d['testimonial_'+n+'_author'];
+      if(session&&d['testimonial_'+n+'_session'])session.textContent=d['testimonial_'+n+'_session'];
+    });
+    var coverage=document.querySelector('.coverage-text');
+    if(coverage&&d.coverage_text)coverage.textContent=d.coverage_text;
+  })
+  .catch(function(e){console.warn('CMS load failed:',e);});
+
+// ── Promo banner integration: hide default strip when a real promo renders ──
+(function(){
+  var zone=document.getElementById('promo-zone');
+  var defaultStrip=document.getElementById('promo-zone-default');
+  var observer=new MutationObserver(function(){
+    var hasRealPromo=zone.querySelector('[id^="bsm-promo-banner"]');
+    if(hasRealPromo){
+      defaultStrip.style.display='none';
+    }
+  });
+  observer.observe(zone,{childList:true});
+})();
+</script>
+<script src="/promo_banner.js"></script>
+</body>
+</html>
