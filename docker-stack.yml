@@ -220,3 +220,4 @@ volumes:
 networks:
   biggshots-prod:
     driver: overlay
+    attachable: true
