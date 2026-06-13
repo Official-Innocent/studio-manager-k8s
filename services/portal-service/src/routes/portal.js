@@ -415,4 +415,25 @@ router.post('/track-download', requireClient, async (req, res) => {
     res.json({ success: true }); // never fail silently on tracking
   }
 });
+
+// ── GET /loyalty — logged-in client: own loyalty progress ────────────────────
+router.get('/loyalty', requireClient, async (req, res) => {
+  try {
+    let { rows } = await query('SELECT * FROM client_loyalty WHERE client_id=$1', [req.clientId]);
+    if (!rows.length) {
+      await query('INSERT INTO client_loyalty (client_id, threshold, discount_pct) VALUES ($1,3,10)', [req.clientId]);
+      ({ rows } = await query('SELECT * FROM client_loyalty WHERE client_id=$1', [req.clientId]));
+    }
+    const d = rows[0];
+    res.json({
+      ...d,
+      progress_pct: Math.round((d.current_cycle / d.threshold) * 100),
+      sessions_to_go: Math.max(0, d.threshold - d.current_cycle),
+      award_ready: d.current_cycle >= d.threshold,
+    });
+  } catch(e) {
+    res.status(500).json({ error: 'Failed to load loyalty.' });
+  }
+});
+
 module.exports = router;
