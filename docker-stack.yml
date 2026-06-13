@@ -1,0 +1,222 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: biggshots_prod
+      POSTGRES_USER: biggshots_prod
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - prod_postgres_data:/var/lib/postgresql/data
+      - ./db/init/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks:
+      - biggshots-prod
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - biggshots-prod
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  notification-service:
+    image: innocentobuteofficial/notification-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      SITE_URL: https://biggshotsmedia.com
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  gallery-service:
+    image: innocentobuteofficial/gallery-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3002"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      GALLERY_DIR: /data/galleries
+      SITE_URL: https://biggshotsmedia.com
+    volumes:
+      - prod_galleries_data:/data/galleries
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  scheduler-service:
+    image: innocentobuteofficial/scheduler-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3003"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      SITE_URL: https://biggshotsmedia.com
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+      SCHEDULER_INTERVAL_MS: "1800000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  booking-service:
+    image: innocentobuteofficial/booking-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3004"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://biggshotsmedia.com
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      OWNER_PHONE: "+447535985507"
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+      UPLOAD_DIR: /data/uploads
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+    volumes:
+      - prod_uploads_data:/data/uploads
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  portal-service:
+    image: innocentobuteofficial/portal-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3005"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://biggshotsmedia.com
+      ADMIN_EMAIL: hello@biggshotsmedia.com
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media <thephotographerltd@gmail.com>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  auth-service:
+    image: innocentobuteofficial/auth-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3007"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://biggshotsmedia.com
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  monitor-service:
+    image: innocentobuteofficial/monitor-service:latest
+    networks:
+      - biggshots-prod
+    environment:
+      NODE_ENV: production
+      PORT: "3006"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_prod
+      DB_USER: biggshots_prod
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      GA4_STUB: "true"
+      SSE_INTERVAL_MS: "5000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  prod_postgres_data:
+  prod_galleries_data:
+  prod_uploads_data:
+
+networks:
+  biggshots-prod:
+    driver: overlay
