@@ -53,7 +53,7 @@ VALUES
 -- ── Quote for the lead (Emma) ────────────────────────────────────────────────
 INSERT INTO quotes (id, project_id, client_id, quote_number, status, line_items, subtotal, total, valid_until, notes, client_message, sent_at, created_at)
 VALUES (
-  'q1000000-0000-0000-0000-000000000001',
+  'a2000000-0000-0000-0000-000000000001',
   'd1000000-0000-0000-0000-000000000001',
   'c1000000-0000-0000-0000-000000000001',
   'QUO-DEMO-0001',
@@ -91,7 +91,7 @@ VALUES
 -- ── Payment plan + installments for James (Gold Wedding, in progress) ────────
 INSERT INTO payment_plans (id, project_id, client_id, total_amount, amount_paid, status, created_at)
 VALUES (
-  'pp100000-0000-0000-0000-000000000001',
+  'b2000000-0000-0000-0000-000000000001',
   'd1000000-0000-0000-0000-000000000002',
   'c1000000-0000-0000-0000-000000000002',
   1200.00, 350.00, 'active', now() - INTERVAL '10 days'
@@ -99,14 +99,14 @@ VALUES (
 
 INSERT INTO payment_installments (id, plan_id, project_id, client_id, installment_num, label, amount, due_date, status, is_deposit, is_non_refundable, paid_at, paid_amount, payment_method, invoice_id, created_at)
 VALUES
-  ('pi100000-0000-0000-0000-000000000001', 'pp100000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000002', 1, 'Booking Deposit', 350.00, CURRENT_DATE - INTERVAL '2 days', 'paid',    true,  true,  now() - INTERVAL '2 days', 350.00, 'card', 'e1000000-0000-0000-0000-000000000001', now() - INTERVAL '10 days'),
-  ('pi100000-0000-0000-0000-000000000002', 'pp100000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000002', 2, 'Balance Payment', 850.00, CURRENT_DATE + INTERVAL '61 days', 'pending', false, false, NULL, NULL, NULL, 'e1000000-0000-0000-0000-000000000002', now() - INTERVAL '10 days');
+  ('c2000000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000002', 1, 'Booking Deposit', 350.00, CURRENT_DATE - INTERVAL '2 days', 'paid',    true,  true,  now() - INTERVAL '2 days', 350.00, 'card', 'e1000000-0000-0000-0000-000000000001', now() - INTERVAL '10 days'),
+  ('c2000000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'd1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000002', 2, 'Balance Payment', 850.00, CURRENT_DATE + INTERVAL '61 days', 'pending', false, false, NULL, NULL, NULL, 'e1000000-0000-0000-0000-000000000002', now() - INTERVAL '10 days');
 
 -- ── Galleries (delivered for Sophie + Liam, in-progress for Priya) ───────────
 INSERT INTO galleries (id, client_id, booking_id, title, slug, description, session_date, is_published, allow_downloads, allow_sharing, show_watermark, display_style, delivered_at, created_at)
 VALUES
-  ('g1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000005', 'Sophie & Partner — Wedding Gallery', 'sophie-bennett-wedding', 'Full wedding day coverage at Woodland Manor.', CURRENT_DATE - INTERVAL '60 days', true,  true, true,  false, 'standard', now() - INTERVAL '32 days', now() - INTERVAL '40 days'),
-  ('g1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000004', 'Liam Carter — Family Session',      'liam-carter-family',     'Golden hour family session at Sywell Country Park.', CURRENT_DATE - INTERVAL '5 days', false, true, false, true,  'standard', NULL, now() - INTERVAL '4 days');
+  ('b3000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000005', 'b1000000-0000-0000-0000-000000000005', 'Sophie & Partner — Wedding Gallery', 'sophie-bennett-wedding', 'Full wedding day coverage at Woodland Manor.', CURRENT_DATE - INTERVAL '60 days', true,  true, true,  false, 'standard', now() - INTERVAL '32 days', now() - INTERVAL '40 days'),
+  ('b3000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000004', 'b1000000-0000-0000-0000-000000000004', 'Liam Carter — Family Session',      'liam-carter-family',     'Golden hour family session at Sywell Country Park.', CURRENT_DATE - INTERVAL '5 days', false, true, false, true,  'standard', NULL, now() - INTERVAL '4 days');
 
 -- ── Promotions (one active banner for the homepage/portal demo) ──────────────
 INSERT INTO promotions (id, type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, active, starts_at, ends_at, created_at)
@@ -135,7 +135,7 @@ VALUES
 -- ── Questionnaire templates ───────────────────────────────────────────────────
 INSERT INTO questionnaire_templates (id, name, session_type, questions, created_at)
 VALUES (
-  'qt100000-0000-0000-0000-000000000001',
+  'd2000000-0000-0000-0000-000000000001',
   'Wedding Day Questionnaire',
   'Wedding Photography',
   '[{"id":"q1","label":"What time does the ceremony start?","type":"text"},{"id":"q2","label":"Who are the key people we should make sure to photograph?","type":"textarea"},{"id":"q3","label":"Do you have a shot list or any must-have photos?","type":"textarea"},{"id":"q4","label":"Is there a second photographer?","type":"select","options":["Yes","No"]}]',
@@ -145,10 +145,10 @@ VALUES (
 -- ── Questionnaire sent to James (in progress) ─────────────────────────────────
 INSERT INTO questionnaires (id, project_id, client_id, template_id, title, questions, answers, status, sent_at, created_at)
 VALUES (
-  'qn100000-0000-0000-0000-000000000001',
+  'e2000000-0000-0000-0000-000000000001',
   'd1000000-0000-0000-0000-000000000002',
   'c1000000-0000-0000-0000-000000000002',
-  'qt100000-0000-0000-0000-000000000001',
+  'd2000000-0000-0000-0000-000000000001',
   'Wedding Day Questionnaire — James & Partner',
   '[{"id":"q1","label":"What time does the ceremony start?","type":"text"},{"id":"q2","label":"Who are the key people we should make sure to photograph?","type":"textarea"},{"id":"q3","label":"Do you have a shot list or any must-have photos?","type":"textarea"},{"id":"q4","label":"Is there a second photographer?","type":"select","options":["Yes","No"]}]',
   '{}',
@@ -160,7 +160,7 @@ VALUES (
 -- ── Contract template ──────────────────────────────────────────────────────────
 INSERT INTO contract_templates (id, name, contract_type, body, is_default, created_at)
 VALUES (
-  'ct100000-0000-0000-0000-000000000001',
+  'f2000000-0000-0000-0000-000000000001',
   'Standard Photography Agreement',
   'general',
   'This agreement is between Bigg Shots Media ("the Studio") and the Client for the provision of photography services as outlined in the booking confirmation. A non-refundable deposit secures the date. The balance is due before the session unless otherwise agreed in writing. Delivery timelines are estimates and may vary during peak season.',
@@ -171,7 +171,7 @@ VALUES (
 -- ── Client loyalty record (Sophie — repeat/VIP client) ────────────────────────
 INSERT INTO client_loyalty (id, client_id, total_sessions, current_cycle, threshold, discount_pct, award_count, created_at)
 VALUES (
-  'cl100000-0000-0000-0000-000000000001',
+  'a3000000-0000-0000-0000-000000000001',
   'c1000000-0000-0000-0000-000000000005',
   3, 0, 3, 10, 1,
   now() - INTERVAL '90 days'
