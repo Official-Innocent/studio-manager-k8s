@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - demo_postgres_data:/var/lib/postgresql/data
-      - ./db/init/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/init/01-schema-demo.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./db/init/03-demo-seed.sql:/docker-entrypoint-initdb.d/02-demo-seed.sql:ro
     networks:
       - biggshots-demo
