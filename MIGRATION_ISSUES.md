@@ -406,4 +406,145 @@ microservices stack (S8-S9b). The monolith remains live and unchanged at
 `monolith-demo.biggshotsmedia.com` as the "before" reference for the
 portfolio narrative.
 
+## Issue 24: S10 — seeded demo environment (k3-demo.biggshotsmedia.com)
+
+**Goal**: a second, fully isolated Swarm stack populated with realistic fake
+data — clients across every pipeline stage, bookings, projects, invoices,
+payment plans, galleries, promotions, tasks, questionnaires — for interview
+walkthroughs, without touching production data.
+
+### Stack generation
+
+`docker-stack-demo.yml` was generated from `docker-stack.yml` via `sed`,
+renaming `biggshots_prod` → `biggshots_demo`, all `prod_*_data` volumes →
+`demo_*_data`, the overlay network to `biggshots-demo`, `SITE_URL` to
+`https://k3-demo.biggshotsmedia.com`, and the published frontend port from
+`8081` to `8082`. `ADMIN_EMAIL` was set to `hello+demo@biggshotsmedia.com`
+(Gmail "+" aliasing — same inbox, clearly tagged) and `MAIL_FROM` to
+"Bigg Shots Media (Demo) <...>" so any test emails are distinguishable.
+`STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` were changed to
+`${DEMO_STRIPE_SECRET_KEY}`/`${DEMO_STRIPE_WEBHOOK_SECRET}` (test-mode
+Stripe keys, to be added — S10d, not yet complete). All other shared secrets
+(`POSTGRES_PASSWORD` pattern, `JWT_SECRET`, `SESSION_SECRET`, Google Calendar
+OAuth creds) were reused from prod's `deploy.env` — confirmed safe because
+`scheduler-service`'s calendar sync (`runCalendarSync()`) is read-only: it
+reads the real Google Calendar to populate the demo's own local
+`blocked_dates` table, never writing to the real calendar.
+
+### Demo seed data (`db/init/03-demo-seed.sql`)
+
+197-line seed covering: 1 admin user, 6 clients spanning every
+`clients.status` value (`lead`, `prospect`, `active` x2, `delivered`,
+`archived`), 6 bookings, 6 projects spanning every `projects.stage` value
+(`lead`, `booked`, `covered`, `delivered`, `completed` x2), 1 quote, 7
+invoices + 2 payment-plan-installment invoices, 6 payments, 1 payment plan
+with 2 installments (one paid, one pending), 2 galleries (one delivered, one
+in-progress), 1 active promotion banner, 4 tasks across open/completed,
+1 questionnaire + template, 1 contract template, 1 client loyalty record,
+and `site_settings` rows for CMS-driven homepage content (hero tagline,
+about section, testimonial, coverage text) — all clearly marked "(Demo)"
+or describing the demo nature.
+
+### Issues encountered and fixed (all on first deploy attempt cycle)
+
+1. **Schema role mismatch**: `01-schema.sql` (dumped from prod via
+   `pg_dump`) contains ~179 `OWNER TO biggshots_prod` / `ALTER ... OWNER TO
+   biggshots_prod` statements. The demo postgres creates role
+   `biggshots_demo` (from `POSTGRES_USER`), so every ownership statement
+   failed with `role "biggshots_prod" does not exist`, partially aborting
+   the init script. Fixed by creating `db/init/01-schema-demo.sql` — a
+   `sed 's/biggshots_prod/biggshots_demo/g'` copy — and mounting that as
+   `01-schema.sql` in the demo stack's postgres `docker-entrypoint-initdb.d`.
+   **Lesson**: any schema dump containing role/owner statements must have the
+   role name parameterized (or the demo DB must reuse the same role name) —
+   role names are not portable across environments by default.
+
+2. **Invalid `projects.stage` values**: seed used `'project_covered'` and
+   `'post_production'`, neither of which exist in
+   `projects_stage_check CHECK (stage = ANY (ARRAY['lead','quote_sent',
+   'booked','covered','delivered','completed','archived']))`. Fixed to
+   `'covered'` and `'delivered'` respectively. **Lesson**: always grep the
+   schema's `CHECK` constraints for enum-like text columns before writing
+   seed data — column names alone don't reveal the allowed value set.
+
+3. **Invalid (non-hex) UUID prefixes**: the seed's mnemonic UUID scheme used
+   prefixes like `q1`, `pp1`, `pi1`, `qt1`, `qn1`, `ct1`, `cl1`, `g1` for
+   quotes/payment-plans/installments/questionnaire-templates/questionnaires/
+   contract-templates/client-loyalty/galleries — but `g`, `p`, `q`, `t`, `n`,
+   `l` are not valid hexadecimal digits, so Postgres rejected these as
+   `invalid input syntax for type uuid`. All 8 prefixes were remapped to
+   valid hex equivalents (e.g. `g1...` → `b3...`, `q1...` → `a2...`).
+   **Lesson**: UUIDs are constrained to `0-9a-f` — mnemonic mapping schemes
+   for readability must be checked against this before use; `g`/`l`/`o`/`q`/
+   `s`/`t`/etc. are easy traps.
+
+4. **Admin password hash mismatch**: the seed's `admin_users.password_hash`
+   was copied from the S6 dev seed's hash for `"DevPassword123!"`, but the
+   comment (and intended demo credential) said `"DemoPassword123!"` — a
+   different password with a different hash. Login failed with "Invalid
+   email or password" until a fresh `bcryptjs` hash for `"DemoPassword123!"`
+   was generated and the row updated directly via `psql UPDATE` (faster than
+   a full reseed) and the seed file corrected for future redeploys.
+
+5. **`docker stack rm` / volume removal race**: after `docker stack rm`,
+   `docker volume rm` failed with "volume is in use" even after a 10-second
+   wait — the underlying container takedown lags behind the stack-removal
+   command returning. A second wait (15s) plus retry succeeded. Similarly,
+   the immediately-following `docker stack deploy` once failed with "network
+   biggshots-demo_biggshots-demo not found" because the network removal
+   hadn't propagated yet. **Lesson**: after `docker stack rm`, poll for
+   actual resource removal (`docker volume rm` / `docker network ls`)
+   rather than using a fixed sleep — or accept that 1-2 retries may be
+   needed.
+
+### Routing / TLS
+
+Following the S9c pattern: `k3-demo.biggshotsmedia.com` (DNS A record
+already existed, pointing at 90.195.213.172) got its own HTTP (port 80,
+acme-challenge + redirect) and HTTPS (port 443) server blocks in
+`biggshots-nginx`'s config, added via direct `vi` edits (no docker/heredoc
+tricks — see Issue 23's prevention notes). The HTTPS block proxies to
+`172.29.0.1:8082` (the demo `frontend` service's routing-mesh address,
+same gateway-IP pattern as prod/monolith-demo).
+
+The existing `biggshotsmedia.com-0001` cert lineage (created in S9c for
+`monolith-demo`) was **expanded** (`--expand --cert-name
+biggshotsmedia.com-0001`) to also cover `k3-demo.biggshotsmedia.com` —
+all three demo/secondary domains now share one cert lineage, separate from
+the original `biggshotsmedia.com`/`www` lineage. Both lineages auto-renew
+via the existing certbot loop.
+
+### Verification (all passing)
+
+```
+12/12 services 1/1 (auth, booking, content, crm, frontend, gallery, monitor,
+                     notification, portal, postgres, redis, scheduler)
+Seed row counts: 6 clients, 6 bookings, 6 projects, 9 invoices, 6 payments,
+                 2 galleries, 1 promotion, 4 tasks, 1 admin
+https://k3-demo.biggshotsmedia.com/                  -> 200
+https://k3-demo.biggshotsmedia.com/admin/            -> 200
+https://k3-demo.biggshotsmedia.com/portal/           -> 200
+https://k3-demo.biggshotsmedia.com/api/site-content  -> demo CMS content
+POST /api/auth/admin/login (admin@demo.biggshotsmedia.com /
+  DemoPassword123!)                                   -> {"success":true,...}
+```
+
+### Remaining S10 work
+
+- **S10b** (portfolio images): hero carousel currently shows the "no photos"
+  fallback (same as prod) since `demo_portfolio_data` is empty. Two real
+  sample images (`Karima_Family_Shoot@40_383.jpg`, ~9.5MB each) exist in the
+  frontend's static `/assets/portfolio/` and could be copied into
+  `demo_portfolio_data` as `opt_*.jpg` to populate the carousel via the real
+  `/api/portfolio` flow.
+- **S10d** (Stripe test mode): `DEMO_STRIPE_SECRET_KEY` /
+  `DEMO_STRIPE_WEBHOOK_SECRET` are currently placeholder values
+  (`sk_test_PLACEHOLDER` / `whsec_PLACEHOLDER`) in `deploy.env`. Real
+  test-mode values need to be obtained from the Stripe dashboard (test mode
+  toggle → Developers → API keys, plus a test webhook endpoint at
+  `https://k3-demo.biggshotsmedia.com/api/payments/stripe/webhook`), and 1-2
+  test-mode Payment Links wired into the demo frontend's package modals for
+  a working end-to-end payment demo.
+
+
 
