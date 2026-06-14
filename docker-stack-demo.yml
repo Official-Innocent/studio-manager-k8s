@@ -1,0 +1,278 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: biggshots_demo
+      POSTGRES_USER: biggshots_demo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - demo_postgres_data:/var/lib/postgresql/data
+      - ./db/init/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/init/03-demo-seed.sql:/docker-entrypoint-initdb.d/02-demo-seed.sql:ro
+    networks:
+      - biggshots-demo
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - biggshots-demo
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+
+  notification-service:
+    image: innocentobuteofficial/notification-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media (Demo) <thephotographerltd@gmail.com>
+      ADMIN_EMAIL: hello+demo@biggshotsmedia.com
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  gallery-service:
+    image: innocentobuteofficial/gallery-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3002"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      GALLERY_DIR: /data/galleries
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+    volumes:
+      - demo_galleries_data:/data/galleries
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  scheduler-service:
+    image: innocentobuteofficial/scheduler-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3003"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      ADMIN_EMAIL: hello+demo@biggshotsmedia.com
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+      SCHEDULER_INTERVAL_MS: "1800000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  booking-service:
+    image: innocentobuteofficial/booking-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3004"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+      ADMIN_EMAIL: hello+demo@biggshotsmedia.com
+      OWNER_PHONE: "+447535985507"
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media (Demo) <thephotographerltd@gmail.com>
+      UPLOAD_DIR: /data/uploads
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REFRESH_TOKEN: ${GOOGLE_REFRESH_TOKEN}
+      STRIPE_SECRET_KEY: ${DEMO_STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${DEMO_STRIPE_WEBHOOK_SECRET}
+    volumes:
+      - demo_uploads_data:/data/uploads
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  portal-service:
+    image: innocentobuteofficial/portal-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3005"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+      ADMIN_EMAIL: hello+demo@biggshotsmedia.com
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: "587"
+      MAIL_SECURE: "false"
+      MAIL_USER: thephotographerltd@gmail.com
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: Bigg Shots Media (Demo) <thephotographerltd@gmail.com>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  auth-service:
+    image: innocentobuteofficial/auth-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3007"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SITE_URL: https://k3-demo.biggshotsmedia.com
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  monitor-service:
+    image: innocentobuteofficial/monitor-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3006"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      GA4_STUB: "true"
+      SSE_INTERVAL_MS: "5000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  content-service:
+    image: innocentobuteofficial/content-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3008"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PORTFOLIO_DIR: /data/portfolio
+    volumes:
+      - demo_portfolio_data:/data/portfolio
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  crm-service:
+    image: innocentobuteofficial/crm-service:latest
+    networks:
+      - biggshots-demo
+    environment:
+      NODE_ENV: production
+      PORT: "3009"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: biggshots_demo
+      DB_USER: biggshots_demo
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  frontend:
+    image: innocentobuteofficial/frontend:latest
+    networks:
+      - biggshots-demo
+    ports:
+      - "8082:80"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  demo_postgres_data:
+  demo_galleries_data:
+  demo_uploads_data:
+  demo_portfolio_data:
+
+networks:
+  biggshots-demo:
+    driver: overlay
+    attachable: true
