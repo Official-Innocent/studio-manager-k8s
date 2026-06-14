@@ -14,7 +14,7 @@ INSERT INTO admin_users (id, email, password_hash, name, role, created_at)
 VALUES (
   'a1000000-0000-0000-0000-000000000001',
   'admin@demo.biggshotsmedia.com',
-  '$2a$12$1QhyREpRPNek4n8f2IsqaO5Q9gSTbrOJxH3U0LUcEYFIMyfoCiwry',
+  '$2a$12$xlKa0OD6R97VKK9CzrHTLulGANH83kkO13XpyrL.tvbZ/6B9jtUHe',
   'Adak José (Demo)',
   'owner',
   now()
