@@ -546,5 +546,85 @@ POST /api/auth/admin/login (admin@demo.biggshotsmedia.com /
   test-mode Payment Links wired into the demo frontend's package modals for
   a working end-to-end payment demo.
 
+## Issue 25: [OPEN — PRIORITY] Production admin smoke test reveals 3 missing endpoints — pipeline, quotes, reports
+
+**Discovered**: while creating the first real production admin user (S9c/S10
+follow-up) and logging into `https://biggshotsmedia.com/admin/` for the
+first time on the new stack, three admin pages failed:
+
+- **Pipeline Board** → "Error loading pipeline."
+- **Quotes** → "Error loading quotes."
+- **Reports** → "Error loading reports. Please try again." (pipeline
+  value/confirmed value/YTD revenue all show "—", revenue/sessions/projects
+  charts stuck on "Loading...")
+
+Direct API checks confirm these aren't auth or nginx-routing issues — the
+endpoints **do not exist** in any service:
+
+```
+GET /api/crm/pipeline  -> falls through nginx to the static frontend's
+GET /api/crm/quotes    -> index.html (no location block matches these
+GET /api/crm/reports   -> paths, so the catch-all `location /` serves
+                          the homepage HTML instead of a 404/JSON error)
+```
+
+`grep` across `crm-service` and `booking-service` route files found zero
+`pipeline`, `quote`, or `report` routes — these were monolith admin features
+(visible in the monolith-demo screenshots: Pipeline Board with stage
+columns, Quotes list with "Studio Quotes", Reports with pipeline
+value/confirmed value/YTD revenue/revenue-by-month chart/sessions-by-type
+chart/projects-by-stage/upcoming-sessions) that were **never ported** during
+S9a's crm-service build, despite `quotes` being a real table in
+`01-schema.sql` (`quotes_status_check` constraint exists, and S10's demo
+seed successfully inserts into it).
+
+**Also note**: the Block Dates page shows a Google Calendar sync error
+(`Error: Unexpected token '<', "<!DOCTYPE "... is not valid JSON`) — almost
+certainly the same root cause: `/api/calendar/sync` (or similar) falls
+through to the frontend's `location /` and returns HTML instead of JSON.
+`frontend/nginx.conf` line 153 has `location /api/calendar/` routing to
+scheduler-service, but the *specific* sync endpoint path used by the
+Block Dates page's "Sync Now" button may not match what scheduler-service
+actually exposes — needs checking alongside the pipeline/quotes/reports work.
+
+### Scope for the fix (next session priority, before S11 continues)
+
+1. **`quotes`**: crm-service needs a `routes/quotes.js` — CRUD against the
+   existing `quotes` table (`quote_number`, `status`, `line_items` jsonb,
+   `subtotal`, `total`, `valid_until`, `client_message`, `sent_at`, etc. —
+   schema already supports this, S10's seed already proves inserts work).
+   Add `quotes` to the crm-service nginx regex
+   (`^/api/(clients|projects|payment-plans|questionnaires|settings|tasks|quotes)`).
+
+2. **`pipeline`**: likely an aggregation endpoint over `projects` grouped by
+   `stage` (lead/quote_sent/booked/covered/delivered/completed/archived) —
+   check the monolith's pipeline board implementation
+   (`bigg-shots-backend`) for the exact shape expected by the frontend's
+   Pipeline Board JS, then port to crm-service (or booking-service, whichever
+   the monolith used) as `GET /pipeline`.
+
+3. **`reports`**: aggregation endpoint(s) for pipeline value, confirmed
+   value, YTD revenue, shoots this month, revenue-by-month (12mo),
+   sessions-by-type, projects-by-stage, upcoming-sessions. Likely spans
+   `projects`, `invoices`, `payments`, `bookings` — may need to live in
+   crm-service with cross-service queries, or be assembled by the frontend
+   from multiple existing endpoints. Check monolith implementation first to
+   determine the original data source and whether it was one endpoint or
+   several.
+
+4. **Calendar sync JSON error**: verify `frontend/nginx.conf`'s
+   `/api/calendar/` block actually matches the Block Dates page's sync
+   button request path; check scheduler-service's calendar routes for the
+   exact endpoint name.
+
+**Impact**: these are core admin features for the studio's day-to-day
+pipeline management and financial visibility on `biggshotsmedia.com` (now
+live in production). Not blocking for the portfolio narrative (S10 demo
+environment is unaffected — same gaps exist there too, but the demo's main
+purpose — clients/bookings/galleries/promotions/tasks — all work), but
+should be prioritised before further S11+ polish work, since this is the
+*production* admin the studio owner will actually use.
+
+
 
 
