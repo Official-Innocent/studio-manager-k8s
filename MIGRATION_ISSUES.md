@@ -625,6 +625,106 @@ purpose — clients/bookings/galleries/promotions/tasks — all work), but
 should be prioritised before further S11+ polish work, since this is the
 *production* admin the studio owner will actually use.
 
+### Investigation findings (this session) — scope is smaller than it looked
+
+Pulled the admin frontend (`/usr/share/nginx/html/admin/index.html`, 3175
+lines, 236KB) from the running `frontend` container and traced each
+"Error loading X" back to its `fetch`/`api()` call and the monolith's
+corresponding backend route:
+
+**Pipeline — likely near-zero backend work.** `loadPipeline()` calls
+`api('/projects')` (i.e. `/api/projects`), which **crm-service already
+serves** and the nginx regex
+`^/api/(clients|projects|payment-plans|questionnaires|settings|tasks)`
+already routes correctly. The function expects each project object to have
+`id`, `first_name`, `last_name`, `stage`, `session_type`, `amount_quoted`,
+`session_date` (it groups by `stage` into the 7 pipeline columns client-side
+— no aggregation needed server-side). Next step: confirm crm-service's
+`GET /projects` response actually includes `first_name`/`last_name` (likely
+needs a `LEFT JOIN clients`) and `amount_quoted`/`session_date` — if so,
+Pipeline may already work or need only a query tweak, not a new endpoint.
+
+**Quotes — well-defined, ~100 lines to port.** `loadQuotes()` calls
+`api('/quotes')` (`/api/quotes`). The monolith's
+`/app/src/routes/quotes.js` (100 lines) is a complete, self-contained
+Express router: `GET /` (list with client+project join), `POST /` (create,
+using `doc_counters` for sequential `QTE-N` numbering), `GET /:id`,
+`PATCH /:id`, `POST /:id/accept`, `DELETE /:id`, plus `GET/PATCH /addons`
+for a `quote_addons` table. All referenced columns
+(`discount_pct`, `discount_amt`, `accepted_at`, `client_message`, etc.) and
+both tables (`quote_addons`, `doc_counters`) already exist in
+`01-schema.sql` — this should port to crm-service almost verbatim. Also
+needs: nginx regex updated to
+`^/api/(clients|projects|payment-plans|questionnaires|settings|tasks|quotes)`,
+and S10's demo seed already proves `quotes` table inserts work
+(QUO-DEMO-0001).
+
+**Reports — backend exists and ported version would match monolith parity,
+but the *frontend* expects a different/newer shape that the monolith itself
+never implemented (pre-existing gap, not a migration regression).**
+`loadReports()` calls `api('/admin/reports')` (`/api/admin/reports` — note
+the `/admin/` prefix, which no current nginx rule matches; would need its
+own `location` block, e.g. `^/api/admin/reports$` → crm-service or a new
+"admin" concern).
+
+The monolith's `/app/src/routes/admin.js` `GET /reports` (55 lines,
+confirmed working via session-cookie auth against `monolith-demo` — returned
+real data: `summary`, `monthly`, `sessions`, `stages`, `upcoming_sessions`,
+`outstanding_invoices`, `pipeline_stages`, `pipeline_total`,
+`confirmed_value`, `ytd_revenue`, `last_ytd_revenue`, `shoots_this_month`).
+
+However, the *active* `loadReports()` function in the frontend (there are
+two `function loadReports(){...}` definitions in the bundled admin JS — a
+JS redeclaration, so the second wins) reads `d.summary` (present) but also
+`d.galleryStats.published`, `d.annualRevenue` (array of
+`{year, revenue, bookings}`), `d.revenueMonthly`, and calls
+`updateProjectionCards(d)` — **none of these fields exist in the monolith's
+actual `/reports` response**, confirmed by `grep -rln
+"galleryStats|annualRevenue|revenueMonthly" /app/src/` returning nothing.
+
+**Conclusion**: the Reports page was very likely already partially broken
+in the monolith itself (backend returns shape A, frontend reads shape B) —
+this is pre-existing technical debt, not something the migration introduced.
+Porting the existing `/reports` endpoint to crm-service as `/api/admin/reports`
+would restore monolith-parity (summary cards `this_month`/`last_month`/
+`outstanding`/etc. would populate via `s.this_month` etc., which ARE read by
+`loadReports()`), but `galleryStats`/`annualRevenue`/`revenueMonthly`/
+`updateProjectionCards` sections would remain empty/broken — same as before
+migration. Fully fixing Reports (adding the missing fields) is a separate,
+larger enhancement beyond migration-parity scope.
+
+### Auth note (tangential finding, not a bug)
+
+While testing, confirmed the new `auth-service` issues stateless JWTs in the
+login response body (`{"success":true,"admin":{...},"token":"eyJ..."}`),
+whereas the monolith uses server-side sessions only (`{"success":true,
+"admin":{...}}` + `Set-Cookie: connect.sid=...`, no `token` field). Both
+`requireAdmin` middlewares accept *either* `req.session.adminId` OR a valid
+`Authorization: Bearer <JWT>` with `role:"admin"` — the new stack's JWT-based
+admin auth is a deliberate, working improvement (stateless, easier for
+distributed services), not a bug. (An earlier apparent "cross-service 401"
+during this investigation was just an expired JWT from hours earlier in the
+session — re-login resolved it immediately; no real auth bug exists.)
+
+### Revised next-session plan for Issue 25
+
+1. Check crm-service `GET /projects` response shape against what
+   `loadPipeline()` needs (`first_name`/`last_name`/`stage`/`session_type`/
+   `amount_quoted`/`session_date`) — likely just needs a `LEFT JOIN clients`
+   if not already present. Quick win.
+2. Port `quotes.js` to `services/crm-service/src/routes/quotes.js` (CRUD +
+   addons), mount at `/quotes`, update nginx regex to include `quotes`.
+3. Port the monolith's existing `/reports` (admin.js GET /reports) to
+   crm-service as `GET /admin/reports`, add nginx `location` for
+   `/api/admin/reports`. Accept that `galleryStats`/`annualRevenue`/
+   `revenueMonthly` sections remain empty (monolith-parity, not a
+   regression) — note this clearly in the portfolio narrative as "known
+   pre-existing gap, not introduced by migration."
+4. Re-check the Block Dates / Google Calendar sync JSON error similarly —
+   trace the "Sync Now" button's fetch call to its actual endpoint path and
+   confirm whether scheduler-service serves it and nginx routes it.
+
+
 
 
 
