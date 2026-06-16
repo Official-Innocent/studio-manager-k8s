@@ -660,6 +660,25 @@ body{background:var(--black);color:var(--white);font-family:var(--sans);min-heig
       <input id="cms-hero_tagline" type="text" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;">
     </div>
 
+    <!-- PAYMENTS -->
+    <div style="margin-bottom:2.5rem;">
+      <div style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;font-weight:600;border-bottom:0.5px solid rgba(201,168,76,0.1);padding-bottom:0.5rem;">Payments</div>
+      <label style="display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Deposit Payment Method</label>
+      <select id="cms-payment_mode" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;margin-bottom:1rem;">
+        <option value="stripe">Stripe — customers pay deposit online by card</option>
+        <option value="bank_transfer">Bank Transfer — customers see your bank details instead</option>
+      </select>
+      <div style="font-size:11px;color:var(--white-dim);line-height:1.7;margin-bottom:1.2rem;">When set to Bank Transfer, the "Pay Deposit &amp; Book" button on every package shows the bank details below instead of a Stripe payment link. Switch back to Stripe at any time once your payment links are ready — no other changes needed.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div><label style="display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Account Name</label><input id="cms-bank_account_name" type="text" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;"></div>
+        <div><label style="display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Sort Code</label><input id="cms-bank_sort_code" type="text" placeholder="00-00-00" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+        <div><label style="display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Account Number</label><input id="cms-bank_account_number" type="text" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;"></div>
+        <div><label style="display:block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;">Reference Note (optional)</label><input id="cms-bank_reference_note" type="text" placeholder="e.g. Use your name + session date as reference" style="width:100%;box-sizing:border-box;background:var(--dark2);border:0.5px solid rgba(201,168,76,0.2);color:var(--white);font-family:var(--sans);font-size:13px;padding:0.8rem 1rem;outline:none;"></div>
+      </div>
+    </div>
+
     <!-- ABOUT -->
     <div style="margin-bottom:2.5rem;">
       <div style="font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;font-weight:600;border-bottom:0.5px solid rgba(201,168,76,0.1);padding-bottom:0.5rem;">About Section</div>
@@ -2783,6 +2802,7 @@ function initCeTabs(){
 function loadSiteContent(){
   api('/settings/site-content').then(function(r){return r.json();}).then(function(d){
     var keys=['hero_tagline','about_title','about_body','about_signature',
+      'payment_mode','bank_account_name','bank_sort_code','bank_account_number','bank_reference_note',
       'instagram_url','facebook_url','coverage_text',
       'package_1_name','package_1_price','package_1_duration',
       'package_2_name','package_2_price','package_2_duration',
@@ -2792,7 +2812,7 @@ function loadSiteContent(){
       'testimonial_3_text','testimonial_3_author','testimonial_3_session'];
     keys.forEach(function(k){
       var el=document.getElementById('cms-'+k);
-      if(el)el.value=d[k]||'';
+      if(el)el.value=d[k]||(k==='payment_mode'?'stripe':'');
     });
     [1,2,3].forEach(function(n){
       var el=document.getElementById('cms-package_'+n+'_features');
@@ -2803,6 +2823,7 @@ function loadSiteContent(){
 function saveSiteContent(){
   var data={};
   var keys=['hero_tagline','about_title','about_body','about_signature',
+    'payment_mode','bank_account_name','bank_sort_code','bank_account_number','bank_reference_note',
     'instagram_url','facebook_url','coverage_text',
     'package_1_name','package_1_price','package_1_duration',
     'package_2_name','package_2_price','package_2_duration',

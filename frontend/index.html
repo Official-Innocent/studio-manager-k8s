@@ -320,6 +320,15 @@ footer{background:var(--dark2);border-top:0.5px solid rgba(201,168,76,0.1);}
 .gift-amount:hover{border-color:var(--gold);background:rgba(201,168,76,0.08);color:var(--gold);}
 .gift-note{font-size:11px;color:rgba(201,168,76,0.6);line-height:1.8;margin-top:2rem;letter-spacing:0.03em;}
 
+/* ── BANK TRANSFER MODAL ── */
+#bank-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:400;overflow-y:auto;padding:3rem;align-items:center;justify-content:center;}
+#bank-modal.open{display:flex;}
+#bank-modal-inner{max-width:560px;width:100%;background:var(--dark2);padding:3rem;position:relative;animation:pkgFadeIn 0.35s ease;}
+.bank-row{display:flex;justify-content:space-between;align-items:center;padding:0.7rem 0;border-bottom:0.5px solid rgba(245,240,232,0.06);}
+.bank-row:last-child{border-bottom:none;}
+.bank-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);}
+.bank-row strong{font-family:var(--serif);font-size:1.1rem;color:var(--gold);font-weight:400;}
+
 /* ── BUTTONS ── */
 .btn-primary{background:var(--gold);color:var(--black);font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;padding:1.1rem 2.8rem;text-decoration:none;transition:all 0.3s;border:none;cursor:pointer;display:inline-block;}
 .btn-primary:hover{background:var(--gold-light);}
@@ -628,6 +637,23 @@ footer{background:var(--dark2);border-top:0.5px solid rgba(201,168,76,0.1);}
       <a href="#contact" class="gift-amount" onclick="closeGiftModal();showForm('enquiry')">Custom</a>
     </div>
     <p class="gift-note">Vouchers are non-refundable and transferable, valid for 12 months from the date of purchase, and redeemable against any session package.</p>
+  </div>
+</div>
+
+<!-- BANK TRANSFER DETAILS MODAL -->
+<div id="bank-modal" onclick="if(event.target===this)closeBankDetails()">
+  <div id="bank-modal-inner">
+    <button class="pkg-modal-close" onclick="closeBankDetails()">&#x2715; Close</button>
+    <div id="bank-pkg-label" style="font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;"></div>
+    <div style="font-family:var(--serif);font-size:2.2rem;font-weight:300;color:var(--white);margin-bottom:0.8rem;">Secure Your Booking by <em style="font-style:italic;color:var(--gold);">Bank Transfer</em></div>
+    <p style="font-size:12px;color:var(--white-dim);line-height:1.8;margin-bottom:1.5rem;">Please transfer your deposit using the details below, then let us know via the booking form so we can confirm your date.</p>
+    <div style="background:var(--dark);border:0.5px solid rgba(201,168,76,0.2);padding:1.5rem;margin-bottom:1.5rem;">
+      <div class="bank-row"><span class="bank-label">Account Name</span><strong id="bank-account-name"></strong></div>
+      <div class="bank-row"><span class="bank-label">Sort Code</span><strong id="bank-sort-code"></strong></div>
+      <div class="bank-row"><span class="bank-label">Account Number</span><strong id="bank-account-number"></strong></div>
+    </div>
+    <p id="bank-reference-note" style="font-size:11px;color:rgba(201,168,76,0.7);line-height:1.8;margin-bottom:1.5rem;"></p>
+    <a href="#contact" class="btn-primary" onclick="closeBankDetails();showForm('booking')" style="display:block;text-align:center;">I've Sent the Transfer — Confirm My Booking</a>
   </div>
 </div>
 
@@ -1096,13 +1122,36 @@ function openPackageModal(type){
     var featuresHtml=pkg.features.map(function(f){
       return '<div class="pkg-feature"><span class="pkg-feature-label">'+f.label+'</span><strong>'+f.value+'</strong></div>';
     }).join('');
-    return '<div class="pkg-card" style="'+(pkg.popular?'border-top:2px solid #C9A84C;':'')+'">'+(pkg.popular?'<div class="pkg-popular">Most Popular</div>':'')+'<div class="pkg-tier">'+pkg.tier+'</div><div class="pkg-price">'+(pkg.price==='POA'?'<span style="font-size:1.4rem;font-weight:300;line-height:1.4;">Price on<br>Application</span>':pkg.price+'<span> total</span>')+'</div><div class="pkg-deposit">'+pkg.deposit+'</div><div class="pkg-divider"></div>'+featuresHtml+'<a href="'+pkg.link+'" target="_blank" class="pkg-btn">Pay Deposit &amp; Book</a><a href="#contact" onclick="closePackageModal();showForm(\'booking\')" class="pkg-btn-enquire">Enquire Instead</a></div>';
+    var isBankTransfer=siteContent.payment_mode==='bank_transfer';
+    var payAction;
+    if(isBankTransfer){
+      payAction='<a href="#contact" onclick="closePackageModal();openBankDetails(\''+pkg.tier.replace(/'/g,"\\'")+'\',\''+(data.label||'').replace(/'/g,"\\'")+'\')" class="pkg-btn">Pay Deposit &amp; Book</a>';
+    }else{
+      payAction='<a href="'+pkg.link+'" target="_blank" class="pkg-btn">Pay Deposit &amp; Book</a>';
+    }
+    return '<div class="pkg-card" style="'+(pkg.popular?'border-top:2px solid #C9A84C;':'')+'">'+(pkg.popular?'<div class="pkg-popular">Most Popular</div>':'')+'<div class="pkg-tier">'+pkg.tier+'</div><div class="pkg-price">'+(pkg.price==='POA'?'<span style="font-size:1.4rem;font-weight:300;line-height:1.4;">Price on<br>Application</span>':pkg.price+'<span> total</span>')+'</div><div class="pkg-deposit">'+pkg.deposit+'</div><div class="pkg-divider"></div>'+featuresHtml+payAction+'<a href="#contact" onclick="closePackageModal();showForm(\'booking\')" class="pkg-btn-enquire">Enquire Instead</a></div>';
   }).join('');
   document.getElementById('pkg-modal').style.display='block';
   document.body.style.overflow='hidden';
 }
 function closePackageModal(){
   document.getElementById('pkg-modal').style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── Bank transfer details modal ──
+function openBankDetails(tier,label){
+  document.getElementById('bank-pkg-label').textContent=(label||'')+(tier?' — '+tier:'');
+  document.getElementById('bank-account-name').textContent=siteContent.bank_account_name||'Please contact us for details';
+  document.getElementById('bank-sort-code').textContent=siteContent.bank_sort_code||'—';
+  document.getElementById('bank-account-number').textContent=siteContent.bank_account_number||'—';
+  var noteEl=document.getElementById('bank-reference-note');
+  noteEl.textContent=siteContent.bank_reference_note||'Please include your name as the payment reference.';
+  document.getElementById('bank-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeBankDetails(){
+  document.getElementById('bank-modal').classList.remove('open');
   document.body.style.overflow='';
 }
 
@@ -1116,7 +1165,7 @@ function closeGiftModal(){
   document.body.style.overflow='';
 }
 
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePackageModal();closeLightbox();closeGiftModal();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePackageModal();closeLightbox();closeGiftModal();closeBankDetails();}});
 document.getElementById('pkg-modal').addEventListener('click',function(e){if(e.target===this)closePackageModal();});
 
 // ── Lead capture ──
@@ -1149,9 +1198,11 @@ function submitLeadCapture(){
 }
 
 // ── CMS content ──
+var siteContent={};
 fetch('/api/site-content')
   .then(function(r){return r.json();})
   .then(function(d){
+    siteContent=d;
     var heroTag=document.querySelector('.hero-tagline');
     if(heroTag&&d.hero_tagline)heroTag.textContent=d.hero_tagline;
     var aboutTitle=document.querySelector('.about-title');
