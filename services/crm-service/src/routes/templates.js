@@ -101,4 +101,35 @@ router.delete('/questionnaire-templates/:id', async (req, res) => {
   } catch(e) { res.status(500).json({ error: 'Failed to delete template.' }); }
 });
 
+// ── Site Content (CMS) ────────────────────────────────────────────────────────
+// Used by the admin "Site Content" panel to read/write homepage copy
+// (hero tagline, about section, packages, testimonials) via the shared
+// site_settings key/value table.
+
+router.get('/site-content', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT key, value FROM site_settings ORDER BY key');
+    const settings = {};
+    rows.forEach(r => { settings[r.key] = r.value; });
+    res.json(settings);
+  } catch(e) { res.status(500).json({ error: 'Failed to load site content.' }); }
+});
+
+router.post('/site-content', async (req, res) => {
+  const updates = req.body;
+  if (!updates || typeof updates !== 'object') {
+    return res.status(400).json({ error: 'Site content must be an object.' });
+  }
+  try {
+    for (const [key, value] of Object.entries(updates)) {
+      await query(
+        `INSERT INTO site_settings (key, value, updated_at) VALUES ($1,$2,NOW())
+         ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+        [key, String(value)]
+      );
+    }
+    res.json({ success: true, message: `${Object.keys(updates).length} setting(s) updated.` });
+  } catch(e) { res.status(500).json({ error: 'Failed to save site content.' }); }
+});
+
 module.exports = router;

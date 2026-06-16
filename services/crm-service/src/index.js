@@ -11,6 +11,7 @@ const templatesRouter = require('./routes/templates');
 const tasksRouter = require('./routes/tasks');
 const quotesRouter = require('./routes/quotes');
 const adminReportsRouter = require('./routes/admin-reports');
+const storeRouter = require('./routes/store');
 
 const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
@@ -39,6 +40,7 @@ app.use('/settings', templatesRouter);
 app.use('/tasks', tasksRouter);
 app.use('/quotes', quotesRouter);
 app.use('/admin', adminReportsRouter);
+app.use('/store', storeRouter);
 
 app.listen(PORT, () => console.log('[crm-service] running on port ' + PORT));
 
