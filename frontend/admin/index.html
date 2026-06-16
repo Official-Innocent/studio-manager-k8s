@@ -888,7 +888,7 @@ var A='/api',calM=new Date().getMonth(),calY=new Date().getFullYear(),bkDates=[]
 function g(id){return document.getElementById(id);}
 function fmtD(d){return d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'--';}
 function toast(msg,err){var t=g('toast');t.textContent=msg;t.style.borderColor=err?'var(--red)':'var(--gold)';t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
-function api(path,opts){return fetch(A+path,Object.assign({credentials:'include'},opts||{}));}
+function api(path,opts){var o=Object.assign({credentials:'include'},opts||{});var t=localStorage.getItem('bsm_token');if(t){o.headers=Object.assign({},o.headers||{},{Authorization:'Bearer '+t});}return fetch(A+path,o);}
 
 function doLogin(){
   var email=g('em').value,pass=g('pw').value,btn=g('login-btn'),err=g('login-error');
@@ -898,6 +898,7 @@ function doLogin(){
   .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
   .then(function(res){
     if(!res.ok){err.textContent=res.d.error||'Login failed.';err.style.display='block';btn.disabled=false;btn.textContent='Sign In \u2192';return;}
+    if(res.d.token){localStorage.setItem('bsm_token',res.d.token);}
     g('topbar-user').textContent=res.d.admin.email;
     g('login-screen').style.display='none';g('dashboard').style.display='block';
     loadDash();
@@ -906,6 +907,7 @@ function doLogin(){
 
 function doLogout(){
   api('/auth/admin/logout',{method:'POST'}).finally(function(){
+    localStorage.removeItem('bsm_token');
     g('dashboard').style.display='none';g('login-screen').style.display='flex';g('pw').value='';
   });
 }
