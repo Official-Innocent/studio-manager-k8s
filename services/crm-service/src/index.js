@@ -9,6 +9,8 @@ const paymentPlansRouter = require('./routes/payment-plans');
 const questionnairesRouter = require('./routes/questionnaires');
 const templatesRouter = require('./routes/templates');
 const tasksRouter = require('./routes/tasks');
+const quotesRouter = require('./routes/quotes');
+const adminReportsRouter = require('./routes/admin-reports');
 
 const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
@@ -35,6 +37,8 @@ app.use('/payment-plans', paymentPlansRouter);
 app.use('/questionnaires', questionnairesRouter);
 app.use('/settings', templatesRouter);
 app.use('/tasks', tasksRouter);
+app.use('/quotes', quotesRouter);
+app.use('/admin', adminReportsRouter);
 
 app.listen(PORT, () => console.log('[crm-service] running on port ' + PORT));
 
