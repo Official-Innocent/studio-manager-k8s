@@ -178,17 +178,29 @@ async function sendGalleryReady(client, gallery, accessUrl) {
 
 // 5. Payment received — client
 async function sendPaymentReceived(payment, client) {
+  const hasBalance = payment.remaining_balance && payment.remaining_balance > 0;
+  const balanceBlock = hasBalance
+    ? `<div class="highlight">
+        <p class="label">Remaining Balance</p>
+        <p><strong style="color:#F5F0E8">Outstanding:</strong> £${Number(payment.remaining_balance).toFixed(2)}</p>
+        ${payment.next_due_date ? `<p><strong style="color:#F5F0E8">Next payment due:</strong> ${new Date(payment.next_due_date).toLocaleDateString('en-GB')}${payment.next_due_amount ? ` (£${Number(payment.next_due_amount).toFixed(2)})` : ''}</p>` : ''}
+      </div>`
+    : (payment.plan_completed
+      ? `<p style="color:#C9A84C"><strong>Your balance is now fully paid — thank you!</strong></p>`
+      : '');
   const html = emailWrapper(`
     <h2>Payment <em>Received</em></h2>
     <div class="gold-line"></div>
     <p>Hi ${client.first_name}, thank you — your payment has been received and processed successfully.</p>
     <div class="highlight">
       <p class="label">Payment Summary</p>
+      ${payment.label ? `<p><strong style="color:#F5F0E8">For:</strong> ${payment.label}</p>` : ''}
       <p><strong style="color:#F5F0E8">Amount:</strong> £${Number(payment.amount).toFixed(2)}</p>
       <p><strong style="color:#F5F0E8">Method:</strong> ${payment.method}</p>
       <p><strong style="color:#F5F0E8">Reference:</strong> ${payment.provider_ref || payment.id.split('-')[0].toUpperCase()}</p>
       <p><strong style="color:#F5F0E8">Date:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
     </div>
+    ${balanceBlock}
     <p>A receipt has been saved to your account. If you have any questions, please get in touch.</p>
   `, 'Your payment has been received');
 

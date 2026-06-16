@@ -1737,13 +1737,46 @@ function openProjectDetail(id){
         '</select>'+
       '</div>'+
       (p.notes?'<div style="background:#1a1a1a;border:0.5px solid rgba(201,168,76,0.08);padding:1rem;margin-bottom:1.5rem;font-size:12px;color:var(--white-dim);">'+p.notes+'</div>':'')+
+      '<div id="proj-payment-plan" style="margin-bottom:1.5rem;"><div style="font-size:11px;color:var(--white-dim);">Loading payment plan...</div></div>'+
       '<div style="display:flex;gap:0.8rem;">'+
         '<button onclick="saveProjectStage(\''+p.id+'\')" style="flex:2;background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Save Stage</button>'+
         '<button onclick="document.getElementById(\'modal-project-detail\').style.display=\'none\'" style="flex:1;background:none;border:0.5px solid rgba(201,168,76,0.2);color:var(--white-dim);font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Close</button>'+
       '</div>'+
     '</div>';
     modal.style.display='flex';
+    loadProjectPaymentPlan(p.id);
   });
+}
+
+function loadProjectPaymentPlan(projectId){
+  var el=document.getElementById('proj-payment-plan');
+  if(!el)return;
+  api('/payment-plans/project/'+projectId).then(function(r){return r.json();}).then(function(plan){
+    if(!plan){el.innerHTML='<div style="font-size:11px;color:var(--white-dim);">No payment plan set up for this project.</div>';return;}
+    var statusColors={paid:'#1D9E75',pending:'#C9A84C',overdue:'#E05555'};
+    var rows=(plan.installments||[]).map(function(inst){
+      var sc=statusColors[inst.status]||'#888780';
+      var paidBtn=inst.status==='paid'
+        ? '<span style="font-size:9px;color:'+sc+';text-transform:uppercase;letter-spacing:0.1em;">Paid'+(inst.paid_at?' '+new Date(inst.paid_at).toLocaleDateString('en-GB'):'')+'</span>'
+        : '<button onclick="markInstallmentPaid(\''+inst.id+'\',\''+projectId+'\')" style="background:none;border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:0.4rem 0.8rem;cursor:pointer;">Mark Paid</button>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:0.5px solid rgba(245,240,232,0.05);">'+
+        '<div><div style="font-size:12px;color:var(--white);">'+(inst.label||'Installment '+inst.installment_num)+'</div><div style="font-size:10px;color:var(--white-dim);">Due '+new Date(inst.due_date).toLocaleDateString('en-GB')+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:0.8rem;"><span style="font-size:12px;color:var(--gold);">£'+parseFloat(inst.amount).toFixed(2)+'</span>'+paidBtn+'</div>'+
+      '</div>';
+    }).join('');
+    el.innerHTML='<div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:0.6rem;">Payment Plan — £'+parseFloat(plan.amount_paid).toFixed(2)+' of £'+parseFloat(plan.total_amount).toFixed(2)+' paid</div>'+rows;
+  }).catch(function(){el.innerHTML='<div style="font-size:11px;color:var(--white-dim);">No payment plan set up for this project.</div>';});
+}
+
+function markInstallmentPaid(installmentId,projectId){
+  var sendEmail=confirm('Mark this installment as paid?\n\nClick OK to mark as paid AND send the client a payment confirmation email.\nClick Cancel to mark as paid WITHOUT sending an email.');
+  api('/payment-plans/installments/'+installmentId+'/mark-paid',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({notify:sendEmail})
+  }).then(function(r){return r.json();}).then(function(res){
+    if(res.success){toast(sendEmail?'Marked paid — confirmation email sent':'Marked paid');loadProjectPaymentPlan(projectId);}
+    else{toast(res.error||'Failed',true);}
+  }).catch(function(){toast('Failed to mark paid',true);});
 }
 
 function saveProjectStage(id){

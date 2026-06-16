@@ -2,6 +2,7 @@
 const express = require('express');
 const { query } = require('../config/database');
 const { requireAdmin } = require('../middleware/auth');
+const { publish } = require('../redis');
 const router = express.Router();
 router.use(requireAdmin);
 
@@ -132,7 +133,7 @@ router.patch('/installments/:id', async (req, res) => {
 
 // ── POST /payment-plans/installments/:id/mark-paid ────────────────────────────
 router.post('/installments/:id/mark-paid', async (req, res) => {
-  const { amount, method, ref } = req.body;
+  const { amount, method, ref, notify } = req.body;
   try {
     const { rows } = await query('SELECT * FROM payment_installments WHERE id=$1', [req.params.id]);
     if (!rows.length) return res.status(404).json({ error: 'Installment not found.' });
@@ -151,6 +152,42 @@ router.post('/installments/:id/mark-paid', async (req, res) => {
     const plan = planRows[0];
     if (plan.amount_paid >= plan.total_amount) {
       await query("UPDATE payment_plans SET status='completed' WHERE id=$1", [plan.id]);
+    }
+
+    // Default to sending the confirmation email unless explicitly disabled
+    // (notify:false), so admins marking several installments at once can
+    // suppress emails for backfilled/historic entries if needed.
+    if (notify !== false) {
+      try {
+        const { rows: clientRows } = await query(
+          'SELECT first_name, last_name, email FROM clients WHERE id=$1', [inst.client_id]
+        );
+        const client = clientRows[0];
+        const { rows: nextInst } = await query(
+          `SELECT * FROM payment_installments
+           WHERE plan_id=$1 AND status='pending' ORDER BY due_date ASC LIMIT 1`,
+          [inst.plan_id]
+        );
+        const remaining = Math.max(0, parseFloat(plan.total_amount) - parseFloat(plan.amount_paid));
+        if (client) {
+          await publish('payment.received', {
+            client: { first_name: client.first_name, last_name: client.last_name, email: client.email },
+            payment: {
+              amount: paidAmt,
+              method: method || 'bank_transfer',
+              provider_ref: ref || null,
+              id: inst.id,
+              label: inst.label,
+              remaining_balance: remaining,
+              next_due_date: nextInst[0] ? nextInst[0].due_date : null,
+              next_due_amount: nextInst[0] ? nextInst[0].amount : null,
+              plan_completed: plan.amount_paid >= plan.total_amount,
+            },
+          });
+        }
+      } catch (notifyErr) {
+        console.error('[payment-plans] notify failed:', notifyErr.message);
+      }
     }
 
     res.json({ success: true, paid: paidAmt });
