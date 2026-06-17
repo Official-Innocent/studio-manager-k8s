@@ -1,11 +1,13 @@
 'use strict';
 require('dotenv').config();
 const express = require('express');
-const { runAll } = require('./scheduler');
+const { runAll, runCalendarSync } = require('./scheduler');
+const { requireAdmin } = require('./middleware/auth');
 
 const { metricsMiddleware, metricsHandler } = require('./metrics');
 const app = express();
 const PORT = process.env.PORT || 3003;
+app.use(express.json());
 app.use(metricsMiddleware);
 
 const jobHealth = { lastRun: null, lastStatus: 'never', nextRun: null };
@@ -13,6 +15,19 @@ const jobHealth = { lastRun: null, lastStatus: 'never', nextRun: null };
 app.get('/metrics', metricsHandler);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'scheduler-service', timestamp: new Date().toISOString(), uptime: process.uptime(), scheduler: jobHealth });
+});
+
+// ── POST /sync — Admin: trigger an on-demand Google Calendar sync ────────────
+// Exposed via nginx as POST /api/calendar/sync. Reads every calendar in
+// GOOGLE_CALENDAR_IDS and writes any newly-busy dates into blocked_dates.
+app.post('/sync', requireAdmin, async (req, res) => {
+  try {
+    const stats = await runCalendarSync();
+    res.json({ success: true, blocked: stats.blocked, skipped: stats.skipped });
+  } catch (e) {
+    console.error('[scheduler-service] /sync error:', e.message);
+    res.status(500).json({ error: 'Calendar sync failed: ' + e.message });
+  }
 });
 
 app.post('/run', async (req, res) => {

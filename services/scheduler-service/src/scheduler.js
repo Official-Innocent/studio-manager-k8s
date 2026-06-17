@@ -480,21 +480,34 @@ async function runUptimeCheck() {
 }
 
 async function runCalendarSync() {
+  // Returns { blocked, skipped } so it can be used both by the periodic tick
+  // (runAll) and by the on-demand POST /sync admin endpoint.
+  const stats = { blocked: 0, skipped: 0 };
   try {
     const gcal = require('./googleCalendar');
     const events = await gcal.getExternalEvents(180);
-    let blocked = 0;
     for (var i = 0; i < events.length; i++) {
       var ev = events[i];
       var dateStr = ev.start.date || (ev.start.dateTime ? ev.start.dateTime.split('T')[0] : null);
-      if (!dateStr) continue;
-      if (ev.description && ev.description.includes('BSM-')) continue;
-      if (ev.organizer && ev.organizer.email && ev.organizer.email !== 'thephotographerltd@gmail.com' && ev.creator && ev.creator.email !== 'thephotographerltd@gmail.com') continue;
+      if (!dateStr) { stats.skipped++; continue; }
+      // Skip events we created ourselves (BSM bookings) so they aren't
+      // double-counted as "blocked" — they're already reflected via bookedDates.
+      if (ev.description && ev.description.includes('BSM-')) { stats.skipped++; continue; }
+      // Only trust events created/organised by one of our own calendars —
+      // this guards against e.g. an invite from someone else landing on a
+      // shared calendar and incorrectly blocking a date.
+      var sourceCal = ev._sourceCalendarId;
+      var isOwnEvent = (ev.organizer && ev.organizer.email === sourceCal) || (ev.creator && ev.creator.email === sourceCal);
+      if (!isOwnEvent) { stats.skipped++; continue; }
       await query('INSERT INTO blocked_dates (date, reason) VALUES ($1,$2) ON CONFLICT (date) DO UPDATE SET reason=$2', [dateStr, ev.summary || 'Google Calendar']);
-      blocked++;
+      stats.blocked++;
     }
-    console.log('[calendar sync] blocked', blocked, 'dates');
-  } catch(e) { console.error('[calendar sync] error:', e.message); }
+    console.log('[calendar sync] blocked', stats.blocked, 'dates,', stats.skipped, 'skipped');
+  } catch(e) {
+    console.error('[calendar sync] error:', e.message);
+    throw e;
+  }
+  return stats;
 }
 
 
@@ -549,4 +562,4 @@ async function runAll() {
   console.log("[scheduler] done");
 }
 
-module.exports = { runAll: runAll };
+module.exports = { runAll: runAll, runCalendarSync: runCalendarSync };

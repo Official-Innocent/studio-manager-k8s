@@ -1128,7 +1128,8 @@ function loadOrders(){
 function renderCal(){
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   g('cal-label').textContent=months[calM]+' '+calY;
-  api('/calendar/availability?year='+calY+'&month='+(calM+1)).then(function(r){return r.json();}).then(function(d){
+  var monthParam = calY + '-' + String(calM+1).padStart(2,'0');
+  api('/bookings/availability?month='+monthParam).then(function(r){return r.json();}).then(function(d){
     bkDates=d.bookedDates||[];blDates=d.blockedDates||[];buildCal();
   }).catch(function(){bkDates=[];blDates=[];buildCal();});
 }
@@ -3183,14 +3184,14 @@ function updateProjectionCards(d) {
       btn.disabled = true;
       btn.textContent = 'Syncing...';
       status.textContent = 'Fetching Google Calendar events...';
-      fetch('/api/calendar/sync', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' } })
+      api('/calendar/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' } })
         .then(function(r) { return r.json(); })
         .then(function(d) {
           btn.disabled = false;
           btn.textContent = 'Sync Now';
           status.style.color = 'var(--gold)';
           status.textContent = 'Synced — ' + (d.blocked||0) + ' dates blocked, ' + (d.skipped||0) + ' skipped.';
-          if (typeof loadCal === 'function') loadCal();
+          if (typeof renderCal === 'function') renderCal();
         })
         .catch(function(err) {
           btn.disabled = false;

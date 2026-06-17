@@ -1,0 +1,5 @@
+[33maa1dc31[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Stage 8: BiggShots Monitor v2 + prom-client metrics on all services
+[33ma5bd1a7[m[33m ([m[1;31morigin/main[m[33m)[m docs: Stage 7 complete
+[33m1f1fe65[m feat: Stage 6 — Prometheus + Grafana deployed via Helm, dashboards verified
+[33mef8a7c5[m docs: Stage 5 complete
+[33mde24422[m feat: Stage 5 — Kubernetes manifests, kind cluster deployed, all 10 pods running, fault isolation verified

@@ -199,7 +199,7 @@ router.patch('/:id', requireAdmin, async (req, res) => {
       query("SELECT id FROM clients WHERE email=$1", [rows[0].email]).then(function(cr){ if(cr.rows.length) { autoCreatePortalAccount(cr.rows[0].id, rows[0].first_name, rows[0].last_name, rows[0].email).catch(console.error); } }).catch(console.error);
       // Create Google Calendar event
       gcal.createEvent(rows[0]).then(function(eventId) {
-        return query('UPDATE bookings SET calendar_event_id= WHERE id=', [eventId, rows[0].id]);
+        return query('UPDATE bookings SET calendar_event_id=$1 WHERE id=$2', [eventId, rows[0].id]);
       }).catch(function(e) { console.error("[gcal] create failed:", e.message); });
     } else if (rows[0].calendar_event_id && (updates.session_date || updates.status)) {
       gcal.updateEvent(rows[0].calendar_event_id, rows[0]).catch(function(e) { console.error("[gcal] update failed:", e.message); });
