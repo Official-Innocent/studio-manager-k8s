@@ -74,7 +74,7 @@ router.get('/admin/me', requireAdmin, async (req, res) => {
   try {
     const { rows } = await query(
       'SELECT id, email, name, role, last_login FROM admin_users WHERE id=$1',
-      [req.session.adminId]
+      [req.session?.adminId || req.adminId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Admin not found.' });
     res.json(rows[0]);
@@ -114,15 +114,16 @@ router.post('/admin/change-password', requireAdmin,
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { currentPassword, newPassword } = req.body;
+    const adminId = req.session?.adminId || req.adminId;
     try {
-      const { rows } = await query('SELECT password_hash FROM admin_users WHERE id=$1', [req.session.adminId]);
+      const { rows } = await query('SELECT password_hash FROM admin_users WHERE id=$1', [adminId]);
       if (!rows.length) return res.status(404).json({ error: 'Admin not found.' });
 
       const match = await bcrypt.compare(currentPassword, rows[0].password_hash);
       if (!match) return res.status(401).json({ error: 'Current password is incorrect.' });
 
       const hash = await bcrypt.hash(newPassword, 12);
-      await query('UPDATE admin_users SET password_hash=$1 WHERE id=$2', [hash, req.session.adminId]);
+      await query('UPDATE admin_users SET password_hash=$1 WHERE id=$2', [hash, adminId]);
 
       res.json({ success: true, message: 'Password updated successfully.' });
     } catch (err) {

@@ -1166,10 +1166,35 @@ function saveSettings(){
   .then(function(){toast('Settings saved');}).catch(function(){toast('Error saving',true);});
 }
 
-api('/auth/admin/me').then(function(r){return r.ok?r.json():Promise.reject();}).then(function(d){
-  g('topbar-user').textContent=d.email;
-  g('login-screen').style.display='none';g('dashboard').style.display='block';loadDash();
-}).catch(function(){});
+// On load, check if the stored token is still valid. A 401 means genuinely
+// logged out — show the login screen. Any other failure (network blip, 5xx)
+// is transient, so we leave whichever screen is already showing rather than
+// silently bouncing a valid session back to login.
+api('/auth/admin/me').then(function(r){
+  if(r.ok)return r.json().then(function(d){return{authed:true,d:d};});
+  if(r.status===401)return{authed:false};
+  return Promise.reject(new Error('transient'));
+}).then(function(res){
+  if(res.authed){
+    g('topbar-user').textContent=res.d.email;
+    g('login-screen').style.display='none';g('dashboard').style.display='block';loadDash();
+  } else {
+    localStorage.removeItem('bsm_token');
+    g('login-screen').style.display='flex';g('dashboard').style.display='none';
+  }
+}).catch(function(){
+  // Transient failure — if we still have a token, assume the session may be
+  // valid and retry once rather than forcing a re-login.
+  var t=localStorage.getItem('bsm_token');
+  if(t){
+    setTimeout(function(){
+      api('/auth/admin/me').then(function(r){return r.ok?r.json():Promise.reject();}).then(function(d){
+        g('topbar-user').textContent=d.email;
+        g('login-screen').style.display='none';g('dashboard').style.display='block';loadDash();
+      }).catch(function(){});
+    },1500);
+  }
+});
 
 // ── FADE TRANSITION HELPER ────────────────────────────────────────────────────
 function fadeIn(el){el.style.opacity='0';el.style.transition='opacity 0.3s ease';setTimeout(function(){el.style.opacity='1';},10);}
