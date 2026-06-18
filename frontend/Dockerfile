@@ -4,6 +4,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Static frontend assets
 COPY index.html /usr/share/nginx/html/index.html
+COPY promo_banner.js /usr/share/nginx/html/promo_banner.js
 COPY admin/ /usr/share/nginx/html/admin/
 COPY portal/ /usr/share/nginx/html/portal/
 COPY pipeline/ /usr/share/nginx/html/pipeline/

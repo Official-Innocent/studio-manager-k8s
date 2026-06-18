@@ -46,8 +46,12 @@ nav.promo-active{background:rgba(10,10,10,0.97)!important;backdrop-filter:blur(1
 .mobile-menu a:hover{color:var(--gold);}
 .mobile-close{position:absolute;top:1.5rem;right:2rem;font-size:1.5rem;cursor:pointer;color:var(--white-dim);}
 
-/* ── PROMO ZONE (reserved space, fixed height — banner OR default trust strip lives here) ── */
-.promo-zone{height:140px;background:var(--dark);border-bottom:0.5px solid rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+/* ── PROMO ZONE (reserved space — banner OR default trust strip lives here).
+   min-height keeps the default trust strip at a fixed 140px, but lets a
+   promo banner with extra content (eyebrow, CTA button, countdown timer)
+   grow taller without being clipped. The hero section below is unaffected
+   either way, since it only reacts to total page height, not a fixed offset. */
+.promo-zone{min-height:140px;background:var(--dark);border-bottom:0.5px solid rgba(201,168,76,0.12);display:flex;align-items:center;justify-content:center;position:relative;}
 .promo-zone-default{display:flex;align-items:center;gap:2.5rem;flex-wrap:wrap;justify-content:center;padding:0 3rem;max-width:1100px;}
 .promo-zone-default .trust-item-text{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white-dim);}
 .promo-zone-default .trust-item-icon{color:var(--gold);font-size:1rem;}

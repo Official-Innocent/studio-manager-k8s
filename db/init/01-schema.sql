@@ -666,7 +666,9 @@ CREATE TABLE public.promotions (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     last_broadcast_at timestamp with time zone,
-    reminder_sent boolean DEFAULT false
+    reminder_sent boolean DEFAULT false,
+    show_availability_count boolean DEFAULT false,
+    availability_month character varying(7)
 );
 
 

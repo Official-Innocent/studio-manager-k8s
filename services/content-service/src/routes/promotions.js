@@ -8,7 +8,8 @@ const router = express.Router();
 router.get('/active', async (req, res) => {
   try {
     const { rows } = await query(`
-      SELECT id, type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, ends_at
+      SELECT id, type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, ends_at,
+             show_availability_count, availability_month
       FROM promotions
       WHERE active = true
         AND (starts_at IS NULL OR starts_at <= NOW())
@@ -38,14 +39,18 @@ router.post('/admin', requireAdmin, async (req, res) => {
     type = 'banner', message, eyebrow, cta_label, cta_link,
     bg_colour = 'gold', show_countdown = false, active = false,
     starts_at, ends_at,
+    show_availability_count = false, availability_month,
   } = req.body;
   if (!message) return res.status(400).json({ error: 'message is required.' });
+  if (show_availability_count && !/^\d{4}-\d{2}$/.test(availability_month || '')) {
+    return res.status(400).json({ error: 'availability_month must be in YYYY-MM format when show_availability_count is enabled.' });
+  }
   try {
     const { rows } = await query(`
-      INSERT INTO promotions (type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, active, starts_at, ends_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      INSERT INTO promotions (type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, active, starts_at, ends_at, show_availability_count, availability_month)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *
-    `, [type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, active, starts_at || null, ends_at || null]);
+    `, [type, message, eyebrow, cta_label, cta_link, bg_colour, show_countdown, active, starts_at || null, ends_at || null, show_availability_count, availability_month || null]);
     res.status(201).json(rows[0]);
   } catch (e) {
     res.status(500).json({ error: 'Failed to create promotion.' });
@@ -54,7 +59,7 @@ router.post('/admin', requireAdmin, async (req, res) => {
 
 // ── PATCH /promotions/admin/:id — admin: update a promotion ────────────────────
 router.patch('/admin/:id', requireAdmin, async (req, res) => {
-  const fields = ['type','message','eyebrow','cta_label','cta_link','bg_colour','show_countdown','active','starts_at','ends_at'];
+  const fields = ['type','message','eyebrow','cta_label','cta_link','bg_colour','show_countdown','active','starts_at','ends_at','show_availability_count','availability_month'];
   const updates = [];
   const values = [];
   let i = 1;
