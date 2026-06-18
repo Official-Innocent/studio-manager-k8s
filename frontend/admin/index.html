@@ -1044,7 +1044,7 @@ function addBkListeners(tb){
   tb.querySelectorAll('[data-edit]').forEach(function(btn){
     btn.addEventListener('click',function(){
       var id=this.getAttribute('data-edit');
-      fetch('/api/bookings/'+id,{credentials:'include'}).then(function(r){return r.json();}).then(function(b){
+      fetch('/api/bookings/'+id,{credentials:'include',headers:{Authorization:'Bearer '+localStorage.getItem('bsm_token')}}).then(function(r){return r.json();}).then(function(b){
         if(b.id)openEditModal(b);
         else toast('Could not load booking',true);
       }).catch(function(){toast('Error loading booking',true);});
@@ -1210,7 +1210,7 @@ g("btn-add-client").addEventListener("click",function(){
   msg.style.display="none";
   if(!first||!email){msg.textContent="First name and email are required.";msg.style.color="var(--red)";msg.style.display="block";return;}
   var btn=this;btn.disabled=true;btn.textContent="Adding...";
-  fetch("/api/clients",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({first_name:first,last_name:last,email:email,phone:phone||null,create_portal:portal})})
+  fetch("/api/clients",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("bsm_token")},body:JSON.stringify({first_name:first,last_name:last,email:email,phone:phone||null,create_portal:portal})})
   .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
   .then(function(res){
     btn.disabled=false;btn.textContent="Add Client";
@@ -1281,11 +1281,11 @@ g("btn-cancel-booking").addEventListener("click",function(){
   var msg=g("cancel-msg");
   msg.style.display="none";
   if(!pw){msg.textContent="Enter admin password to confirm cancellation.";msg.style.display="block";return;}
-  fetch("/api/auth/admin/verify-password",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:pw})})
+  fetch("/api/auth/admin/verify-password",{method:"POST",credentials:"include",headers:{"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("bsm_token")},body:JSON.stringify({password:pw})})
   .then(function(r){return r.json().then(function(d){return{ok:r.ok,d:d};});})
   .then(function(res){
     if(!res.ok){msg.textContent="Incorrect password.";msg.style.display="block";return;}
-    return fetch("/api/bookings/"+id,{method:"PATCH",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"cancelled"})})
+    return fetch("/api/bookings/"+id,{method:"PATCH",credentials:"include",headers:{"Content-Type":"application/json",Authorization:"Bearer "+localStorage.getItem("bsm_token")},body:JSON.stringify({status:"cancelled"})})
     .then(function(){toast("Booking cancelled");closeEditModal();loadBookings();loadDash();});
   }).catch(function(){msg.textContent="Error. Please try again.";msg.style.display="block";});
 });
@@ -1495,7 +1495,7 @@ function uploadGalleryBatch(batches,idx,done,total){
   g("gal-prog-text").textContent="Uploading "+(done+1)+" to "+Math.min(done+batches[idx].length,total)+" of "+total+"...";
   var fd=new FormData();
   batches[idx].forEach(function(f){fd.append("photos",f);});
-  fetch("/api/photos/upload/"+curGal.id,{method:"POST",credentials:"include",body:fd})
+  fetch("/api/photos/upload/"+curGal.id,{method:"POST",credentials:"include",headers:{Authorization:"Bearer "+localStorage.getItem("bsm_token")},body:fd})
   .then(function(r){
     if(!r.ok){return r.text().then(function(t){throw new Error(t);});}
     return r.json();
@@ -2263,7 +2263,7 @@ function handlePhotoUpload(galleryId,input){
   if(prog)prog.textContent='Uploading '+files.length+' photo'+(files.length!==1?'s':'')+', please wait...';
   var fd=new FormData();
   Array.from(files).forEach(function(f){fd.append('photos',f);});
-  fetch('/api/photos/upload/'+galleryId,{method:'POST',credentials:'include',body:fd})
+  fetch('/api/photos/upload/'+galleryId,{method:'POST',credentials:'include',headers:{Authorization:'Bearer '+localStorage.getItem('bsm_token')},body:fd})
   .then(function(r){return r.json();}).then(function(res){
     toast(files.length+' photo'+(files.length!==1?'s':'')+' uploaded successfully!');
     if(zone)zone.style.display='none';
@@ -2906,7 +2906,7 @@ function saveSiteContent(){
 }
 
 function reorderPortfolio(photos){
-  fetch('/api/portfolio/reorder',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({order:photos})});
+  fetch('/api/portfolio/reorder',{method:'PATCH',credentials:'include',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage.getItem('bsm_token')},body:JSON.stringify({order:photos})});
 }
 var pmgrSelected={};
 function pmgrUpdateToolbar(){
@@ -2930,7 +2930,7 @@ function pmgrDeleteSelected(){
   if(!sel.length)return;
   if(!confirm('Delete '+sel.length+' photo'+(sel.length>1?'s':'')+' from portfolio?'))return;
   Promise.all(sel.map(function(fn){
-    return fetch('/api/portfolio/'+fn,{method:'DELETE',credentials:'include'}).then(function(r){return r.json();});
+    return fetch('/api/portfolio/'+fn,{method:'DELETE',credentials:'include',headers:{Authorization:'Bearer '+localStorage.getItem('bsm_token')}}).then(function(r){return r.json();});
   })).then(function(){pmgrSelected={};safeToast('Photos deleted');loadPortfolioMgr();});
 }
 function loadPortfolioMgr(){
@@ -2986,7 +2986,7 @@ function loadPortfolioMgr(){
 }
 function deletePortfolioPhoto(filename){
   if(!confirm('Remove this photo from the portfolio?'))return;
-  fetch('/api/portfolio/'+filename,{method:'DELETE',credentials:'include'})
+  fetch('/api/portfolio/'+filename,{method:'DELETE',credentials:'include',headers:{Authorization:'Bearer '+localStorage.getItem('bsm_token')}})
     .then(function(r){return r.json();}).then(function(d){
       if(d.success){safeToast('Photo removed');loadPortfolioMgr();}
       else safeToast('Error removing photo',true);
@@ -3003,7 +3003,7 @@ function uploadPortfolioPhotos(input){
   status.textContent='Uploading and optimising '+files.length+' photo'+(files.length>1?'s':'')+'...';
   var fd = new FormData();
   files.forEach(function(f){fd.append('photos',f);});
-  fetch('/api/portfolio/upload',{method:'POST',credentials:'include',body:fd})
+  fetch('/api/portfolio/upload',{method:'POST',credentials:'include',headers:{Authorization:'Bearer '+localStorage.getItem('bsm_token')},body:fd})
     .then(function(r){return r.json();}).then(function(d){
       if(d.success){
         status.style.color='var(--green)';
