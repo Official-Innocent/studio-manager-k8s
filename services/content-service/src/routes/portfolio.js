@@ -12,13 +12,20 @@ const PORTFOLIO_DIR = process.env.PORTFOLIO_DIR || '/data/portfolio';
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 // ── GET /portfolio — list public portfolio photos ───────────────────────────
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     if (!fs.existsSync(PORTFOLIO_DIR)) return res.json({ photos: [] });
     const files = fs.readdirSync(PORTFOLIO_DIR)
-      .filter(f => /^opt_.*\.(jpg|jpeg|png)$/i.test(f))
-      .sort();
-    res.json({ photos: files.map(f => '/assets/portfolio/' + f) });
+      .filter(f => /^opt_.*\.(jpg|jpeg|png)$/i.test(f));
+    try {
+      const { query } = require('../config/database');
+      const r = await query("SELECT value FROM site_settings WHERE key='portfolio_order'");
+      const ord = r.rows[0] ? JSON.parse(r.rows[0].value) : [];
+      const sorted = ord.filter(f => files.includes(f)).concat(files.filter(f => !ord.includes(f)));
+      return res.json({ photos: sorted.map(f => '/assets/portfolio/' + f) });
+    } catch(e) {
+      return res.json({ photos: files.sort().map(f => '/assets/portfolio/' + f) });
+    }
   } catch (e) {
     res.json({ photos: [] });
   }
@@ -62,11 +69,8 @@ router.delete('/:filename', requireAdmin, (req, res) => {
 });
 
 // ── PATCH /portfolio/reorder — admin: persist display order ──────────────────
-// Stores the desired filename order in site_settings under key 'portfolio_order'.
-// GET / returns alphabetical order by default; frontends that care about order
-// should read 'portfolio_order' from /site-content and sort client-side.
 router.patch('/reorder', requireAdmin, async (req, res) => {
-  const { order } = req.body; // array of filenames, desired order
+  const { order } = req.body;
   if (!Array.isArray(order)) return res.status(400).json({ error: 'order must be an array of filenames' });
   try {
     const { query } = require('../config/database');
