@@ -16,7 +16,7 @@ spec:
       containers:
       - name: scheduler-service
         image: innocentobuteofficial/scheduler-service:latest
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         ports:
         - containerPort: 3003
         envFrom:

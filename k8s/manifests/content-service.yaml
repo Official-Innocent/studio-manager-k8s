@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: booking-service
+  name: content-service
   namespace: biggshots
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: booking-service
+      app: content-service
   template:
     metadata:
       labels:
-        app: booking-service
+        app: content-service
     spec:
       containers:
-      - name: booking-service
-        image: innocentobuteofficial/booking-service:latest
+      - name: content-service
+        image: innocentobuteofficial/bsm-content-service:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3004
+        - containerPort: 3008
         envFrom:
         - configMapRef:
             name: biggshots-config
@@ -27,13 +27,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3004
+            port: 3008
           initialDelaySeconds: 15
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
-            port: 3004
+            port: 3008
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
@@ -47,11 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: booking-service
+  name: content-service
   namespace: biggshots
 spec:
   selector:
-    app: booking-service
+    app: content-service
   ports:
-  - port: 3004
-    targetPort: 3004
+  - port: 3008
+    targetPort: 3008

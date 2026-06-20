@@ -16,7 +16,7 @@ spec:
       containers:
       - name: notification-service
         image: innocentobuteofficial/notification-service:latest
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         ports:
         - containerPort: 3001
         envFrom:
