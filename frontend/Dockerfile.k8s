@@ -1,12 +1,17 @@
 FROM nginx:alpine
 
 COPY . /usr/share/nginx/html
-COPY nginx.k8s.conf /etc/nginx/conf.d/default.conf
+COPY nginx.k8s.conf.template /etc/nginx/templates/default.conf.template
 
 # Remove files that shouldn't be served as static content
 RUN rm -f /usr/share/nginx/html/Dockerfile \
           /usr/share/nginx/html/nginx.conf \
           /usr/share/nginx/html/nginx.k8s.conf \
+          /usr/share/nginx/html/nginx.k8s.conf.template \
           /usr/share/nginx/html/Dockerfile.k8s
+
+# Default namespace if not overridden — matches our dev namespace
+ENV K8S_NAMESPACE=biggshots
+ENV NGINX_ENVSUBST_FILTER=K8S_NAMESPACE
 
 EXPOSE 80

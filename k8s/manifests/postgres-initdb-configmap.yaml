@@ -1,0 +1,676 @@
+apiVersion: v1
+data:
+  00-create-prod-role.sql: |
+    -- Compatibility shim for demo/dev environments
+    -- The schema dump (01-schema.sql) was exported from production and hardcodes
+    -- "ALTER ... OWNER TO biggshots_prod" statements. Rather than maintain a
+    -- patched copy of the schema, we create a role alias here so the dump runs
+    -- unmodified in any environment.
+    DO
+    $$
+    BEGIN
+       IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'biggshots_prod') THEN
+          CREATE ROLE biggshots_prod;
+       END IF;
+    END
+    $$;
+  01-schema.sql: "--\n-- PostgreSQL database dump\n--\n\n\\restrict xLxPb3pWrVXcaNRy99aTOXa2rOecOUlQsUAors6W2nR3fgxjpb1woDjboS9oaQH\n\n--
+    Dumped from database version 16.14\n-- Dumped by pg_dump version 16.14\n\nSET
+    statement_timeout = 0;\nSET lock_timeout = 0;\nSET idle_in_transaction_session_timeout
+    = 0;\nSET client_encoding = 'UTF8';\nSET standard_conforming_strings = on;\nSELECT
+    pg_catalog.set_config('search_path', '', false);\nSET check_function_bodies =
+    false;\nSET xmloption = content;\nSET client_min_messages = warning;\nSET row_security
+    = off;\n\n--\n-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -\n--\n\nCREATE
+    EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;\n\n\n--\n-- Name: EXTENSION
+    pgcrypto; Type: COMMENT; Schema: -; Owner: \n--\n\nCOMMENT ON EXTENSION pgcrypto
+    IS 'cryptographic functions';\n\n\n--\n-- Name: uuid-ossp; Type: EXTENSION; Schema:
+    -; Owner: -\n--\n\nCREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA public;\n\n\n--\n--
+    Name: EXTENSION \"uuid-ossp\"; Type: COMMENT; Schema: -; Owner: \n--\n\nCOMMENT
+    ON EXTENSION \"uuid-ossp\" IS 'generate universally unique identifiers (UUIDs)';\n\n\n--\n--
+    Name: update_updated_at(); Type: FUNCTION; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    FUNCTION public.update_updated_at() RETURNS trigger\n    LANGUAGE plpgsql\n    AS
+    $$\nBEGIN\n  NEW.updated_at = NOW();\n  RETURN NEW;\nEND;\n$$;\n\n\nALTER FUNCTION
+    public.update_updated_at() OWNER TO biggshots_prod;\n\nSET default_tablespace
+    = '';\n\nSET default_table_access_method = heap;\n\n--\n-- Name: admin_users;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.admin_users
+    (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n    email character
+    varying(255) NOT NULL,\n    password_hash character varying(255) NOT NULL,\n    name
+    character varying(255) DEFAULT 'Studio Owner'::character varying NOT NULL,\n    role
+    character varying(50) DEFAULT 'owner'::character varying NOT NULL,\n    created_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    last_login timestamp with
+    time zone\n);\n\n\nALTER TABLE public.admin_users OWNER TO biggshots_prod;\n\n--\n--
+    Name: blocked_dates; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.blocked_dates (\n    id uuid DEFAULT public.uuid_generate_v4() NOT
+    NULL,\n    date date NOT NULL,\n    reason character varying(255),\n    created_at
+    timestamp with time zone DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.blocked_dates
+    OWNER TO biggshots_prod;\n\n--\n-- Name: bookings; Type: TABLE; Schema: public;
+    Owner: biggshots_prod\n--\n\nCREATE TABLE public.bookings (\n    id uuid DEFAULT
+    public.uuid_generate_v4() NOT NULL,\n    client_id uuid,\n    first_name character
+    varying(100) NOT NULL,\n    last_name character varying(100) NOT NULL,\n    email
+    character varying(255) NOT NULL,\n    phone character varying(30),\n    session_type
+    character varying(100) NOT NULL,\n    session_date date NOT NULL,\n    session_time
+    time without time zone,\n    duration_hours numeric(4,1),\n    location text,\n
+    \   notes text,\n    package_id uuid,\n    status character varying(30) DEFAULT
+    'pending'::character varying NOT NULL,\n    payment_status character varying(30)
+    DEFAULT 'unpaid'::character varying NOT NULL,\n    amount_total numeric(10,2),\n
+    \   amount_paid numeric(10,2) DEFAULT 0,\n    contract_signed boolean DEFAULT
+    false NOT NULL,\n    contract_signed_at timestamp with time zone,\n    internal_notes
+    text,\n    created_at timestamp with time zone DEFAULT now() NOT NULL,\n    updated_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    calendar_event_id character
+    varying(255),\n    enquiry_source character varying(100),\n    enquiry_source_detail
+    text\n);\n\n\nALTER TABLE public.bookings OWNER TO biggshots_prod;\n\n--\n-- Name:
+    client_loyalty; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.client_loyalty (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n
+    \   client_id uuid NOT NULL,\n    total_sessions integer DEFAULT 0 NOT NULL,\n
+    \   current_cycle integer DEFAULT 0 NOT NULL,\n    threshold integer DEFAULT 3
+    NOT NULL,\n    discount_pct integer DEFAULT 10 NOT NULL,\n    award_count integer
+    DEFAULT 0 NOT NULL,\n    last_award_at timestamp with time zone,\n    updated_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    created_at timestamp with
+    time zone DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.client_loyalty OWNER
+    TO biggshots_prod;\n\n--\n-- Name: clients; Type: TABLE; Schema: public; Owner:
+    biggshots_prod\n--\n\nCREATE TABLE public.clients (\n    id uuid DEFAULT public.uuid_generate_v4()
+    NOT NULL,\n    email character varying(255) NOT NULL,\n    password_hash character
+    varying(255),\n    first_name character varying(100) NOT NULL,\n    last_name
+    character varying(100) NOT NULL,\n    phone character varying(30),\n    address
+    text,\n    notes text,\n    created_at timestamp with time zone DEFAULT now()
+    NOT NULL,\n    last_login timestamp with time zone,\n    is_active boolean DEFAULT
+    true NOT NULL,\n    portal_enabled boolean DEFAULT false NOT NULL,\n    welcome_sent_at
+    timestamp with time zone,\n    birthday date,\n    session_anniversary date,\n
+    \   anniversary_date date,\n    marketing_consent boolean DEFAULT true,\n    tags
+    text[],\n    loyalty_threshold integer DEFAULT 3,\n    loyalty_discount integer
+    DEFAULT 10,\n    status character varying(20) DEFAULT 'active'::character varying,\n
+    \   CONSTRAINT clients_status_check CHECK (((status)::text = ANY (ARRAY[('lead'::character
+    varying)::text, ('prospect'::character varying)::text, ('active'::character varying)::text,
+    ('delivered'::character varying)::text, ('archived'::character varying)::text])))\n);\n\n\nALTER
+    TABLE public.clients OWNER TO biggshots_prod;\n\n--\n-- Name: contract_templates;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.contract_templates
+    (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n    name text NOT NULL,\n
+    \   contract_type text DEFAULT 'general'::text NOT NULL,\n    body text NOT NULL,\n
+    \   is_default boolean DEFAULT false,\n    created_at timestamp with time zone
+    DEFAULT now() NOT NULL,\n    updated_at timestamp with time zone DEFAULT now()
+    NOT NULL\n);\n\n\nALTER TABLE public.contract_templates OWNER TO biggshots_prod;\n\n--\n--
+    Name: contracts; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.contracts (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n    project_id
+    uuid,\n    client_id uuid NOT NULL,\n    template_id uuid,\n    contract_type
+    text DEFAULT 'general'::text NOT NULL,\n    title text NOT NULL,\n    body text
+    NOT NULL,\n    status text DEFAULT 'draft'::text NOT NULL,\n    client_name_signed
+    text,\n    client_signature text,\n    signed_at timestamp with time zone,\n    sent_at
+    timestamp with time zone,\n    created_at timestamp with time zone DEFAULT now()
+    NOT NULL,\n    updated_at timestamp with time zone DEFAULT now() NOT NULL,\n    CONSTRAINT
+    contracts_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'sent'::text,
+    'signed'::text, 'declined'::text])))\n);\n\n\nALTER TABLE public.contracts OWNER
+    TO biggshots_prod;\n\n--\n-- Name: delivery_timeframes; Type: TABLE; Schema: public;
+    Owner: biggshots_prod\n--\n\nCREATE TABLE public.delivery_timeframes (\n    id
+    uuid DEFAULT gen_random_uuid() NOT NULL,\n    session_type text NOT NULL,\n    delivery_days
+    integer NOT NULL,\n    gallery_expiry_days integer DEFAULT 30 NOT NULL,\n    label
+    text NOT NULL\n);\n\n\nALTER TABLE public.delivery_timeframes OWNER TO biggshots_prod;\n\n--\n--
+    Name: doc_counters; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.doc_counters (\n    doc_type text NOT NULL,\n    last_num integer
+    DEFAULT 1000 NOT NULL\n);\n\n\nALTER TABLE public.doc_counters OWNER TO biggshots_prod;\n\n--\n--
+    Name: email_log; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.email_log (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n
+    \   to_email character varying(255) NOT NULL,\n    subject character varying(500)
+    NOT NULL,\n    template character varying(100),\n    status character varying(30)
+    DEFAULT 'sent'::character varying NOT NULL,\n    error text,\n    sent_at timestamp
+    with time zone DEFAULT now() NOT NULL,\n    client_id uuid,\n    body text,\n
+    \   from_email text,\n    created_at timestamp with time zone DEFAULT now(),\n
+    \   project_id uuid,\n    direction text DEFAULT 'outbound'::text,\n    email_type
+    text\n);\n\n\nALTER TABLE public.email_log OWNER TO biggshots_prod;\n\n--\n--
+    Name: galleries; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.galleries (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n
+    \   client_id uuid,\n    booking_id uuid,\n    title character varying(255) NOT
+    NULL,\n    slug character varying(255) NOT NULL,\n    access_token character varying(255)
+    DEFAULT encode(public.gen_random_bytes(32), 'hex'::text) NOT NULL,\n    password_hash
+    character varying(255),\n    cover_image_id uuid,\n    description text,\n    session_date
+    date,\n    is_published boolean DEFAULT false NOT NULL,\n    allow_downloads boolean
+    DEFAULT true NOT NULL,\n    allow_sharing boolean DEFAULT false NOT NULL,\n    show_watermark
+    boolean DEFAULT false NOT NULL,\n    expires_at timestamp with time zone,\n    download_count
+    integer DEFAULT 0 NOT NULL,\n    view_count integer DEFAULT 0 NOT NULL,\n    created_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    updated_at timestamp with
+    time zone DEFAULT now() NOT NULL,\n    cover_photo_url text,\n    display_style
+    text DEFAULT 'standard'::text,\n    delivered_at timestamp with time zone\n);\n\n\nALTER
+    TABLE public.galleries OWNER TO biggshots_prod;\n\n--\n-- Name: invoices; Type:
+    TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.invoices
+    (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n    invoice_number
+    character varying(50) NOT NULL,\n    booking_id uuid,\n    client_id uuid,\n    client_name
+    character varying(255),\n    client_email character varying(255) NOT NULL,\n    line_items
+    jsonb DEFAULT '[]'::jsonb NOT NULL,\n    subtotal numeric(10,2) NOT NULL,\n    tax_rate
+    numeric(5,2) DEFAULT 0 NOT NULL,\n    tax_amount numeric(10,2) DEFAULT 0 NOT NULL,\n
+    \   total numeric(10,2) NOT NULL,\n    amount_paid numeric(10,2) DEFAULT 0 NOT
+    NULL,\n    status character varying(30) DEFAULT 'draft'::character varying NOT
+    NULL,\n    due_date date,\n    paid_at timestamp with time zone,\n    notes text,\n
+    \   created_at timestamp with time zone DEFAULT now() NOT NULL,\n    updated_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    project_id uuid,\n    quote_id
+    uuid,\n    deposit_pct numeric(5,2) DEFAULT 25,\n    bank_name text DEFAULT 'Monzo'::text,\n
+    \   monzo_link text,\n    invoice_type text DEFAULT 'deposit'::text NOT NULL,\n
+    \   bank_sort_code text,\n    deposit_amt numeric(10,2) DEFAULT 0,\n    sent_at
+    timestamp with time zone,\n    bank_account text,\n    payment_ref text,\n    client_message
+    text,\n    payment_method text\n);\n\n\nALTER TABLE public.invoices OWNER TO biggshots_prod;\n\n--\n--
+    Name: packages; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.packages (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n
+    \   name character varying(100) NOT NULL,\n    slug character varying(100) NOT
+    NULL,\n    price numeric(10,2) NOT NULL,\n    duration_text character varying(100),\n
+    \   description text,\n    features jsonb DEFAULT '[]'::jsonb NOT NULL,\n    is_featured
+    boolean DEFAULT false NOT NULL,\n    is_active boolean DEFAULT true NOT NULL,\n
+    \   sort_order integer DEFAULT 0 NOT NULL,\n    created_at timestamp with time
+    zone DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.packages OWNER TO biggshots_prod;\n\n--\n--
+    Name: password_reset_tokens; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.password_reset_tokens (\n    id integer NOT NULL,\n    client_id
+    uuid,\n    token character varying(255) NOT NULL,\n    expires_at timestamp with
+    time zone NOT NULL,\n    used_at timestamp with time zone,\n    created_at timestamp
+    with time zone DEFAULT now()\n);\n\n\nALTER TABLE public.password_reset_tokens
+    OWNER TO biggshots_prod;\n\n--\n-- Name: password_reset_tokens_id_seq; Type: SEQUENCE;
+    Schema: public; Owner: biggshots_prod\n--\n\nCREATE SEQUENCE public.password_reset_tokens_id_seq\n
+    \   AS integer\n    START WITH 1\n    INCREMENT BY 1\n    NO MINVALUE\n    NO
+    MAXVALUE\n    CACHE 1;\n\n\nALTER SEQUENCE public.password_reset_tokens_id_seq
+    OWNER TO biggshots_prod;\n\n--\n-- Name: password_reset_tokens_id_seq; Type: SEQUENCE
+    OWNED BY; Schema: public; Owner: biggshots_prod\n--\n\nALTER SEQUENCE public.password_reset_tokens_id_seq
+    OWNED BY public.password_reset_tokens.id;\n\n\n--\n-- Name: payment_installments;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.payment_installments
+    (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n    plan_id uuid NOT NULL,\n
+    \   project_id uuid NOT NULL,\n    client_id uuid NOT NULL,\n    installment_num
+    integer NOT NULL,\n    label text NOT NULL,\n    amount numeric(10,2) NOT NULL,\n
+    \   due_date date NOT NULL,\n    status text DEFAULT 'pending'::text NOT NULL,\n
+    \   is_deposit boolean DEFAULT false NOT NULL,\n    is_non_refundable boolean
+    DEFAULT false NOT NULL,\n    paid_at timestamp with time zone,\n    paid_amount
+    numeric(10,2),\n    payment_method text,\n    payment_ref text,\n    reminder_sent_7d
+    boolean DEFAULT false,\n    reminder_sent_1d boolean DEFAULT false,\n    reminder_sent_overdue
+    boolean DEFAULT false,\n    invoice_id uuid,\n    notes text,\n    created_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    updated_at timestamp with
+    time zone DEFAULT now() NOT NULL,\n    arrangement_agreed boolean DEFAULT false,\n
+    \   arrangement_note text,\n    CONSTRAINT payment_installments_status_check CHECK
+    ((status = ANY (ARRAY['pending'::text, 'sent'::text, 'paid'::text, 'overdue'::text,
+    'waived'::text])))\n);\n\n\nALTER TABLE public.payment_installments OWNER TO biggshots_prod;\n\n--\n--
+    Name: payment_methods; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.payment_methods (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n
+    \   name text NOT NULL,\n    method_type text DEFAULT 'bank_transfer'::text NOT
+    NULL,\n    bank_name text,\n    sort_code text,\n    account_no text,\n    account_name
+    text,\n    payment_link text,\n    notes text,\n    is_default boolean DEFAULT
+    false,\n    created_at timestamp with time zone DEFAULT now() NOT NULL,\n    CONSTRAINT
+    payment_methods_method_type_check CHECK ((method_type = ANY (ARRAY['bank_transfer'::text,
+    'payment_link'::text, 'cash'::text, 'other'::text])))\n);\n\n\nALTER TABLE public.payment_methods
+    OWNER TO biggshots_prod;\n\n--\n-- Name: payment_plans; Type: TABLE; Schema: public;
+    Owner: biggshots_prod\n--\n\nCREATE TABLE public.payment_plans (\n    id uuid
+    DEFAULT gen_random_uuid() NOT NULL,\n    project_id uuid NOT NULL,\n    client_id
+    uuid NOT NULL,\n    total_amount numeric(10,2) NOT NULL,\n    amount_paid numeric(10,2)
+    DEFAULT 0 NOT NULL,\n    status text DEFAULT 'active'::text NOT NULL,\n    created_at
+    timestamp with time zone DEFAULT now() NOT NULL,\n    updated_at timestamp with
+    time zone DEFAULT now() NOT NULL,\n    CONSTRAINT payment_plans_status_check CHECK
+    ((status = ANY (ARRAY['active'::text, 'completed'::text, 'cancelled'::text])))\n);\n\n\nALTER
+    TABLE public.payment_plans OWNER TO biggshots_prod;\n\n--\n-- Name: payments;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.payments
+    (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n    invoice_id uuid,\n
+    \   booking_id uuid,\n    order_id uuid,\n    amount numeric(10,2) NOT NULL,\n
+    \   currency character varying(3) DEFAULT 'GBP'::character varying NOT NULL,\n
+    \   method character varying(30) NOT NULL,\n    status character varying(30) DEFAULT
+    'pending'::character varying NOT NULL,\n    provider_ref character varying(255),\n
+    \   metadata jsonb,\n    created_at timestamp with time zone DEFAULT now() NOT
+    NULL\n);\n\n\nALTER TABLE public.payments OWNER TO biggshots_prod;\n\n--\n-- Name:
+    photo_selections; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.photo_selections (\n    id uuid DEFAULT public.uuid_generate_v4()
+    NOT NULL,\n    gallery_id uuid NOT NULL,\n    photo_id uuid NOT NULL,\n    client_id
+    uuid,\n    list_type character varying(30) DEFAULT 'favourites'::character varying
+    NOT NULL,\n    selected_at timestamp with time zone DEFAULT now() NOT NULL\n);\n\n\nALTER
+    TABLE public.photo_selections OWNER TO biggshots_prod;\n\n--\n-- Name: photos;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.photos
+    (\n    id uuid DEFAULT public.uuid_generate_v4() NOT NULL,\n    gallery_id uuid
+    NOT NULL,\n    filename character varying(500) NOT NULL,\n    original_name character
+    varying(500),\n    file_path text NOT NULL,\n    thumb_path text,\n    web_path
+    text,\n    file_size bigint,\n    width integer,\n    height integer,\n    mime_type
+    character varying(100),\n    exif_data jsonb,\n    face_data jsonb,\n    ai_tags
+    jsonb,\n    sort_order integer DEFAULT 0 NOT NULL,\n    is_cover boolean DEFAULT
+    false NOT NULL,\n    upload_at timestamp with time zone DEFAULT now() NOT NULL\n);\n\n\nALTER
+    TABLE public.photos OWNER TO biggshots_prod;\n\n--\n-- Name: portal_activity_log;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.portal_activity_log
+    (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n    client_id uuid,\n    activity_type
+    character varying(50) NOT NULL,\n    reference_id uuid,\n    meta jsonb,\n    created_at
+    timestamp with time zone DEFAULT now()\n);\n\n\nALTER TABLE public.portal_activity_log
+    OWNER TO biggshots_prod;\n\n--\n-- Name: print_orders; Type: TABLE; Schema: public;
+    Owner: biggshots_prod\n--\n\nCREATE TABLE public.print_orders (\n    id uuid DEFAULT
+    public.uuid_generate_v4() NOT NULL,\n    client_id uuid,\n    gallery_id uuid,\n
+    \   prodigi_order_id character varying(255),\n    status character varying(30)
+    DEFAULT 'pending'::character varying NOT NULL,\n    line_items jsonb DEFAULT '[]'::jsonb
+    NOT NULL,\n    shipping_name character varying(255),\n    shipping_address jsonb,\n
+    \   subtotal numeric(10,2),\n    shipping_cost numeric(10,2),\n    commission
+    numeric(10,2),\n    total numeric(10,2),\n    tracking_number character varying(255),\n
+    \   carrier character varying(100),\n    notes text,\n    created_at timestamp
+    with time zone DEFAULT now() NOT NULL,\n    updated_at timestamp with time zone
+    DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.print_orders OWNER TO biggshots_prod;\n\n--\n--
+    Name: project_stage_log; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.project_stage_log (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n
+    \   project_id uuid NOT NULL,\n    from_stage text,\n    to_stage text NOT NULL,\n
+    \   triggered_doc text,\n    email_sent boolean DEFAULT false,\n    override_used
+    boolean DEFAULT false,\n    notes text,\n    created_at timestamp with time zone
+    DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.project_stage_log OWNER TO
+    biggshots_prod;\n\n--\n-- Name: projects; Type: TABLE; Schema: public; Owner:
+    biggshots_prod\n--\n\nCREATE TABLE public.projects (\n    id uuid DEFAULT gen_random_uuid()
+    NOT NULL,\n    booking_id uuid,\n    client_id uuid NOT NULL,\n    title text
+    NOT NULL,\n    stage text DEFAULT 'lead'::text NOT NULL,\n    session_type text,\n
+    \   session_date date,\n    session_location text,\n    notes text,\n    internal_notes
+    text,\n    amount_quoted numeric(10,2),\n    amount_invoiced numeric(10,2),\n
+    \   deposit_paid numeric(10,2) DEFAULT 0,\n    balance_paid numeric(10,2) DEFAULT
+    0,\n    cover_photo text,\n    created_at timestamp with time zone DEFAULT now()
+    NOT NULL,\n    updated_at timestamp with time zone DEFAULT now() NOT NULL,\n    delivery_due_date
+    date,\n    gallery_expiry_date date,\n    delivery_days integer,\n    balance_due_date
+    date,\n    archived_reason text,\n    follow_up_flag boolean DEFAULT false,\n
+    \   follow_up_date date,\n    follow_up_note text,\n    CONSTRAINT projects_stage_check
+    CHECK ((stage = ANY (ARRAY['lead'::text, 'quote_sent'::text, 'booked'::text, 'covered'::text,
+    'delivered'::text, 'completed'::text, 'archived'::text])))\n);\n\n\nALTER TABLE
+    public.projects OWNER TO biggshots_prod;\n\n--\n-- Name: promotions; Type: TABLE;
+    Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.promotions (\n
+    \   id integer NOT NULL,\n    type character varying(20) DEFAULT 'banner'::character
+    varying,\n    message text NOT NULL,\n    eyebrow character varying(100),\n    cta_label
+    character varying(100),\n    cta_link character varying(255),\n    bg_colour character
+    varying(20) DEFAULT 'gold'::character varying,\n    show_countdown boolean DEFAULT
+    false,\n    active boolean DEFAULT false,\n    starts_at timestamp with time zone,\n
+    \   ends_at timestamp with time zone,\n    created_at timestamp with time zone
+    DEFAULT now(),\n    updated_at timestamp with time zone DEFAULT now(),\n    last_broadcast_at
+    timestamp with time zone,\n    reminder_sent boolean DEFAULT false,\n    show_availability_count
+    boolean DEFAULT false,\n    availability_month character varying(7)\n);\n\n\nALTER
+    TABLE public.promotions OWNER TO biggshots_prod;\n\n--\n-- Name: promotions_id_seq;
+    Type: SEQUENCE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE SEQUENCE public.promotions_id_seq\n
+    \   AS integer\n    START WITH 1\n    INCREMENT BY 1\n    NO MINVALUE\n    NO
+    MAXVALUE\n    CACHE 1;\n\n\nALTER SEQUENCE public.promotions_id_seq OWNER TO biggshots_prod;\n\n--\n--
+    Name: promotions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    SEQUENCE public.promotions_id_seq OWNED BY public.promotions.id;\n\n\n--\n-- Name:
+    questionnaire_templates; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.questionnaire_templates (\n    id uuid DEFAULT gen_random_uuid()
+    NOT NULL,\n    name text NOT NULL,\n    session_type text,\n    questions jsonb
+    DEFAULT '[]'::jsonb NOT NULL,\n    created_at timestamp with time zone DEFAULT
+    now() NOT NULL\n);\n\n\nALTER TABLE public.questionnaire_templates OWNER TO biggshots_prod;\n\n--\n--
+    Name: questionnaires; Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TABLE public.questionnaires (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n
+    \   project_id uuid,\n    client_id uuid NOT NULL,\n    template_id uuid,\n    title
+    text NOT NULL,\n    questions jsonb DEFAULT '[]'::jsonb NOT NULL,\n    answers
+    jsonb DEFAULT '{}'::jsonb,\n    status text DEFAULT 'draft'::text NOT NULL,\n
+    \   sent_at timestamp with time zone,\n    completed_at timestamp with time zone,\n
+    \   created_at timestamp with time zone DEFAULT now() NOT NULL,\n    admin_notes
+    text,\n    CONSTRAINT questionnaires_status_check CHECK ((status = ANY (ARRAY['draft'::text,
+    'sent'::text, 'completed'::text])))\n);\n\n\nALTER TABLE public.questionnaires
+    OWNER TO biggshots_prod;\n\n--\n-- Name: quote_addons; Type: TABLE; Schema: public;
+    Owner: biggshots_prod\n--\n\nCREATE TABLE public.quote_addons (\n    id integer
+    NOT NULL,\n    category character varying(50) NOT NULL,\n    name character varying(200)
+    NOT NULL,\n    description text,\n    price numeric(10,2) NOT NULL,\n    unit
+    character varying(50) DEFAULT 'fixed'::character varying,\n    is_base boolean
+    DEFAULT false,\n    is_active boolean DEFAULT true,\n    sort_order integer DEFAULT
+    0,\n    created_at timestamp without time zone DEFAULT now()\n);\n\n\nALTER TABLE
+    public.quote_addons OWNER TO biggshots_prod;\n\n--\n-- Name: quote_addons_id_seq;
+    Type: SEQUENCE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE SEQUENCE public.quote_addons_id_seq\n
+    \   AS integer\n    START WITH 1\n    INCREMENT BY 1\n    NO MINVALUE\n    NO
+    MAXVALUE\n    CACHE 1;\n\n\nALTER SEQUENCE public.quote_addons_id_seq OWNER TO
+    biggshots_prod;\n\n--\n-- Name: quote_addons_id_seq; Type: SEQUENCE OWNED BY;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER SEQUENCE public.quote_addons_id_seq
+    OWNED BY public.quote_addons.id;\n\n\n--\n-- Name: quotes; Type: TABLE; Schema:
+    public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.quotes (\n    id uuid
+    DEFAULT gen_random_uuid() NOT NULL,\n    project_id uuid,\n    client_id uuid
+    NOT NULL,\n    quote_number text NOT NULL,\n    status text DEFAULT 'draft'::text
+    NOT NULL,\n    line_items jsonb DEFAULT '[]'::jsonb NOT NULL,\n    subtotal numeric(10,2)
+    DEFAULT 0 NOT NULL,\n    discount_pct numeric(5,2) DEFAULT 0,\n    discount_amt
+    numeric(10,2) DEFAULT 0,\n    total numeric(10,2) DEFAULT 0 NOT NULL,\n    valid_until
+    date,\n    notes text,\n    client_message text,\n    accepted_at timestamp with
+    time zone,\n    sent_at timestamp with time zone,\n    created_at timestamp with
+    time zone DEFAULT now() NOT NULL,\n    updated_at timestamp with time zone DEFAULT
+    now() NOT NULL,\n    archived_at timestamp with time zone,\n    archive_reason
+    text,\n    CONSTRAINT quotes_status_check CHECK ((status = ANY (ARRAY['draft'::text,
+    'sent'::text, 'accepted'::text, 'declined'::text, 'expired'::text])))\n);\n\n\nALTER
+    TABLE public.quotes OWNER TO biggshots_prod;\n\n--\n-- Name: scheduled_emails;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.scheduled_emails
+    (\n    id uuid DEFAULT gen_random_uuid() NOT NULL,\n    client_id uuid,\n    email_type
+    text NOT NULL,\n    scheduled_for timestamp with time zone NOT NULL,\n    subject
+    text NOT NULL,\n    body text NOT NULL,\n    status text DEFAULT 'pending'::text
+    NOT NULL,\n    sent_at timestamp with time zone,\n    created_at timestamp with
+    time zone DEFAULT now() NOT NULL,\n    CONSTRAINT scheduled_emails_status_check
+    CHECK ((status = ANY (ARRAY['pending'::text, 'sent'::text, 'failed'::text, 'cancelled'::text])))\n);\n\n\nALTER
+    TABLE public.scheduled_emails OWNER TO biggshots_prod;\n\n--\n-- Name: site_settings;
+    Type: TABLE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TABLE public.site_settings
+    (\n    key character varying(100) NOT NULL,\n    value text,\n    updated_at timestamp
+    with time zone DEFAULT now() NOT NULL\n);\n\n\nALTER TABLE public.site_settings
+    OWNER TO biggshots_prod;\n\n--\n-- Name: tasks; Type: TABLE; Schema: public; Owner:
+    biggshots_prod\n--\n\nCREATE TABLE public.tasks (\n    id integer NOT NULL,\n
+    \   type character varying(50) NOT NULL,\n    title text NOT NULL,\n    description
+    text,\n    priority character varying(10) DEFAULT 'medium'::character varying,\n
+    \   status character varying(20) DEFAULT 'open'::character varying,\n    client_id
+    uuid,\n    booking_id uuid,\n    project_id uuid,\n    due_date date,\n    dismissed_at
+    timestamp with time zone,\n    auto_resolve_on character varying(50),\n    created_at
+    timestamp with time zone DEFAULT now(),\n    updated_at timestamp with time zone
+    DEFAULT now()\n);\n\n\nALTER TABLE public.tasks OWNER TO biggshots_prod;\n\n--\n--
+    Name: tasks_id_seq; Type: SEQUENCE; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    SEQUENCE public.tasks_id_seq\n    AS integer\n    START WITH 1\n    INCREMENT
+    BY 1\n    NO MINVALUE\n    NO MAXVALUE\n    CACHE 1;\n\n\nALTER SEQUENCE public.tasks_id_seq
+    OWNER TO biggshots_prod;\n\n--\n-- Name: tasks_id_seq; Type: SEQUENCE OWNED BY;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER SEQUENCE public.tasks_id_seq
+    OWNED BY public.tasks.id;\n\n\n--\n-- Name: password_reset_tokens id; Type: DEFAULT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.password_reset_tokens
+    ALTER COLUMN id SET DEFAULT nextval('public.password_reset_tokens_id_seq'::regclass);\n\n\n--\n--
+    Name: promotions id; Type: DEFAULT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.promotions ALTER COLUMN id SET DEFAULT nextval('public.promotions_id_seq'::regclass);\n\n\n--\n--
+    Name: quote_addons id; Type: DEFAULT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.quote_addons ALTER COLUMN id SET DEFAULT nextval('public.quote_addons_id_seq'::regclass);\n\n\n--\n--
+    Name: tasks id; Type: DEFAULT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.tasks ALTER COLUMN id SET DEFAULT nextval('public.tasks_id_seq'::regclass);\n\n\n--\n--
+    Name: admin_users admin_users_email_key; Type: CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.admin_users\n    ADD CONSTRAINT
+    admin_users_email_key UNIQUE (email);\n\n\n--\n-- Name: admin_users admin_users_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.admin_users\n    ADD CONSTRAINT admin_users_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: blocked_dates blocked_dates_date_key; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.blocked_dates\n    ADD CONSTRAINT
+    blocked_dates_date_key UNIQUE (date);\n\n\n--\n-- Name: blocked_dates blocked_dates_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.blocked_dates\n    ADD CONSTRAINT blocked_dates_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: bookings bookings_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.bookings\n    ADD CONSTRAINT bookings_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: client_loyalty client_loyalty_client_id_key; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.client_loyalty\n    ADD CONSTRAINT
+    client_loyalty_client_id_key UNIQUE (client_id);\n\n\n--\n-- Name: client_loyalty
+    client_loyalty_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.client_loyalty\n    ADD CONSTRAINT client_loyalty_pkey PRIMARY
+    KEY (id);\n\n\n--\n-- Name: clients clients_email_key; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.clients\n    ADD
+    CONSTRAINT clients_email_key UNIQUE (email);\n\n\n--\n-- Name: clients clients_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.clients\n    ADD CONSTRAINT clients_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: contract_templates contract_templates_pkey; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.contract_templates\n    ADD
+    CONSTRAINT contract_templates_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: contracts
+    contracts_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.contracts\n    ADD CONSTRAINT contracts_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: delivery_timeframes delivery_timeframes_pkey; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.delivery_timeframes\n
+    \   ADD CONSTRAINT delivery_timeframes_pkey PRIMARY KEY (id);\n\n\n--\n-- Name:
+    delivery_timeframes delivery_timeframes_session_type_key; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.delivery_timeframes\n
+    \   ADD CONSTRAINT delivery_timeframes_session_type_key UNIQUE (session_type);\n\n\n--\n--
+    Name: doc_counters doc_counters_pkey; Type: CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.doc_counters\n    ADD CONSTRAINT
+    doc_counters_pkey PRIMARY KEY (doc_type);\n\n\n--\n-- Name: email_log email_log_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.email_log\n    ADD CONSTRAINT email_log_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: galleries galleries_access_token_key; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.galleries\n    ADD CONSTRAINT
+    galleries_access_token_key UNIQUE (access_token);\n\n\n--\n-- Name: galleries
+    galleries_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.galleries\n    ADD CONSTRAINT galleries_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: galleries galleries_slug_key; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.galleries\n    ADD CONSTRAINT galleries_slug_key UNIQUE (slug);\n\n\n--\n--
+    Name: invoices invoices_invoice_number_key; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.invoices\n    ADD CONSTRAINT
+    invoices_invoice_number_key UNIQUE (invoice_number);\n\n\n--\n-- Name: invoices
+    invoices_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.invoices\n    ADD CONSTRAINT invoices_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: packages packages_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.packages\n    ADD CONSTRAINT packages_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: packages packages_slug_key; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.packages\n    ADD CONSTRAINT packages_slug_key UNIQUE (slug);\n\n\n--\n--
+    Name: password_reset_tokens password_reset_tokens_pkey; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.password_reset_tokens\n
+    \   ADD CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id);\n\n\n--\n-- Name:
+    password_reset_tokens password_reset_tokens_token_key; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.password_reset_tokens\n
+    \   ADD CONSTRAINT password_reset_tokens_token_key UNIQUE (token);\n\n\n--\n--
+    Name: payment_installments payment_installments_pkey; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_installments\n
+    \   ADD CONSTRAINT payment_installments_pkey PRIMARY KEY (id);\n\n\n--\n-- Name:
+    payment_methods payment_methods_pkey; Type: CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_methods\n    ADD CONSTRAINT
+    payment_methods_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: payment_plans payment_plans_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.payment_plans\n    ADD CONSTRAINT payment_plans_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.payments\n    ADD CONSTRAINT payments_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: photo_selections photo_selections_gallery_id_photo_id_client_id_list_type_key;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.photo_selections\n    ADD CONSTRAINT photo_selections_gallery_id_photo_id_client_id_list_type_key
+    UNIQUE (gallery_id, photo_id, client_id, list_type);\n\n\n--\n-- Name: photo_selections
+    photo_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.photo_selections\n    ADD CONSTRAINT photo_selections_pkey PRIMARY
+    KEY (id);\n\n\n--\n-- Name: photos photos_pkey; Type: CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.photos\n    ADD CONSTRAINT
+    photos_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: portal_activity_log portal_activity_log_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.portal_activity_log\n    ADD CONSTRAINT portal_activity_log_pkey PRIMARY
+    KEY (id);\n\n\n--\n-- Name: print_orders print_orders_pkey; Type: CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.print_orders\n
+    \   ADD CONSTRAINT print_orders_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: project_stage_log
+    project_stage_log_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.project_stage_log\n    ADD CONSTRAINT project_stage_log_pkey
+    PRIMARY KEY (id);\n\n\n--\n-- Name: projects projects_pkey; Type: CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.projects\n
+    \   ADD CONSTRAINT projects_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: promotions
+    promotions_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.promotions\n    ADD CONSTRAINT promotions_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: questionnaire_templates questionnaire_templates_pkey; Type: CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.questionnaire_templates\n
+    \   ADD CONSTRAINT questionnaire_templates_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: questionnaires questionnaires_pkey; Type: CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.questionnaires\n    ADD CONSTRAINT
+    questionnaires_pkey PRIMARY KEY (id);\n\n\n--\n-- Name: quote_addons quote_addons_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.quote_addons\n    ADD CONSTRAINT quote_addons_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: quotes quotes_pkey; Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.quotes\n    ADD CONSTRAINT quotes_pkey PRIMARY KEY (id);\n\n\n--\n--
+    Name: quotes quotes_quote_number_key; Type: CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.quotes\n    ADD CONSTRAINT quotes_quote_number_key
+    UNIQUE (quote_number);\n\n\n--\n-- Name: scheduled_emails scheduled_emails_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.scheduled_emails\n    ADD CONSTRAINT scheduled_emails_pkey PRIMARY KEY
+    (id);\n\n\n--\n-- Name: site_settings site_settings_pkey; Type: CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.site_settings\n    ADD
+    CONSTRAINT site_settings_pkey PRIMARY KEY (key);\n\n\n--\n-- Name: tasks tasks_pkey;
+    Type: CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY
+    public.tasks\n    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);\n\n\n--\n-- Name:
+    idx_bookings_date; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_bookings_date ON public.bookings USING btree (session_date);\n\n\n--\n--
+    Name: idx_bookings_email; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_bookings_email ON public.bookings USING btree (email);\n\n\n--\n-- Name:
+    idx_bookings_status; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_bookings_status ON public.bookings USING btree (status);\n\n\n--\n--
+    Name: idx_pal_client; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_pal_client ON public.portal_activity_log USING btree (client_id);\n\n\n--\n--
+    Name: idx_pal_created; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_pal_created ON public.portal_activity_log USING btree (created_at);\n\n\n--\n--
+    Name: idx_pal_type; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_pal_type ON public.portal_activity_log USING btree (activity_type);\n\n\n--\n--
+    Name: idx_photos_gallery; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_photos_gallery ON public.photos USING btree (gallery_id);\n\n\n--\n--
+    Name: idx_photos_sort; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_photos_sort ON public.photos USING btree (gallery_id, sort_order);\n\n\n--\n--
+    Name: idx_reset_tokens_token; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_reset_tokens_token ON public.password_reset_tokens USING btree (token);\n\n\n--\n--
+    Name: idx_tasks_due_date; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_tasks_due_date ON public.tasks USING btree (due_date);\n\n\n--\n-- Name:
+    idx_tasks_status; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_tasks_status ON public.tasks USING btree (status);\n\n\n--\n-- Name:
+    idx_tasks_type; Type: INDEX; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    INDEX idx_tasks_type ON public.tasks USING btree (type);\n\n\n--\n-- Name: bookings
+    trg_bookings_updated_at; Type: TRIGGER; Schema: public; Owner: biggshots_prod\n--\n\nCREATE
+    TRIGGER trg_bookings_updated_at BEFORE UPDATE ON public.bookings FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at();\n\n\n--\n-- Name: galleries trg_galleries_updated_at;
+    Type: TRIGGER; Schema: public; Owner: biggshots_prod\n--\n\nCREATE TRIGGER trg_galleries_updated_at
+    BEFORE UPDATE ON public.galleries FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();\n\n\n--\n--
+    Name: invoices trg_invoices_updated_at; Type: TRIGGER; Schema: public; Owner:
+    biggshots_prod\n--\n\nCREATE TRIGGER trg_invoices_updated_at BEFORE UPDATE ON
+    public.invoices FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();\n\n\n--\n--
+    Name: bookings bookings_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.bookings\n    ADD CONSTRAINT bookings_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;\n\n\n--\n--
+    Name: client_loyalty client_loyalty_client_id_fkey; Type: FK CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.client_loyalty\n
+    \   ADD CONSTRAINT client_loyalty_client_id_fkey FOREIGN KEY (client_id) REFERENCES
+    public.clients(id) ON DELETE CASCADE;\n\n\n--\n-- Name: contracts contracts_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.contracts\n    ADD CONSTRAINT contracts_client_id_fkey FOREIGN KEY
+    (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n-- Name:
+    contracts contracts_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.contracts\n    ADD CONSTRAINT contracts_project_id_fkey
+    FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE SET NULL;\n\n\n--\n--
+    Name: email_log email_log_client_id_fkey; Type: FK CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.email_log\n    ADD CONSTRAINT
+    email_log_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id)
+    ON DELETE CASCADE;\n\n\n--\n-- Name: galleries galleries_booking_id_fkey; Type:
+    FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.galleries\n
+    \   ADD CONSTRAINT galleries_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES
+    public.bookings(id) ON DELETE SET NULL;\n\n\n--\n-- Name: galleries galleries_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.galleries\n    ADD CONSTRAINT galleries_client_id_fkey FOREIGN KEY
+    (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;\n\n\n--\n-- Name:
+    invoices invoices_booking_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.invoices\n    ADD CONSTRAINT invoices_booking_id_fkey
+    FOREIGN KEY (booking_id) REFERENCES public.bookings(id) ON DELETE SET NULL;\n\n\n--\n--
+    Name: invoices invoices_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.invoices\n    ADD CONSTRAINT invoices_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;\n\n\n--\n--
+    Name: invoices invoices_project_id_fkey; Type: FK CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.invoices\n    ADD CONSTRAINT
+    invoices_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: invoices invoices_quote_id_fkey; Type: FK
+    CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.invoices\n
+    \   ADD CONSTRAINT invoices_quote_id_fkey FOREIGN KEY (quote_id) REFERENCES public.quotes(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: password_reset_tokens password_reset_tokens_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.password_reset_tokens\n    ADD CONSTRAINT password_reset_tokens_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: payment_installments payment_installments_client_id_fkey; Type: FK CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_installments\n
+    \   ADD CONSTRAINT payment_installments_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n-- Name: payment_installments
+    payment_installments_invoice_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_installments\n    ADD CONSTRAINT
+    payment_installments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES public.invoices(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: payment_installments payment_installments_plan_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.payment_installments\n    ADD CONSTRAINT payment_installments_plan_id_fkey
+    FOREIGN KEY (plan_id) REFERENCES public.payment_plans(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: payment_installments payment_installments_project_id_fkey; Type: FK CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_installments\n
+    \   ADD CONSTRAINT payment_installments_project_id_fkey FOREIGN KEY (project_id)
+    REFERENCES public.projects(id) ON DELETE CASCADE;\n\n\n--\n-- Name: payment_plans
+    payment_plans_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER
+    TABLE ONLY public.payment_plans\n    ADD CONSTRAINT payment_plans_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: payment_plans payment_plans_project_id_fkey; Type: FK CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.payment_plans\n    ADD
+    CONSTRAINT payment_plans_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
+    ON DELETE CASCADE;\n\n\n--\n-- Name: payments payments_booking_id_fkey; Type:
+    FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.payments\n
+    \   ADD CONSTRAINT payments_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES
+    public.bookings(id) ON DELETE SET NULL;\n\n\n--\n-- Name: payments payments_invoice_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.payments\n    ADD CONSTRAINT payments_invoice_id_fkey FOREIGN KEY
+    (invoice_id) REFERENCES public.invoices(id) ON DELETE SET NULL;\n\n\n--\n-- Name:
+    photo_selections photo_selections_client_id_fkey; Type: FK CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.photo_selections\n
+    \   ADD CONSTRAINT photo_selections_client_id_fkey FOREIGN KEY (client_id) REFERENCES
+    public.clients(id) ON DELETE SET NULL;\n\n\n--\n-- Name: photo_selections photo_selections_gallery_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.photo_selections\n    ADD CONSTRAINT photo_selections_gallery_id_fkey
+    FOREIGN KEY (gallery_id) REFERENCES public.galleries(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: photo_selections photo_selections_photo_id_fkey; Type: FK CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.photo_selections\n
+    \   ADD CONSTRAINT photo_selections_photo_id_fkey FOREIGN KEY (photo_id) REFERENCES
+    public.photos(id) ON DELETE CASCADE;\n\n\n--\n-- Name: photos photos_gallery_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.photos\n    ADD CONSTRAINT photos_gallery_id_fkey FOREIGN KEY (gallery_id)
+    REFERENCES public.galleries(id) ON DELETE CASCADE;\n\n\n--\n-- Name: portal_activity_log
+    portal_activity_log_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.portal_activity_log\n    ADD CONSTRAINT
+    portal_activity_log_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id)
+    ON DELETE CASCADE;\n\n\n--\n-- Name: print_orders print_orders_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.print_orders\n    ADD CONSTRAINT print_orders_client_id_fkey FOREIGN
+    KEY (client_id) REFERENCES public.clients(id) ON DELETE SET NULL;\n\n\n--\n--
+    Name: print_orders print_orders_gallery_id_fkey; Type: FK CONSTRAINT; Schema:
+    public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.print_orders\n    ADD
+    CONSTRAINT print_orders_gallery_id_fkey FOREIGN KEY (gallery_id) REFERENCES public.galleries(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: project_stage_log project_stage_log_project_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.project_stage_log\n    ADD CONSTRAINT project_stage_log_project_id_fkey
+    FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: projects projects_booking_id_fkey; Type: FK CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.projects\n    ADD CONSTRAINT
+    projects_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES public.bookings(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: projects projects_client_id_fkey; Type:
+    FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.projects\n
+    \   ADD CONSTRAINT projects_client_id_fkey FOREIGN KEY (client_id) REFERENCES
+    public.clients(id) ON DELETE CASCADE;\n\n\n--\n-- Name: questionnaires questionnaires_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.questionnaires\n    ADD CONSTRAINT questionnaires_client_id_fkey FOREIGN
+    KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n-- Name:
+    questionnaires questionnaires_project_id_fkey; Type: FK CONSTRAINT; Schema: public;
+    Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.questionnaires\n    ADD CONSTRAINT
+    questionnaires_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id)
+    ON DELETE SET NULL;\n\n\n--\n-- Name: quotes quotes_client_id_fkey; Type: FK CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.quotes\n
+    \   ADD CONSTRAINT quotes_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id)
+    ON DELETE CASCADE;\n\n\n--\n-- Name: quotes quotes_project_id_fkey; Type: FK CONSTRAINT;
+    Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE ONLY public.quotes\n
+    \   ADD CONSTRAINT quotes_project_id_fkey FOREIGN KEY (project_id) REFERENCES
+    public.projects(id) ON DELETE SET NULL;\n\n\n--\n-- Name: scheduled_emails scheduled_emails_client_id_fkey;
+    Type: FK CONSTRAINT; Schema: public; Owner: biggshots_prod\n--\n\nALTER TABLE
+    ONLY public.scheduled_emails\n    ADD CONSTRAINT scheduled_emails_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: tasks tasks_booking_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.tasks\n    ADD CONSTRAINT tasks_booking_id_fkey
+    FOREIGN KEY (booking_id) REFERENCES public.bookings(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: tasks tasks_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.tasks\n    ADD CONSTRAINT tasks_client_id_fkey
+    FOREIGN KEY (client_id) REFERENCES public.clients(id) ON DELETE CASCADE;\n\n\n--\n--
+    Name: tasks tasks_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner:
+    biggshots_prod\n--\n\nALTER TABLE ONLY public.tasks\n    ADD CONSTRAINT tasks_project_id_fkey
+    FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;\n\n\n--\n--
+    PostgreSQL database dump complete\n--\n\n\\unrestrict xLxPb3pWrVXcaNRy99aTOXa2rOecOUlQsUAors6W2nR3fgxjpb1woDjboS9oaQH\n\n"
+  02-seed.sql: |
+    -- ─────────────────────────────────────────────────────────────────────────────
+    -- S6 integration test seed data
+    -- Fresh, fake data only — completely isolated from production (biggshots_dev DB)
+    -- UUID scheme: aXXXXXXX = admin, c = clients, b = bookings, d = projects,
+    --               e = invoices, f = payments (all valid hex digits)
+    -- ─────────────────────────────────────────────────────────────────────────────
+
+    -- Admin user (password: "DevPassword123!")
+    INSERT INTO admin_users (id, email, password_hash, name, role, created_at)
+    VALUES (
+      'a0000000-0000-0000-0000-000000000001',
+      'admin@dev.local',
+      '$2a$12$1QhyREpRPNek4n8f2IsqaO5Q9gSTbrOJxH3U0LUcEYFIMyfoCiwry',
+      'Dev Admin',
+      'owner',
+      now()
+    );
+
+    -- Clients
+    INSERT INTO clients (id, email, password_hash, first_name, last_name, phone, is_active, portal_enabled, marketing_consent, created_at)
+    VALUES
+      ('c0000000-0000-0000-0000-000000000001', 'alice@dev.local', NULL, 'Alice', 'Anderson', '+447700900001', true, true, true, now()),
+      ('c0000000-0000-0000-0000-000000000002', 'bob@dev.local',   NULL, 'Bob',   'Brown',    '+447700900002', true, false, true, now()),
+      ('c0000000-0000-0000-0000-000000000003', 'carol@dev.local', NULL, 'Carol', 'Clarke',   '+447700900003', true, true, false, now());
+
+    -- Bookings
+    INSERT INTO bookings (id, client_id, first_name, last_name, email, phone, session_type, session_date, session_time, duration_hours, location, status, payment_status, amount_total, amount_paid, contract_signed, created_at)
+    VALUES
+      ('b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Alice', 'Anderson', 'alice@dev.local', '+447700900001', 'Wedding',  CURRENT_DATE + INTERVAL '30 days', '11:00', 8, 'Northampton', 'confirmed', 'deposit_paid', 1800.00, 450.00, true, now()),
+      ('b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'Bob',   'Brown',    'bob@dev.local',   '+447700900002', 'Portrait', CURRENT_DATE + INTERVAL '10 days', '14:00', 1, 'Studio',      'pending',   'unpaid',       150.00,   0.00, false, now()),
+      ('b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 'Carol', 'Clarke',   'carol@dev.local', '+447700900003', 'Maternity', CURRENT_DATE - INTERVAL '5 days',  '10:00', 2, 'Outdoor',     'completed', 'paid',         300.00, 300.00, true, now());
+
+    -- Projects (linked to bookings)
+    INSERT INTO projects (id, booking_id, client_id, title, stage, session_type, session_date, session_location, amount_quoted, deposit_paid, balance_paid, created_at)
+    VALUES
+      ('d0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Alice & Partner — Wedding',   'booked',   'Wedding',   CURRENT_DATE + INTERVAL '30 days', 'Northampton', 1800.00, 450.00, 0.00, now()),
+      ('d0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'Bob — Portrait Session',      'lead',     'Portrait',  CURRENT_DATE + INTERVAL '10 days', 'Studio',      150.00,   0.00, 0.00, now()),
+      ('d0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 'Carol — Maternity Shoot',     'delivered','Maternity', CURRENT_DATE - INTERVAL '5 days',  'Outdoor',     300.00, 300.00, 0.00, now());
+
+    -- Invoices
+    INSERT INTO invoices (id, invoice_number, booking_id, client_id, client_name, client_email, line_items, subtotal, total, amount_paid, status, due_date, created_at)
+    VALUES
+      ('e0000000-0000-0000-0000-000000000001', 'INV-DEV-0001', 'b0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'Alice Anderson', 'alice@dev.local', '[{"description":"Wedding deposit","quantity":1,"total":450.00}]', 450.00, 450.00, 450.00, 'paid', CURRENT_DATE + INTERVAL '7 days', now()),
+      ('e0000000-0000-0000-0000-000000000002', 'INV-DEV-0002', 'b0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', 'Carol Clarke',   'carol@dev.local', '[{"description":"Maternity session — full payment","quantity":1,"total":300.00}]', 300.00, 300.00, 300.00, 'paid', CURRENT_DATE - INTERVAL '10 days', now());
+
+    -- Payments
+    INSERT INTO payments (id, invoice_id, booking_id, amount, currency, method, status, provider_ref, created_at)
+    VALUES
+      ('f0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 450.00, 'GBP', 'bank_transfer', 'completed', 'DEV-REF-001', now()),
+      ('f0000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000003', 300.00, 'GBP', 'bank_transfer', 'completed', 'DEV-REF-002', now());
+kind: ConfigMap
+metadata:
+  name: biggshots-dev-initdb
+  namespace: biggshots

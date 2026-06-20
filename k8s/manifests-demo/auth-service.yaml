@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: auth-service
+  namespace: biggshots-demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: content-service
+      app: auth-service
   template:
     metadata:
       labels:
-        app: content-service
+        app: auth-service
     spec:
       containers:
-      - name: content-service
-        image: innocentobuteofficial/content-service:latest
+      - name: auth-service
+        image: innocentobuteofficial/auth-service:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3008
+        - containerPort: 3007
         envFrom:
         - configMapRef:
             name: biggshots-config
@@ -27,13 +27,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3008
+            port: 3007
           initialDelaySeconds: 15
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
-            port: 3008
+            port: 3007
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
@@ -47,11 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: auth-service
+  namespace: biggshots-demo
 spec:
   selector:
-    app: content-service
+    app: auth-service
   ports:
-  - port: 3008
-    targetPort: 3008
+  - port: 3007
+    targetPort: 3007

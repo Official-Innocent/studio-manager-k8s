@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: biggshots
+  namespace: biggshots-demo
 spec:
   replicas: 2
   selector:
@@ -19,7 +19,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: K8S_NAMESPACE
-          value: "biggshots"
+          value: "biggshots-demo"
         ports:
         - containerPort: 80
         livenessProbe:
@@ -46,7 +46,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
-  namespace: biggshots
+  namespace: biggshots-demo
 spec:
   selector:
     app: frontend

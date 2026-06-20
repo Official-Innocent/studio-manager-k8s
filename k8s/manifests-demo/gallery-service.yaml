@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: gallery-service
+  namespace: biggshots-demo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: content-service
+      app: gallery-service
   template:
     metadata:
       labels:
-        app: content-service
+        app: gallery-service
     spec:
       containers:
-      - name: content-service
-        image: innocentobuteofficial/content-service:latest
+      - name: gallery-service
+        image: innocentobuteofficial/gallery-service:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3008
+        - containerPort: 3002
         envFrom:
         - configMapRef:
             name: biggshots-config
@@ -27,31 +27,31 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3008
+            port: 3002
           initialDelaySeconds: 15
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
-            port: 3008
+            port: 3002
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
           requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
             memory: "256Mi"
             cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: gallery-service
+  namespace: biggshots-demo
 spec:
   selector:
-    app: content-service
+    app: gallery-service
   ports:
-  - port: 3008
-    targetPort: 3008
+  - port: 3002
+    targetPort: 3002

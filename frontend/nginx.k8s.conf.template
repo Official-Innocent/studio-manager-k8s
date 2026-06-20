@@ -1,0 +1,206 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Bigg Shots Media — Swarm stack nginx config (S9b)
+#
+# Serves the static frontend (copied from the monolith's public/ directory)
+# and proxies /api/* to the appropriate microservice, remapping paths where
+# they differ from the monolith's monolithic /api/* layout.
+#
+# Upstream service names are Swarm overlay-network DNS names (biggshots_<service>
+# is NOT used — Swarm strips the stack prefix for DNS within the same network,
+# so plain service names like "auth-service" resolve correctly).
+# ─────────────────────────────────────────────────────────────────────────────
+
+resolver kube-dns.kube-system.svc.cluster.local valid=10s ipv6=off;
+
+server {
+    listen 80;
+    server_name biggshotsmedia.com www.biggshotsmedia.com;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    client_max_body_size 500M;
+    client_body_timeout 300s;
+    proxy_read_timeout 300s;
+    proxy_send_timeout 300s;
+
+    add_header X-Content-Type-Options nosniff always;
+
+    location ~ /\. { deny all; return 404; }
+    location ~ \.(env|log|sql|conf|bak|backup|sh)$ { deny all; return 404; }
+    location ~ ^/(src|scripts|docker|node_modules)/ { deny all; return 404; }
+
+    # ── Common proxy settings (used via includes below) ───────────────────────
+    # proxy_set_header lines are repeated per-location since nginx does not
+    # support shared snippets without a separate file; kept inline for clarity.
+
+    # ── Auth-service: login, sessions, portal credential management ───────────
+    # /api/auth/*                              -> auth-service /*
+    location /api/auth/ {
+        set $upstream_auth auth-service.${K8S_NAMESPACE}.svc.cluster.local:3007;
+        rewrite ^/api/auth/(.*)$ /$1 break;
+        proxy_pass http://$upstream_auth;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # Path-mismatch remaps: these were under /api/portal/* in the monolith but
+    # now live in auth-service.
+    location ~ ^/api/portal/(admin/create-client-account|admin/reset-client-password|forgot-password|reset-password)$ {
+        set $upstream_auth auth-service.${K8S_NAMESPACE}.svc.cluster.local:3007;
+        rewrite ^/api/portal/(.*)$ /$1 break;
+        proxy_pass http://$upstream_auth;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── Gallery-service: client galleries and photos ───────────────────────────
+    # /api/galleries/*, /api/photos/*          -> gallery-service /galleries/*, /photos/*
+    location ~ ^/api/(galleries|photos)(/.*)?$ {
+        set $upstream_gallery gallery-service.${K8S_NAMESPACE}.svc.cluster.local:3002;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_gallery;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+        proxy_buffering off;
+    }
+
+    # ── Booking-service: bookings, invoices, contracts, payments ────────────────
+    # /api/bookings/*, /api/invoices/*, /api/contracts/*, /api/payments/*
+    location ~ ^/api/(bookings|invoices|contracts|payments)(/.*)?$ {
+        set $upstream_booking booking-service.${K8S_NAMESPACE}.svc.cluster.local:3004;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_booking;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # Stripe webhook needs raw body — handled identically by booking-service,
+    # but ensure no buffering interferes with the signature check.
+    location = /api/payments/stripe/webhook {
+        set $upstream_booking booking-service.${K8S_NAMESPACE}.svc.cluster.local:3004;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_booking;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+    }
+
+    # ── Portal-service: client portal session, loyalty, downloads ──────────────
+    # /api/portal/*                            -> portal-service /portal/*
+    # (remaps above take priority for the 4 auth-service paths)
+    location /api/portal/ {
+        set $upstream_portal portal-service.${K8S_NAMESPACE}.svc.cluster.local:3005;
+        rewrite ^/api/portal/(.*)$ /portal/$1 break;
+        proxy_pass http://$upstream_portal;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── Content-service: portfolio, site-content, promotions ────────────────────
+    # /api/portfolio/*, /api/site-content/*, /api/promotions/*
+    location ~ ^/api/(portfolio|site-content|promotions)(/.*)?$ {
+        set $upstream_content content-service.${K8S_NAMESPACE}.svc.cluster.local:3008;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_content;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── CRM-service: clients, projects, payment-plans, questionnaires, tasks ────
+    # /api/clients/*, /api/projects/*, /api/payment-plans/*,
+    # /api/questionnaires/*, /api/settings/*, /api/tasks/*, /api/quotes/*
+    location ~ ^/api/(clients|projects|payment-plans|questionnaires|settings|tasks|quotes)(/.*)?$ {
+        set $upstream_crm crm-service.${K8S_NAMESPACE}.svc.cluster.local:3009;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_crm;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── CRM-service: admin reports/dashboard aggregation ────────────────────────
+    # /api/admin/reports -> crm-service /admin/reports
+    location ~ ^/api/admin/(.*)$ {
+        set $upstream_crm_admin crm-service.${K8S_NAMESPACE}.svc.cluster.local:3009;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_crm_admin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── CRM-service: print orders (store) ────────────────────────────────────────
+    # /api/store/orders -> crm-service /store/orders
+    location ~ ^/api/store/(.*)$ {
+        set $upstream_crm_store crm-service.${K8S_NAMESPACE}.svc.cluster.local:3009;
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://$upstream_crm_store;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cookie_path / /;
+    }
+
+    # ── Notification-service: internal, no direct frontend calls expected ───────
+    # (events are published via Redis; exposed here only for /health checks)
+    location = /api/notifications/health {
+        set $upstream_notification notification-service.${K8S_NAMESPACE}.svc.cluster.local:3001;
+        proxy_pass http://$upstream_notification/health;
+        proxy_set_header Host $host;
+    }
+
+    # ── Scheduler-service: calendar sync trigger ────────────────────────────────
+    location /api/calendar/ {
+        set $upstream_scheduler scheduler-service.${K8S_NAMESPACE}.svc.cluster.local:3003;
+        rewrite ^/api/calendar/(.*)$ /$1 break;
+        proxy_pass http://$upstream_scheduler;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # ── Monitor dashboard (kept at /monitor/ as in the monolith) ─────────────────
+    location ^~ /monitor/ {
+        set $upstream_monitor monitor-service.${K8S_NAMESPACE}.svc.cluster.local:3006;
+        proxy_pass http://$upstream_monitor;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # ── Static frontend ──────────────────────────────────────────────────────────
+    # Directories with their own index.html (admin, portal, pipeline, documents,
+    # SEO landing pages) resolve naturally via try_files below.
+    location / {
+        try_files $uri $uri/ $uri/index.html /index.html;
+    }
+}

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: scheduler-service
+  namespace: biggshots-demo
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: content-service
+      app: scheduler-service
   template:
     metadata:
       labels:
-        app: content-service
+        app: scheduler-service
     spec:
       containers:
-      - name: content-service
-        image: innocentobuteofficial/content-service:latest
+      - name: scheduler-service
+        image: innocentobuteofficial/scheduler-service:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3008
+        - containerPort: 3003
         envFrom:
         - configMapRef:
             name: biggshots-config
@@ -27,19 +27,19 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3008
-          initialDelaySeconds: 15
+            port: 3003
+          initialDelaySeconds: 20
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
-            port: 3008
-          initialDelaySeconds: 10
+            port: 3003
+          initialDelaySeconds: 15
           periodSeconds: 10
         resources:
           requests:
             memory: "128Mi"
-            cpu: "100m"
+            cpu: "50m"
           limits:
             memory: "256Mi"
             cpu: "200m"
@@ -47,11 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: content-service
-  namespace: biggshots
+  name: scheduler-service
+  namespace: biggshots-demo
 spec:
   selector:
-    app: content-service
+    app: scheduler-service
   ports:
-  - port: 3008
-    targetPort: 3008
+  - port: 3003
+    targetPort: 3003

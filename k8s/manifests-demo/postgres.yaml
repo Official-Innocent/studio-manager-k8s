@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: biggshots-postgres
-  namespace: biggshots
+  namespace: biggshots-demo
 spec:
   replicas: 1
   strategy:
@@ -54,13 +54,13 @@ spec:
           claimName: biggshots-postgres-pvc
       - name: initdb-scripts
         configMap:
-          name: biggshots-dev-initdb
+          name: biggshots-demo-initdb
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: biggshots-postgres-pvc
-  namespace: biggshots
+  namespace: biggshots-demo
 spec:
   accessModes:
     - ReadWriteOnce
@@ -72,7 +72,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: biggshots-postgres
-  namespace: biggshots
+  namespace: biggshots-demo
 spec:
   selector:
     app: biggshots-postgres
