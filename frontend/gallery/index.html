@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio Gallery | Bigg Shots Media</title>
+<meta name="description" content="Browse our full portfolio of wedding, family, maternity, commercial and portrait photography. Bigg Shots Media — Northampton and the East Midlands.">
+<meta property="og:title" content="Portfolio Gallery | Bigg Shots Media">
+<meta property="og:description" content="Browse our full portfolio of wedding, family, maternity, commercial and portrait photography.">
+<meta property="og:url" content="https://biggshotsmedia.com/gallery">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://biggshotsmedia.com/gallery">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0A0A0A;color:#F5F0E8;font-family:'Helvetica Neue',sans-serif;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.95);border-bottom:0.5px solid rgba(201,168,76,0.15);padding:0 2rem;height:70px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:13px;font-weight:700;letter-spacing:4px;color:#F5F0E8;text-decoration:none;}
+.logo em{color:#C9A84C;font-style:normal;}
+.nav-links{display:flex;gap:2rem;}
+.nav-links a{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#B0A898;text-decoration:none;}
+.nav-links a:hover{color:#C9A84C;}
+.hero{padding:140px 2rem 60px;max-width:900px;margin:0 auto;text-align:center;}
+.eyebrow{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:#C9A84C;margin-bottom:1rem;}
+h1{font-family:Georgia,serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:300;line-height:1.2;margin-bottom:1.5rem;}
+h1 em{color:#C9A84C;font-style:italic;}
+.hero-sub{font-size:16px;color:#B0A898;line-height:1.7;max-width:600px;margin:0 auto;}
+.gallery-wrap{padding:0 2rem 80px;max-width:1400px;margin:0 auto;}
+.gallery-grid{column-count:4;column-gap:1rem;}
+.gallery-item{break-inside:avoid;margin-bottom:1rem;cursor:pointer;overflow:hidden;background:#111;}
+.gallery-item img{width:100%;display:block;transition:transform 0.4s ease;}
+.gallery-item:hover img{transform:scale(1.04);}
+.gallery-empty{text-align:center;padding:4rem 0;color:#666;font-size:14px;}
+@media(max-width:1100px){.gallery-grid{column-count:3;}}
+@media(max-width:700px){.gallery-grid{column-count:2;column-gap:0.6rem;}.gallery-item{margin-bottom:0.6rem;}}
+@media(max-width:480px){.gallery-grid{column-count:1;}}
+.lightbox{display:none;position:fixed;inset:0;z-index:9999;background:rgba(5,5,5,0.96);align-items:center;justify-content:center;}
+.lightbox.open{display:flex;}
+.lightbox-img{max-width:90vw;max-height:85vh;object-fit:contain;}
+.lightbox-close{position:absolute;top:1.5rem;right:2rem;background:none;border:none;color:#F5F0E8;font-size:1.8rem;cursor:pointer;}
+.lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;color:#F5F0E8;font-size:2.5rem;cursor:pointer;padding:1rem;}
+.lightbox-prev{left:1rem;}
+.lightbox-next{right:1rem;}
+.lightbox-counter{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);font-size:12px;letter-spacing:0.2em;color:#B0A898;}
+footer{padding:2rem;text-align:center;border-top:0.5px solid rgba(201,168,76,0.1);font-size:11px;color:#666;}
+footer a{color:#C9A84C;text-decoration:none;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="logo">BIGG SHOTS <em>MEDIA</em></a>
+  <div class="nav-links">
+    <a href="/#services">Services</a>
+    <a href="/#packages">Packages</a>
+    <a href="/gallery">Portfolio</a>
+    <a href="/#booking">Book</a>
+  </div>
+</nav>
+<div class="hero">
+  <p class="eyebrow">Full Portfolio</p>
+  <h1>Moments <em>Worth Keeping</em></h1>
+  <p class="hero-sub">A complete look at the weddings, families, maternity sessions, and commercial work we've had the privilege to capture.</p>
+</div>
+<div class="gallery-wrap">
+  <div class="gallery-grid" id="gallery-grid"></div>
+  <div class="gallery-empty" id="gallery-empty" style="display:none;">No photos available right now — check back soon.</div>
+</div>
+<div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+  <button class="lightbox-prev" onclick="lightboxNav(-1)">&#8249;</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  <button class="lightbox-next" onclick="lightboxNav(1)">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+<footer>
+  <p>&copy; 2026 Bigg Shots Media &mdash; <a href="/">biggshotsmedia.com</a> &mdash; <a href="mailto:hello@biggshotsmedia.com">hello@biggshotsmedia.com</a></p>
+</footer>
+<script>
+var photos=[];
+function renderGallery(list){
+  var grid=document.getElementById('gallery-grid');
+  var empty=document.getElementById('gallery-empty');
+  if(!list||!list.length){
+    empty.style.display='block';
+    return;
+  }
+  photos=list;
+  grid.innerHTML=list.map(function(src,i){
+    return '<div class="gallery-item" onclick="openLightbox('+i+')"><img src="'+src+'" alt="Bigg Shots Media photography" loading="lazy"></div>';
+  }).join('');
+}
+function openLightbox(i){
+  lightboxIndex=i;
+  var lb=document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src=photos[i];
+  document.getElementById('lightbox-counter').textContent=(i+1)+' / '+photos.length;
+  lb.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+var lightboxIndex=0;
+function lightboxNav(dir){
+  lightboxIndex=(lightboxIndex+dir+photos.length)%photos.length;
+  document.getElementById('lightbox-img').src=photos[lightboxIndex];
+  document.getElementById('lightbox-counter').textContent=(lightboxIndex+1)+' / '+photos.length;
+}
+document.addEventListener('keydown',function(e){
+  if(!document.getElementById('lightbox').classList.contains('open'))return;
+  if(e.key==='ArrowLeft')lightboxNav(-1);
+  if(e.key==='ArrowRight')lightboxNav(1);
+  if(e.key==='Escape')closeLightbox();
+});
+var urlParams=new URLSearchParams(window.location.search);
+var pathMatch=window.location.pathname.match(/^\/gallery\/([a-z]+)\/?$/);
+var categoryParam=(pathMatch&&pathMatch[1])||urlParams.get('category')||'';
+var apiUrl='/api/portfolio?t='+Date.now()+(categoryParam?'&category='+encodeURIComponent(categoryParam):'');
+if(categoryParam){
+  var titleMap={wedding:'Weddings',family:'Family Sessions',maternity:'Maternity',commercial:'Commercial',portrait:'Portraits',video:'Videography',birthday:'Birthdays',event:'Events',headshot:'Headshots'};
+  var label=titleMap[categoryParam]||categoryParam;
+  document.title=label+' Portfolio | Bigg Shots Media';
+  var h1=document.querySelector('.hero h1');
+  if(h1)h1.innerHTML=label+' <em>Gallery</em>';
+}
+fetch(apiUrl)
+  .then(function(r){return r.json();})
+  .then(function(d){renderGallery(d.photos||[]);})
+  .catch(function(){document.getElementById('gallery-empty').style.display='block';});
+</script>
+</body>
+</html>

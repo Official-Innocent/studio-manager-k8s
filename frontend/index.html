@@ -31,6 +31,7 @@ body{background:var(--black);color:var(--white);font-family:var(--sans);overflow
 nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;transition:all 0.4s;}
 nav.scrolled{background:rgba(10,10,10,0.97);backdrop-filter:blur(12px);border-bottom:0.5px solid rgba(201,168,76,0.1);}
 nav.promo-active{background:rgba(10,10,10,0.97)!important;backdrop-filter:blur(12px)!important;border-bottom:0.5px solid rgba(201,168,76,0.1)!important;}
+#navbar{position:relative;z-index:10;background:var(--dark);padding:0.8rem 2rem;display:flex;align-items:center;justify-content:space-between;}
 .nav-brand{font-family:var(--serif);font-size:1.3rem;font-weight:400;letter-spacing:0.15em;color:var(--white);text-decoration:none;}
 .nav-brand span{color:var(--gold);}
 .nav-links{display:flex;gap:2rem;align-items:center;}
@@ -65,6 +66,8 @@ nav.promo-active{background:rgba(10,10,10,0.97)!important;backdrop-filter:blur(1
 .hero-cinematic{position:relative;aspect-ratio:21/9;min-height:400px;max-height:90vh;overflow:hidden;display:flex;align-items:flex-end;}
 
 .hero-carousel-bg{position:absolute;inset:0;display:flex;gap:0;animation:heroPan 80s linear infinite;width:max-content;height:100%;}
+.hero-cinematic:hover .hero-carousel-bg{animation-play-state:paused;}
+.hero-cinematic:hover .hero-progress-fill{animation-play-state:paused;}
 /* OPTION 3 FALLBACK (cover, no letterbox):
 .hero-carousel-bg img{height:100%;width:auto;min-width:100vw;object-fit:cover;object-position:center top;flex-shrink:0;display:block;}
 */
@@ -159,13 +162,13 @@ nav.promo-active{background:rgba(10,10,10,0.97)!important;backdrop-filter:blur(1
 .service-ribbon{position:absolute;top:1.2rem;right:1.2rem;background:var(--gold);color:var(--black);font-size:8px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:0.35rem 0.8rem;z-index:2;}
 
 /* Service backgrounds */
-.svc-wedding .service-bg{background:url("/assets/portfolio/opt_1780052614293_p7539.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-wedding .service-bg{background:url("/assets/portfolio/opt_1781837804569_kemfr.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
 .svc-family .service-bg{background:linear-gradient(135deg,#0d1f1a 0%,#1a0d1f 100%);}
-.svc-birthday .service-bg{background:url("/assets/portfolio/Karima_Family_Shoot@40_383.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
-.svc-portrait .service-bg{background:url("/assets/portfolio/opt_1780053443095_ma6hm.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-birthday .service-bg{background:url("/assets/portfolio/opt_1782075377114_pal04.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-portrait .service-bg{background:url("/assets/portfolio/opt_1781840134083_qtpel.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
 .svc-commercial .service-bg{background:linear-gradient(135deg,#0a0a1a 0%,#0f0f2d 100%);}
 .svc-collab .service-bg{background:linear-gradient(135deg,#1a1a0a 0%,#2d2d0f 100%);}
-.svc-maternity .service-bg{background:url("/assets/portfolio/opt_1780053442674_g4ude.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
+.svc-maternity .service-bg{background:url("/assets/portfolio/opt_1781837805050_z9d90.jpg") center/cover no-repeat;filter:brightness(0.25) saturate(0) grayscale(1);}
 .svc-video .service-bg{background:linear-gradient(135deg,#0d0d0d 0%,#1f1810 100%);}
 .svc-video .service-bg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 38px,rgba(201,168,76,0.04) 38px,rgba(201,168,76,0.04) 40px);}
 .svc-gift .service-bg{background:linear-gradient(135deg,#1f1810 0%,#0d0d0d 100%);}
@@ -386,6 +389,7 @@ footer{background:var(--dark2);border-top:0.5px solid rgba(201,168,76,0.1);}
     <a href="#about">About</a>
     <a href="#services">Services</a>
     <a href="#packages">Packages</a>
+    <a href="/gallery">Gallery</a>
     <a href="#testimonials">Stories</a>
     <a href="#contact" class="nav-book" onclick="showForm('booking')">Book a Session</a>
   </div>
@@ -400,6 +404,7 @@ footer{background:var(--dark2);border-top:0.5px solid rgba(201,168,76,0.1);}
   <a href="#about" onclick="document.getElementById('mobile-menu').classList.remove('open')">About</a>
   <a href="#services" onclick="document.getElementById('mobile-menu').classList.remove('open')">Services</a>
   <a href="#packages" onclick="document.getElementById('mobile-menu').classList.remove('open')">Packages</a>
+  <a href="/gallery">Gallery</a>
   <a href="#testimonials" onclick="document.getElementById('mobile-menu').classList.remove('open')">Stories</a>
   <a href="#contact" onclick="document.getElementById('mobile-menu').classList.remove('open');showForm('booking')">Book a Session</a>
 </div>
@@ -983,8 +988,9 @@ function buildHeroCarousel(photos){
   }
   heroPhotos=photos;
   var all=photos.concat(photos);
-  bg.innerHTML=all.map(function(src){
-    return '<div class="hero-slide"><div class="hero-slide-bg" style="background-image:url(' + src + ')"></div><img src="'+src+'" alt="Bigg Shots Media photography" loading="eager"></div>';
+  bg.innerHTML=all.map(function(src,idx){
+    var origIdx=idx%photos.length;
+    return '<div class="hero-slide" onclick="openLightbox('+origIdx+')" style="cursor:pointer"><div class="hero-slide-bg" style="background-image:url(' + src + ')"></div><img src="'+src+'" alt="Bigg Shots Media photography" loading="eager"></div>';
   }).join('');
 }
 
@@ -1016,7 +1022,7 @@ document.addEventListener('keydown',function(e){
 });
 
 // ── Load photos ──
-fetch('/api/portfolio?t='+Date.now())
+fetch('/api/portfolio?carousel=true&t='+Date.now())
   .then(function(r){return r.json();})
   .then(function(d){buildHeroCarousel(d.photos||[]);})
   .catch(function(){buildHeroCarousel([]);});

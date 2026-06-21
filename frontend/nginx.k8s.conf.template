@@ -197,6 +197,12 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # ── Gallery category routes — clean URLs mapped to ?category= query param ───
+    # e.g. /gallery/wedding -> serves gallery/index.html, JS reads the category
+    # from the path itself (see frontend/gallery/index.html)
+    location ~ ^/gallery/([a-z]+)/?$ {
+        try_files /gallery/index.html =404;
+    }
     # ── Static frontend ──────────────────────────────────────────────────────────
     # Directories with their own index.html (admin, portal, pipeline, documents,
     # SEO landing pages) resolve naturally via try_files below.

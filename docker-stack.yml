@@ -258,11 +258,13 @@ services:
         condition: on-failure
 
   frontend:
-    image: innocentobuteofficial/frontend:latest
+    image: innocentobuteofficial/bsm-frontend:latest
     networks:
       - biggshots-prod
     ports:
       - "8081:80"
+    volumes:
+      - prod_portfolio_data:/usr/share/nginx/html/assets/portfolio:ro
     deploy:
       replicas: 1
       restart_policy:

@@ -41,6 +41,16 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "150m"
+        volumeMounts:
+        - name: portfolio-data
+          mountPath: /usr/share/nginx/html/assets/portfolio
+          subPath: portfolio
+          readOnly: true
+      volumes:
+      - name: portfolio-data
+        persistentVolumeClaim:
+          claimName: content-service-pvc
+          readOnly: true
 ---
 apiVersion: v1
 kind: Service

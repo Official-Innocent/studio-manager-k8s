@@ -43,6 +43,25 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "200m"
+        volumeMounts:
+        - name: content-data
+          mountPath: /data
+      volumes:
+      - name: content-data
+        persistentVolumeClaim:
+          claimName: content-service-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: content-service-pvc
+  namespace: biggshots-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
 ---
 apiVersion: v1
 kind: Service
