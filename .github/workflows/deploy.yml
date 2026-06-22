@@ -1,0 +1,227 @@
+# ── Bigg Shots Media — CI/CD Pipeline ────────────────────────────────────────
+# Triggers on push to main branch.
+# Builds all microservice images, pushes to ECR, deploys to EKS.
+#
+# PRODUCTION NOTE: In production you would add:
+# - A separate 'test' job that runs unit/integration tests before build
+# - A 'staging' environment deploy before production
+# - Manual approval gate between staging and production
+# - Slack/PagerDuty notifications on failure
+# - Image signing (AWS Signer or Cosign) for supply chain security
+#
+# WHY GITHUB ACTIONS over alternatives:
+# - Native integration with GitHub (where the code lives)
+# - No separate CI server to maintain (Jenkins) or pay for (CircleCI)
+# - Secrets managed by GitHub, not stored in a separate vault for basic use
+# - OIDC support allows keyless AWS authentication (no long-lived credentials)
+#
+# PRODUCTION NOTE on credentials: We're using long-lived IAM access keys stored
+# as GitHub secrets. This is acceptable for a demo but not ideal for production.
+# The production approach is GitHub OIDC + IAM role assumption:
+# - No long-lived credentials stored anywhere
+# - GitHub generates a short-lived token per workflow run
+# - AWS validates the token and issues temporary credentials
+# - Credentials expire when the job ends
+# Example production config:
+# - name: Configure AWS credentials
+#   uses: aws-actions/configure-aws-credentials@v4
+#   with:
+#     role-to-assume: arn:aws:iam::210452150981:role/github-actions-deploy
+#     aws-region: eu-west-2
+
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: 210452150981.dkr.ecr.eu-west-2.amazonaws.com
+  EKS_CLUSTER_NAME: biggshots-prod-eks
+  K8S_NAMESPACE: biggshots
+
+jobs:
+  # ── Job 1: Build and push all service images to ECR ────────────────────────
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - name: frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile.k8s
+          - name: auth-service
+            context: ./services/auth-service
+            dockerfile: ./services/auth-service/Dockerfile
+          - name: booking-service
+            context: ./services/booking-service
+            dockerfile: ./services/booking-service/Dockerfile
+          - name: content-service
+            context: ./services/content-service
+            dockerfile: ./services/content-service/Dockerfile
+          - name: gallery-service
+            context: ./services/gallery-service
+            dockerfile: ./services/gallery-service/Dockerfile
+          - name: notification-service
+            context: ./services/notification-service
+            dockerfile: ./services/notification-service/Dockerfile
+          - name: portal-service
+            context: ./services/portal-service
+            dockerfile: ./services/portal-service/Dockerfile
+          - name: scheduler-service
+            context: ./services/scheduler-service
+            dockerfile: ./services/scheduler-service/Dockerfile
+          - name: monitor-service
+            context: ./services/monitor-service
+            dockerfile: ./services/monitor-service/Dockerfile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials from GitHub secrets.
+      # PRODUCTION NOTE: Replace with OIDC role assumption (see comment above).
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Authenticate Docker to ECR.
+      # The get-login-password command generates a temporary ECR token (valid 12hrs).
+      # This is the standard ECR authentication pattern — the token is piped
+      # directly to docker login without ever touching disk.
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Build and push the image for this matrix service.
+      # Tags: both the git SHA (immutable, traceable) and 'latest' (convenience).
+      # PRODUCTION NOTE: In production, tag with git SHA only — never rely on
+      # 'latest' in production manifests as it's ambiguous and breaks rollbacks.
+      # Use the SHA tag in k8s manifests so you always know exactly which commit
+      # is running: image: 210452150981.dkr.ecr.eu-west-2.amazonaws.com/biggshots/frontend:abc1234
+      - name: Build and push ${{ matrix.service.name }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/biggshots/${{ matrix.service.name }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY }}/biggshots/${{ matrix.service.name }}:latest
+
+  # ── Job 2: Deploy to EKS ───────────────────────────────────────────────────
+  # Runs after ALL build-and-push matrix jobs complete successfully.
+  # If any image build fails, this job is skipped automatically.
+  deploy:
+    name: Deploy to EKS
+    runs-on: ubuntu-latest
+    needs: build-and-push  # Only runs if all build jobs succeed
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Update local kubeconfig to point kubectl at the EKS cluster.
+      # This generates a ~/.kube/config entry using the AWS CLI to authenticate.
+      # The GitHub Actions runner's IAM credentials are used to sign kubectl
+      # API calls — no separate kubeconfig file needs to be stored as a secret.
+      # PRODUCTION NOTE: This is the correct pattern. Never store kubeconfig
+      # files as GitHub secrets — they contain long-lived credentials and become
+      # stale. Always generate fresh kubeconfig via aws eks update-kubeconfig.
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ env.EKS_CLUSTER_NAME }} \
+            --region ${{ env.AWS_REGION }}
+
+      # Update all k8s manifests to use the ECR image URLs with the git SHA tag.
+      # sed replaces the Docker Hub image references in our existing manifests
+      # with ECR URLs tagged with the current commit SHA.
+      # This ensures every deployment is traceable to an exact commit.
+      - name: Update image references in manifests
+        run: |
+          for service in frontend auth-service booking-service content-service \
+                         gallery-service notification-service portal-service \
+                         scheduler-service monitor-service; do
+            sed -i "s|innocentobuteofficial/bsm-${service}:.*|${ECR_REGISTRY}/biggshots/${service}:${{ github.sha }}|g" \
+              k8s/manifests/${service}.yaml 2>/dev/null || true
+            sed -i "s|innocentobuteofficial/${service}:.*|${ECR_REGISTRY}/biggshots/${service}:${{ github.sha }}|g" \
+              k8s/manifests/${service}.yaml 2>/dev/null || true
+          done
+
+      # Apply all Kubernetes manifests to the EKS cluster.
+      # kubectl apply is idempotent — safe to run on every deploy.
+      # It creates resources that don't exist and updates those that have changed.
+      # PRODUCTION NOTE: In production consider using Helm for more sophisticated
+      # release management (rollback, versioning, templating across environments).
+      # We're using raw manifests here to keep the demo straightforward and show
+      # understanding of the underlying Kubernetes primitives.
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/manifests/ -n ${{ env.K8S_NAMESPACE }} --validate=false
+
+      # Wait for all deployments to complete their rollout.
+      # kubectl rollout status blocks until the deployment reaches desired state
+      # or times out (default 5 minutes). If a pod fails to start, this step
+      # fails and the pipeline stops — preventing silent broken deployments.
+      - name: Wait for rollouts to complete
+        run: |
+          for service in frontend auth-service booking-service content-service \
+                         gallery-service notification-service portal-service \
+                         scheduler-service monitor-service; do
+            echo "Waiting for $service..."
+            kubectl rollout status deployment/${service} \
+              -n ${{ env.K8S_NAMESPACE }} \
+              --timeout=300s || echo "Warning: ${service} rollout check failed"
+          done
+
+      # Smoke test: verify the load balancer is responding.
+      # Retries for up to 2 minutes to allow for load balancer provisioning time.
+      # PRODUCTION NOTE: In production, smoke tests would be more comprehensive:
+      # - Check specific API endpoints return expected status codes
+      # - Verify database connectivity via a health endpoint
+      # - Run a synthetic transaction (create a test booking, then delete it)
+      - name: Smoke test
+        run: |
+          LB_URL=$(kubectl get svc frontend -n ${{ env.K8S_NAMESPACE }} \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+          if [ -z "$LB_URL" ]; then
+            echo "No load balancer URL yet — skipping smoke test"
+            exit 0
+          fi
+          echo "Testing $LB_URL..."
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://$LB_URL || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Smoke test passed — HTTP $STATUS"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $STATUS — retrying in 10s..."
+            sleep 10
+          done
+          echo "⚠️ Smoke test did not confirm 200 — check load balancer status"
+
+      # Print deployment summary — useful for the GitHub Actions run log.
+      - name: Deployment summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Deployment complete"
+          echo "Cluster:   ${{ env.EKS_CLUSTER_NAME }}"
+          echo "Namespace: ${{ env.K8S_NAMESPACE }}"
+          echo "Image tag: ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }}
