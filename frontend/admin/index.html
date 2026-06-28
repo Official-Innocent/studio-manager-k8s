@@ -385,10 +385,14 @@ body{background:var(--black);color:var(--white);font-family:var(--sans);min-heig
  <!-- PIPELINE PANEL -->
 
  <div class="panel" id="panel-pipeline" style="padding:0;">
-  <div style="padding:1.5rem 2rem;border-bottom:0.5px solid rgba(201,168,76,0.1);">
+  <div style="padding:1.5rem 2rem;border-bottom:0.5px solid rgba(201,168,76,0.1);display:flex;align-items:center;justify-content:space-between;">
     <p class="panel-title" style="margin:0;">Pipeline <em>Board</em></p>
+    <button onclick="openAddLeadModal()" style="background:var(--gold);color:#1a1200;border:none;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.6rem 1.2rem;cursor:pointer;">+ Add Lead</button>
   </div>
-  <div style="padding:1.5rem 2rem;">
+  <div style="padding:1rem 2rem 0;">
+    <div id="pipeline-summary" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;"></div>
+  </div>
+  <div style="padding:0 2rem 1.5rem;">
     <div id="pipeline-board" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
       <div style="font-size:12px;color:var(--white-dim);">Loading pipeline...</div>
     </div>
@@ -1708,6 +1712,54 @@ renderGalleryPhotos=function(photos){
 // ── REPORTS ──────────────────────────────────────────────────────────────────
 var reportsLoaded=false;
 // ── PIPELINE ─────────────────────────────────────────────────────────────────
+function openAddLeadModal(){
+  var modal=document.getElementById('modal-project-detail');
+  if(!modal){modal=document.createElement('div');modal.id='modal-project-detail';modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(10,10,10,0.95);display:flex;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;';document.body.appendChild(modal);}
+  modal.innerHTML='<div style="background:#111;border:0.5px solid rgba(201,168,76,0.2);width:100%;max-width:500px;padding:2rem;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">'+
+      '<p class="panel-title" style="margin:0;">New <em>Lead</em></p>'+
+      '<span onclick="document.getElementById('modal-project-detail').style.display='none'" style="cursor:pointer;color:var(--white-dim);font-size:1.2rem;">✕</span>'+
+    '</div>'+
+    '<div style="display:grid;gap:1rem;">'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">First Name</label><input id="lead-first" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;" placeholder="First name"></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Last Name</label><input id="lead-last" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;" placeholder="Last name"></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Email</label><input id="lead-email" type="email" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;" placeholder="email@example.com"></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Phone</label><input id="lead-phone" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;" placeholder="07..."></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Session Type</label><input id="lead-session" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;" placeholder="e.g. Portrait, Wedding, Headshots"></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Notes</label><textarea id="lead-notes" rows="3" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;resize:vertical;" placeholder="How they got in touch, what they are looking for..."></textarea></div>'+
+      '<div><label style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-bottom:0.4rem;">Source</label><select id="lead-source" style="width:100%;background:#1A1A1A;border:0.5px solid rgba(201,168,76,0.2);color:#F5F0E8;font-family:var(--sans);font-size:12px;padding:0.7rem 0.8rem;outline:none;"><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="google">Google</option><option value="referral">Referral</option><option value="phone">Phone call</option><option value="email">Email</option><option value="website">Website</option><option value="other">Other</option></select></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:0.8rem;margin-top:1.5rem;">'+
+      '<button onclick="saveNewLead()" style="flex:2;background:var(--gold);color:var(--black);border:none;font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Save Lead</button>'+
+      '<button onclick="document.getElementById('modal-project-detail').style.display='none'" style="flex:1;background:none;border:0.5px solid rgba(201,168,76,0.2);color:var(--white-dim);font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:0.8rem;cursor:pointer;">Cancel</button>'+
+    '</div>'+
+  '</div>';
+  modal.style.display='flex';
+}
+
+function saveNewLead(){
+  var first=document.getElementById('lead-first').value.trim();
+  var last=document.getElementById('lead-last').value.trim();
+  var email=document.getElementById('lead-email').value.trim();
+  var phone=document.getElementById('lead-phone').value.trim();
+  var session=document.getElementById('lead-session').value.trim();
+  var notes=document.getElementById('lead-notes').value.trim();
+  var source=document.getElementById('lead-source').value;
+  if(!first||!email){safeToast('First name and email are required',true);return;}
+  api('/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({first_name:first,last_name:last,email:email,phone:phone,notes:notes,source:source})})
+    .then(function(r){return r.json();}).then(function(c){
+      if(!c.id&&!c.client){safeToast('Error creating lead',true);return;}
+      var clientId=(c.id||c.client.id);
+      return api('/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_id:clientId,session_type:session||'Enquiry',stage:'lead',notes:notes,amount_quoted:0})});
+    }).then(function(r){return r&&r.json();}).then(function(p){
+      if(p&&(p.id||p.project)){
+        safeToast('Lead added to pipeline');
+        document.getElementById('modal-project-detail').style.display='none';
+        loadPipeline();
+      } else {safeToast('Error creating project',true);}
+    }).catch(function(e){safeToast('Error: '+e.message,true);});
+}
+
 function loadPipeline(){
   api('/projects').then(function(r){return r.json();}).then(function(d){
     var projects=d.projects||d||[];
@@ -1715,6 +1767,16 @@ function loadPipeline(){
     var labels={'lead':'Lead','quote_sent':'Quote Sent','booked':'Booked','covered':'Covered','delivered':'Delivered','completed':'Completed','archived':'Archived'};
     var board=g('pipeline-board');
     board.innerHTML='';
+    // Summary bar
+    var summary=document.getElementById('pipeline-summary');
+    if(summary){
+      var stageColors={'lead':'#C9A84C','quote_sent':'#6699CC','booked':'#4ECBA0','covered':'#9B59B6','delivered':'#E67E22','completed':'#2ECC71','archived':'#666'};
+      summary.innerHTML=stages.map(function(s){
+        var count=projects.filter(function(p){return p.stage===s;}).length;
+        if(count===0)return '';
+        return '<span style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:'+stageColors[s]+';background:rgba(0,0,0,0.3);border:0.5px solid '+stageColors[s]+'40;padding:0.3rem 0.7rem;border-radius:2px;">'+labels[s]+' '+count+'</span>';
+      }).join('');
+    }
     stages.forEach(function(stage){
       var items=projects.filter(function(p){return p.stage===stage;}).sort(function(a,b){if(!a.session_date)return 1;if(!b.session_date)return -1;return new Date(a.session_date)-new Date(b.session_date);});
       var col=document.createElement('div');
