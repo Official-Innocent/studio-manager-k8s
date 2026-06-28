@@ -197,6 +197,10 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # ── Experience page ──────────────────────────────────────────────────────────
+    location ~ ^/experience/?$ {
+        try_files /experience/index.html =404;
+    }
     # ── Gallery category routes — clean URLs mapped to ?category= query param ───
     # e.g. /gallery/wedding -> serves gallery/index.html, JS reads the category
     # from the path itself (see frontend/gallery/index.html)
