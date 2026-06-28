@@ -24,6 +24,9 @@ async function handleEmailType(type, data) {
     case 'portal.password_reset': return emailService.sendPasswordReset(data.client, data.resetUrl);
     case 'questionnaire.sent': return emailService.sendQuestionnaireSent(data.client, data.questionnaire);
     case 'project.stage_changed': return emailService.sendProjectStageChanged(data.client, data);
+    case 'booking.reminder': return emailService.sendShootReminder(data.booking);
+    case 'review.request': return emailService.sendReviewRequest(data.client, data.booking);
+    case 'balance.invoice': return emailService.sendBalanceInvoice(data.client, data.booking, data.invoiceUrl);
     default: throw new Error('Unknown email type: ' + type);
   }
 }
@@ -40,7 +43,7 @@ app.listen(PORT, () => console.log('[notification-service] running on port ' + P
     const subscriber = createSubscriber();
     await subscriber.connect();
     console.log('[notification-service] Redis connected');
-    const events = ['booking.received','booking.confirmed','booking.owner_notification','gallery.ready','payment.received','payment.owner_notification','order.shipped','portal.credentials','portal.password_reset','questionnaire.sent','project.stage_changed'];
+    const events = ['booking.received','booking.confirmed','booking.owner_notification','gallery.ready','payment.received','payment.owner_notification','order.shipped','portal.credentials','portal.password_reset','questionnaire.sent','project.stage_changed','booking.reminder','review.request','balance.invoice'];
     for (const event of events) {
       await subscriber.subscribe(event, async (message) => {
         try { await handleEmailType(event, JSON.parse(message)); } catch(e) { console.error('[redis event error]', e.message); }

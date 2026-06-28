@@ -258,7 +258,7 @@ async function sendPortalCredentials(client, password) {
     </div>
     <p>We recommend changing your password after your first login.</p>
     <a href="${process.env.SITE_URL || 'https://biggshotsmedia.com'}/portal" class="btn">Access Your Portal</a>
-  `, 'Your client portal is ready');
+  `, "Your client portal is ready");
 
   return send(client.email, 'Your Bigg Shots Media client portal is ready', html, 'portal_credentials');
 }
@@ -271,7 +271,7 @@ async function sendPasswordReset(client, resetUrl) {
     <p>Hi ${client.first_name}, we received a request to reset your portal password. Click below to set a new password. This link expires in 1 hour.</p>
     <a href="${resetUrl}" class="btn">Reset My Password</a>
     <p style="margin-top:24px;font-size:12px;color:#666;">If you did not request this, you can safely ignore this email.</p>
-  `, 'Reset your portal password');
+  `, "Reset your portal password");
 
   return send(client.email, 'Reset your Bigg Shots Media portal password', html, 'portal_password_reset');
 }
@@ -284,7 +284,7 @@ async function sendQuestionnaireSent(client, questionnaire) {
     <p>Hi ${client.first_name}, your photographer has sent you a pre-shoot questionnaire: <strong style="color:#F5F0E8">${questionnaire.title}</strong>.</p>
     <p>Please log in to your client portal to fill it in before your session — this helps us prepare and make your experience as smooth as possible.</p>
     <a href="${process.env.SITE_URL || 'https://biggshotsmedia.com'}/portal" class="btn">Go to Portal</a>
-  `, 'Your pre-shoot questionnaire is ready');
+  `, "Your pre-shoot questionnaire is ready");
 
   return send(client.email, 'Your pre-shoot questionnaire — Bigg Shots Media', html, 'questionnaire_sent');
 }
@@ -313,6 +313,74 @@ async function sendProjectStageChanged(client, data) {
   return send(client.email, `${copy.heading} — Bigg Shots Media`, html, 'project_stage_' + to_stage);
 }
 
+// 12. 48-hour shoot reminder
+async function sendShootReminder(booking) {
+  const sessionDate = new Date(booking.session_date).toLocaleDateString('en-GB', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const html = emailWrapper(`
+    <h2>Your Session is <em>Tomorrow!</em></h2>
+    <div class="gold-line"></div>
+    <p>Hi ${booking.first_name}, just a friendly reminder that your photography session is tomorrow. I'm looking forward to working with you!</p>
+    <div class="highlight">
+      <p class="label">Session Details</p>
+      <p><strong style="color:#F5F0E8">Session:</strong> ${booking.session_type}</p>
+      <p><strong style="color:#F5F0E8">Date:</strong> ${sessionDate}</p>
+      ${booking.session_time ? `<p><strong style="color:#F5F0E8">Time:</strong> ${booking.session_time}</p>` : ''}
+      ${booking.location ? `<p><strong style="color:#F5F0E8">Location:</strong> ${booking.location}</p>` : ''}
+      <p><strong style="color:#F5F0E8">Reference:</strong> #${booking.id.split('-')[0].toUpperCase()}</p>
+    </div>
+    <p><strong style="color:#F5F0E8">A few things to help you prepare:</strong></p>
+    <p>✦ Wear colours that complement each other — avoid large logos or busy patterns<br>
+    ✦ Arrive relaxed — we're not in a rush<br>
+    ✦ Bring any items meaningful to you — props, flowers, a favourite outfit<br>
+    ✦ Most importantly — just be yourself. The best photos happen naturally.</p>
+    <p>If anything changes or you need to reach me, reply to this email or call directly.</p>
+    <a href="mailto:${process.env.MAIL_USER}" class="btn">Get in Touch</a>
+  `, "Your shoot is tomorrow — here's what to expect");
+
+  return send(booking.email, 'See You Tomorrow — Bigg Shots Media', html, 'shoot_reminder');
+}
+
+// 13. Review request (14 days after gallery delivery)
+async function sendReviewRequest(client, booking) {
+  const reviewUrl = process.env.GOOGLE_REVIEW_URL || 'https://g.page/r/review';
+  const html = emailWrapper(`
+    <h2>How Was Your <em>Experience?</em></h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, I hope you're loving your photos! It's been a couple of weeks since your gallery was delivered and I'd love to hear how you found the experience.</p>
+    <p>If you enjoyed your session with Bigg Shots Media, a quick Google review makes a huge difference to a small business — it takes less than a minute and means the world.</p>
+    <a href="${reviewUrl}" class="btn">Leave a Google Review →</a>
+    <div class="gold-line"></div>
+    <p style="font-size:12px;color:#666;">Had an issue? Please reply to this email before leaving a review — I'd love the chance to make things right.</p>
+  `, "We'd love to hear from you");
+
+  return send(client.email, 'How Was Your Experience? — Bigg Shots Media', html, 'review_request');
+}
+
+// 14. Balance invoice (triggered when gallery is delivered)
+async function sendBalanceInvoice(client, booking, invoiceUrl) {
+  const sessionDate = new Date(booking.session_date).toLocaleDateString('en-GB', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const balanceAmount = booking.total_price - booking.deposit_paid;
+  const html = emailWrapper(`
+    <h2>Your Gallery is Ready — Balance <em>Invoice</em></h2>
+    <div class="gold-line"></div>
+    <p>Hi ${client.first_name}, your gallery has been delivered! I hope you love your photos.</p>
+    <p>Your session balance is now due. Please find your invoice details below.</p>
+    <div class="highlight">
+      <p class="label">Invoice Summary</p>
+      <p><strong style="color:#F5F0E8">Session:</strong> ${booking.session_type}</p>
+      <p><strong style="color:#F5F0E8">Session Date:</strong> ${sessionDate}</p>
+      <p><strong style="color:#F5F0E8">Total:</strong> £${Number(booking.total_price).toFixed(2)}</p>
+      <p><strong style="color:#F5F0E8">Deposit Paid:</strong> £${Number(booking.deposit_paid).toFixed(2)}</p>
+      <p><strong style="color:#C9A84C;font-size:16px;">Balance Due: £${Number(balanceAmount).toFixed(2)}</strong></p>
+    </div>
+    <p>Payment can be made via bank transfer or card. Details are included in your invoice.</p>
+    ${invoiceUrl ? `<a href="${invoiceUrl}" class="btn">View & Pay Invoice →</a>` : ''}
+    <p style="font-size:12px;color:#666;margin-top:24px;">If you have any questions about your invoice, please reply to this email.</p>
+  `, `Balance due: £${Number(booking.total_price - booking.deposit_paid).toFixed(2)}`);
+
+  return send(client.email, `Balance Invoice — Bigg Shots Media`, html, 'balance_invoice');
+}
+
 module.exports = {
   sendBookingConfirmationToClient,
   sendBookingNotificationToOwner,
@@ -325,4 +393,7 @@ module.exports = {
   sendPasswordReset,
   sendQuestionnaireSent,
   sendProjectStageChanged,
+  sendShootReminder,
+  sendReviewRequest,
+  sendBalanceInvoice,
 };
